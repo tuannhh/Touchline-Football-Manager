@@ -1,0 +1,16 @@
+node_modules/
+dist/
+saves/*.json
+saves/*.tmp
+.cache/
+*.log
+
+saves/*.bak
+saves/backups/
+
+# Careers, credentials and machine-specific artifacts are never distributed.
+saves/
+.DS_Store
+.env
+.env.*
+*.pem

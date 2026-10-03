@@ -1,0 +1,9 @@
+.match-action-strip{display:flex;align-items:center;gap:12px;min-height:57px;padding:12px 16px;border-top:1px solid #394b3b;background:#18271d;font-size:12px}
+.match-action-strip>.action-dot{width:8px;height:8px;flex-shrink:0;border-radius:50%;background:#d6f177;box-shadow:0 0 0 4px #d6f17714}
+.match-action-strip>div{display:flex;flex:1;flex-direction:column;gap:4px;min-width:0}
+.match-action-strip strong{color:#e9f2df;font-weight:600}.match-action-strip small{color:#a1b29f;font-size:10px}
+.match-action-strip>.action-minute{color:#a2b09e;font-variant-numeric:tabular-nums;white-space:nowrap}
+.match-action-strip.action-goal{background:#2b401e}.match-action-strip.action-shot>.action-dot{background:#f1c76d}
+.match-controls{flex-wrap:wrap}.match-controls .check-label{white-space:nowrap}
+.match-controls .motion-toggle{font-size:11px}.match-playback-help{margin:0 0 16px;color:var(--muted);font-size:11px;line-height:1.6}
+@media(max-width:650px){.match-action-strip{padding:10px 12px}.match-action-strip strong{font-size:11px}.match-action-strip>.action-minute{font-size:10px}.match-controls .motion-toggle{font-size:10px}}

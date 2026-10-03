@@ -1,0 +1,233 @@
+{
+  "version": 1,
+  "latestId": "2026-10-03-initial",
+  "releases": [
+    {
+      "id": "2026-10-03-initial",
+      "name": "Đội hình 03/10/2026 · 2026/27",
+      "label": "Đội hình 03/10/2026 · 2026/27",
+      "season": "2026/27",
+      "asOf": "2026-10-03",
+      "asOfTimezone": "Asia/Ho_Chi_Minh",
+      "publishedAt": "2026-10-03T01:54:47.342Z",
+      "counts": {
+        "leagues": 30,
+        "clubs": 568,
+        "players": 16440,
+        "homegrownPlayers": 518
+      },
+      "sources": [
+        {
+          "name": "ESPN public roster API"
+        },
+        {
+          "name": "VPF official team pages"
+        },
+        {
+          "name": "FC Barcelona official first-team portraits"
+        },
+        {
+          "name": "FotMob public league and squad data"
+        },
+        {
+          "name": "Premier League official 2026/27 squad list"
+        },
+        {
+          "name": "Vitória SC official B squad"
+        },
+        {
+          "name": "Wikipedia dated Vietnamese third-tier squad tables"
+        },
+        {
+          "name": "Sparta Rotterdam official youth squad"
+        },
+        {
+          "name": "Voetbal International 2026/27 Jong Almere squad"
+        },
+        {
+          "name": "Athletic Club official player biographies"
+        },
+        {
+          "name": "FC Barcelona / Arsenal official training biographies"
+        },
+        {
+          "name": "Official club player portraits"
+        },
+        {
+          "name": "FotMob player portrait CDN, matched by player identity"
+        },
+        {
+          "name": "Premier League squad flags",
+          "url": "https://www.premierleague.com/en/news/4706139/see-all-the-202627-premier-league-squad-lists"
+        },
+        {
+          "name": "UEFA Article 31",
+          "url": "https://documents.uefa.com/r/Regulations-of-the-UEFA-Europa-League-2026/27/Article-31-Player-lists-Online"
+        },
+        {
+          "name": "Spurs PL U21 cutoff corroboration",
+          "url": "https://www.tottenhamhotspur.com/news/1088296/squad-confirmed-for-202627-premier-league-season"
+        },
+        {
+          "name": "FIGC CU 245/A 2026",
+          "url": "https://files.figc.it/version/c%3AZmQ5Yzc3MGItNDE1Ni00%3AYzdmYmQ0YjItMDY4MS00/245%20-%20Modifica%20disposizioni%20in%20materia%20di%20Tetto%20alle%20Rose.pdf"
+        },
+        {
+          "name": "DFL LOS §5b 2026",
+          "url": "https://media.dfl.de/sites/2/2026/04/Lizenzordnung-Spieler-LOS-2026-04-21-Stand.pdf"
+        },
+        {
+          "name": "Liga Portugal 2026/27 definition u, articles 87–88",
+          "url": "https://www.ligaportugal.pt/backoffice/assets/20260701_RC_2026_27_f53785bcd4.pdf"
+        },
+        {
+          "name": "Premier League · ESPN",
+          "url": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams?limit=100"
+        },
+        {
+          "name": "Bundesliga · ESPN",
+          "url": "https://site.api.espn.com/apis/site/v2/sports/soccer/ger.1/teams?limit=100"
+        },
+        {
+          "name": "Ligue 1 · ESPN",
+          "url": "https://site.api.espn.com/apis/site/v2/sports/soccer/fra.1/teams?limit=100"
+        },
+        {
+          "name": "Serie A · ESPN",
+          "url": "https://site.api.espn.com/apis/site/v2/sports/soccer/ita.1/teams?limit=100"
+        },
+        {
+          "name": "LaLiga · ESPN",
+          "url": "https://site.api.espn.com/apis/site/v2/sports/soccer/esp.1/teams?limit=100"
+        },
+        {
+          "name": "Liga Portugal · ESPN",
+          "url": "https://site.api.espn.com/apis/site/v2/sports/soccer/por.1/teams?limit=100"
+        },
+        {
+          "name": "Eredivisie · ESPN",
+          "url": "https://site.api.espn.com/apis/site/v2/sports/soccer/ned.1/teams?limit=100"
+        },
+        {
+          "name": "V.League 1 · VPF",
+          "url": "https://vpf.vn/cac-doi-bong-v-league/"
+        },
+        {
+          "name": "Championship · ESPN",
+          "url": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.2/teams?limit=100"
+        },
+        {
+          "name": "League One · ESPN",
+          "url": "https://site.api.espn.com/apis/site/v2/sports/soccer/eng.3/teams?limit=100"
+        },
+        {
+          "name": "2. Bundesliga · ESPN",
+          "url": "https://site.api.espn.com/apis/site/v2/sports/soccer/ger.2/teams?limit=100"
+        },
+        {
+          "name": "Ligue 2 · ESPN",
+          "url": "https://site.api.espn.com/apis/site/v2/sports/soccer/fra.2/teams?limit=100"
+        },
+        {
+          "name": "Serie B · ESPN",
+          "url": "https://site.api.espn.com/apis/site/v2/sports/soccer/ita.2/teams?limit=100"
+        },
+        {
+          "name": "LaLiga 2 · ESPN",
+          "url": "https://site.api.espn.com/apis/site/v2/sports/soccer/esp.2/teams?limit=100"
+        },
+        {
+          "name": "Eerste Divisie · ESPN",
+          "url": "https://site.api.espn.com/apis/site/v2/sports/soccer/ned.2/teams?limit=100"
+        },
+        {
+          "name": "Đối thủ châu Âu khác · ESPN / UEFA",
+          "url": "https://www.uefa.com/uefachampionsleague/clubs/"
+        },
+        {
+          "name": "3. Liga · FotMob",
+          "url": "https://www.fotmob.com/leagues/208/overview/3-liga"
+        },
+        {
+          "name": "Ligue 3 · FotMob",
+          "url": "https://www.fotmob.com/leagues/8970/overview/ligue-3"
+        },
+        {
+          "name": "Serie C · Grp. A · FotMob",
+          "url": "https://www.fotmob.com/leagues/147/overview/serie-c"
+        },
+        {
+          "name": "Serie C · Grp. B · FotMob",
+          "url": "https://www.fotmob.com/leagues/147/overview/serie-c"
+        },
+        {
+          "name": "Serie C · Grp. C · FotMob",
+          "url": "https://www.fotmob.com/leagues/147/overview/serie-c"
+        },
+        {
+          "name": "Primera Federación · Group 1 · FotMob",
+          "url": "https://www.fotmob.com/leagues/8968/overview/primera-federacion"
+        },
+        {
+          "name": "Primera Federación · Group 2 · FotMob",
+          "url": "https://www.fotmob.com/leagues/8968/overview/primera-federacion"
+        },
+        {
+          "name": "Liga Portugal 2 · FotMob",
+          "url": "https://www.fotmob.com/leagues/185/overview/liga-portugal-2"
+        },
+        {
+          "name": "Liga 3 · 3 Zona A · FotMob",
+          "url": "https://www.fotmob.com/leagues/9112/overview/liga-3"
+        },
+        {
+          "name": "Liga 3 · 3 Zona B · FotMob",
+          "url": "https://www.fotmob.com/leagues/9112/overview/liga-3"
+        },
+        {
+          "name": "Tweede Divisie · FotMob",
+          "url": "https://www.fotmob.com/leagues/9195/overview/tweede-divisie"
+        },
+        {
+          "name": "V.League 2 · Hạng Nhất · VPF",
+          "url": "https://vpf.vn/cac-doi-bong-hang-nhat/"
+        },
+        {
+          "name": "Hạng Nhì · Bảng A (tạm) · Bộ VHTTDL / hồ sơ 2026",
+          "url": "https://bvhttdl.gov.vn/xac-inh-bang-au-giai-hang-nhi-quoc-gia-2026-14-oi-tham-du-tranh-3-suat-thang-hang.htm"
+        },
+        {
+          "name": "Hạng Nhì · Bảng B (tạm) · Bộ VHTTDL / hồ sơ 2026",
+          "url": "https://bvhttdl.gov.vn/xac-inh-bang-au-giai-hang-nhi-quoc-gia-2026-14-oi-tham-du-tranh-3-suat-thang-hang.htm"
+        },
+        {
+          "name": "UEFA Champions League",
+          "url": "https://www.uefa.com/uefachampionsleague/clubs/"
+        },
+        {
+          "name": "UEFA Europa League",
+          "url": "https://www.uefa.com/uefaeuropaleague/clubs/"
+        },
+        {
+          "name": "UEFA Conference League",
+          "url": "https://www.uefa.com/uefaconferenceleague/clubs/"
+        }
+      ],
+      "hashes": {
+        "database": "42388e1a2a19f21f2acf6bccb87460cdf13a49492e4689853761f91309d61d4d",
+        "homegrown": "83b3ba6dee5cac5d216b7fe8fd7a137f0484c0cd5cc43e42e13cd4f015de7eb9"
+      },
+      "notes": "Bản chụp nguồn công khai đã đối chiếu đến 03/10/2026; ngày xuất bản ghi riêng. Một số giải hạng dưới và nhóm Hạng Nhì Việt Nam còn tạm thời; xem nguồn, rosterNote và meta.provisionalLeagues. Các tuổi 0 từ nhà cung cấp biểu thị thiếu dữ liệu. Chỉ số thi đấu, tài chính và lịch game là mô phỏng.",
+      "sourceImportedAt": "2026-10-02T16:30:54.295604+00:00",
+      "homegrownVerifiedAt": "2026-10-03",
+      "assets": "Portrait files and the live portrait index are maintained separately; roster identity and home-grown evidence are immutable.",
+      "review": {
+        "baseId": null,
+        "risks": [],
+        "acknowledged": [],
+        "note": ""
+      },
+      "hash": "e23db9b6fa956bab5bb3eab0f3817eb53eacf3045fae2c080562434ecb548408"
+    }
+  ]
+}

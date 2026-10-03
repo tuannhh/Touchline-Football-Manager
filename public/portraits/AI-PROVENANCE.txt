@@ -1,0 +1,7 @@
+Asset: ai-atlas.png
+Created: 2026-10-02
+Tool: built-in image_gen (no external image-generation API key).
+Purpose: explicitly labeled fictional portrait fallback for profiles without a sourced photograph.
+
+Prompt:
+Use case: stylized-concept. Asset type: a single game texture atlas for a local football management game. Create a perfectly aligned 8 by 8 grid (64 equal square cells, no gaps, no borders, no margin) of DIFFERENT fictional male adult professional footballer head-and-shoulders portrait avatars. All are invented adults, ages 20 to 38, with a diverse range of European, African, East Asian, Southeast Asian, Middle Eastern and Latin American appearances, haircuts and facial hair. Clean sophisticated semi-realistic painted sports game portrait style, frontal looking at camera, head fully contained in each square, same consistent zoom and vertical framing across all 64 cells. All wear plain muted charcoal green crew neck football jerseys with no logo or brand. Each cell background is the same solid deep green charcoal #202f28. Flat even studio lighting, readable faces at 48px. Grid must be exact 8 columns by 8 rows on a square canvas, 2048x2048 if possible. No text, numbers, watermarks, icons, lines, or spacing. This will be used as an explicitly labeled AI illustration fallback when an actual real player's photo is unavailable; avoid intentional likenesses of celebrities.
