@@ -1,5 +1,13 @@
 # Touchline — quản lý bóng đá cục bộ
 
+**Giới thiệu:** [English](docs/INTRO.en.md) · [Español](docs/INTRO.es.md) · [Português](docs/INTRO.pt.md) · [Français](docs/INTRO.fr.md)
+
+Touchline là game quản lý bóng đá độc lập dành cho một người chơi trên máy cá nhân: xây dựng đội hình, kéo thả chiến thuật, thương lượng chuyển nhượng, quản lý ban huấn luyện và theo dõi trận đấu 2D. Bạn có thể lưu nhiều sự nghiệp, chọn ngôn ngữ và đơn vị hiển thị, hoặc dùng Editor để thử nghiệm theo cách riêng.
+
+[Ảnh chụp trong game](docs/SCREENSHOTS.md) · [Bài giới thiệu để chia sẻ](docs/COMMUNITY_POST.vi.md)
+
+**Mục đích giải trí và hình ảnh:** Đây là dự án cá nhân phục vụ giải trí, không có liên kết chính thức với Football Manager, các CLB, giải đấu hay liên đoàn. Ảnh cầu thủ, logo, tên và tài sản của bên thứ ba thuộc các chủ sở hữu tương ứng; việc xuất hiện trong game không cấp quyền sử dụng lại. Tác giả không cấp phép khai thác thương mại các tài sản đó và không chịu trách nhiệm, trong phạm vi pháp luật cho phép, về việc người dùng sử dụng thương mại, phân phối lại hoặc vi phạm bản quyền hình ảnh/quyền hình ảnh. Người sử dụng tự chịu trách nhiệm xin các quyền cần thiết. Giấy phép MIT của mã nguồn dự án không cấp lại giấy phép cho tài sản của bên thứ ba.
+
 Bản **1.7.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
 
 ## Mở game
