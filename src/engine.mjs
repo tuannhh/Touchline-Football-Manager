@@ -114,7 +114,7 @@ export function rearrangeLineup(g,ids,formation){
 }
 export function setFormation(g,formation){if(!FORMATIONS[formation])throw Error('Sơ đồ không hợp lệ.');if(g.phaseTactics?.enabled)remapPhaseFormation(g.phaseTactics,'inPossession',formation,g.lineup,g.players);else g.lineup=rearrangeLineup(g,g.lineup,formation);g.formation=formation;g.tactics={...normalizeTactics(g.tactics),presetId:'custom'};}
 export function applyTacticPreset(g,id){const p=TACTICAL_PRESETS.find(p=>p.id===id);if(!p)throw Error('Mẫu chiến thuật không hợp lệ.');setFormation(g,p.formation);g.mentality=p.mentality;g.tactics={...p.settings};}
-export function assignSlot(g,index,id){const p=g.players[id];if(!Number.isInteger(index)||index<0||index>10||!p||p.clubId!==g.clubId||!available(p)||!registered(g,p,currentFixture(g)?.leagueId))throw Error('Cầu thủ không đủ điều kiện hoặc chưa đăng ký cho giải đấu.');const old=g.lineup.indexOf(id);if(old>=0)[g.lineup[old],g.lineup[index]]=[g.lineup[index],g.lineup[old]];else{const outgoing=g.lineup[index],seat=g.bench?.indexOf(id)??-1;g.lineup[index]=id;if(seat>=0){g.bench[seat]=outgoing;g.bench=g.bench.filter(Boolean);}}if(g.benchVersion!==undefined)repairBench(g,{eligible:p=>available(p)&&registered(g,p,currentFixture(g)?.leagueId)});}
+export function assignSlot(g,index,id,competitionId=currentFixture(g)?.leagueId){const p=g.players[id];if(!Number.isInteger(index)||index<0||index>10||!p||p.clubId!==g.clubId||!available(p)||!registered(g,p,competitionId))throw Error('Cầu thủ không đủ điều kiện hoặc chưa đăng ký cho giải đấu.');const old=g.lineup.indexOf(id);if(old>=0)[g.lineup[old],g.lineup[index]]=[g.lineup[index],g.lineup[old]];else{const outgoing=g.lineup[index],seat=g.bench?.indexOf(id)??-1;g.lineup[index]=id;if(seat>=0){g.bench[seat]=outgoing;g.bench=g.bench.filter(Boolean);}}if(g.benchVersion!==undefined)repairBench(g,{competitionId,eligible:p=>available(p)&&registered(g,p,competitionId)});}
 export function enablePhaseTactics(g,enabled=true){
  if(enabled){if(!g.phaseTactics?.enabled)g.phaseTactics=createPhaseTactics(g.formation);}
  else if(g.phaseTactics){if(g.phaseTactics.enabled){g.lineup=phaseLineup(g.lineup,g.phaseTactics,'inPossession',g.formation);g.formation=g.phaseTactics.inPossession.formation;}delete g.phaseTactics;}
@@ -123,11 +123,11 @@ export function setPhaseFormation(g,phase,formation){
  if(!g.phaseTactics?.enabled)throw Error('Hãy bật hai sơ đồ theo pha trước.');
  remapPhaseFormation(g.phaseTactics,phase,formation,g.lineup,g.players);g.tactics={...normalizeTactics(g.tactics),presetId:'custom'};
 }
-export function assignPhaseSlot(g,phase,index,id){
- if(!g.phaseTactics?.enabled)return assignSlot(g,index,id);
+export function assignPhaseSlot(g,phase,index,id,competitionId=currentFixture(g)?.leagueId){
+ if(!g.phaseTactics?.enabled)return assignSlot(g,index,id,competitionId);
  const p=g.players[id],shape=g.phaseTactics[phase];
- if(!shape||!Number.isInteger(index)||index<0||index>10||!p||p.clubId!==g.clubId||!available(p)||!registered(g,p,currentFixture(g)?.leagueId))throw Error('Cầu thủ hoặc vị trí theo pha không hợp lệ.');
- const seat=g.lineup.indexOf(id);if(seat>=0)swapPhaseSeats(g.phaseTactics,phase,index,seat);else assignSlot(g,shape.slots[index],id);
+ if(!shape||!Number.isInteger(index)||index<0||index>10||!p||p.clubId!==g.clubId||!available(p)||!registered(g,p,competitionId))throw Error('Cầu thủ hoặc vị trí theo pha không hợp lệ.');
+ const seat=g.lineup.indexOf(id);if(seat>=0)swapPhaseSeats(g.phaseTactics,phase,index,seat);else assignSlot(g,shape.slots[index],id,competitionId);
 }
 function requireLiveTactics(g,m,side){if(m.completed||![0,1].includes(side)||[m.home,m.away][side]!==g.clubId)throw Error('Không thể chỉnh chiến thuật lúc này.');}
 export function enableMatchPhaseTactics(g,m,side,enabled=true){

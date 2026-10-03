@@ -8,10 +8,10 @@ import {positionCode} from './playerPositions.mjs';
 import {matchdayRule,liveMatchdayRule,matchSubLimit} from './matchday.mjs';
 import './matchday.css';
 
-export default function TacticalBoard({g,formation,lineup,players,onAssign,onAssignBench,onRemoveBench,onProfile,live=null,side=0,onInteract,phaseLabel}){
+export default function TacticalBoard({g,formation,lineup,players,onAssign,onAssignBench,onRemoveBench,onProfile,live=null,side=0,onInteract,phaseLabel,competitionId=currentFixture(g)?.leagueId}){
  const [slot,setSlot]=useState(null),[benchSlot,setBenchSlot]=useState(null),[chosen,setChosen]=useState(null),[query,setQuery]=useState(''),[drag,setDrag]=useState(null),[notice,setNotice]=useState('');
- const gesture=useRef(null),suppress=useRef(0),root=useRef(null),roles=FORMATION_SLOTS[formation],bench=live?live.bench[side]:(g.bench||[]),rule=live?liveMatchdayRule(g,live):matchdayRule(g);
- const eligible=p=>!!p&&(live?!live.completed&&!live.red.includes(p.id)&&!live.off.includes(p.id)&&!live.injured.includes(p.id)&&(lineup.includes(p.id)||bench.includes(p.id)):available(p)&&registered(g,p,currentFixture(g)?.leagueId));
+ const gesture=useRef(null),suppress=useRef(0),root=useRef(null),roles=FORMATION_SLOTS[formation],bench=live?live.bench[side]:(g.bench||[]),rule=live?liveMatchdayRule(g,live):matchdayRule(g,competitionId);
+ const eligible=p=>!!p&&(live?!live.completed&&!live.red.includes(p.id)&&!live.off.includes(p.id)&&!live.injured.includes(p.id)&&(lineup.includes(p.id)||bench.includes(p.id)):available(p)&&registered(g,p,competitionId));
  const cancel=()=>{gesture.current=null;setDrag(null);setChosen(null);setSlot(null);setBenchSlot(null);};
  const assign=(index,id)=>{const ok=onAssign(index,id);if(ok!==false){setNotice(`${g.players[id].name} → ${positionCode(roles[index][0])}.`);cancel();}};
  const assignBench=(index,id)=>{if(live){const outgoing=lineup.indexOf(id),incoming=bench[index];if(outgoing>=0&&incoming)assign(outgoing,incoming);else setNotice('Trong trận, kéo cầu thủ dự bị vào sân để thay người.');return;}const ok=onAssignBench?.(index,id);if(ok!==false){setNotice(`${g.players[id].name} đã được xếp vào danh sách dự bị.`);cancel();}};

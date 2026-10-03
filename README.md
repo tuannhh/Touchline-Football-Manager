@@ -8,11 +8,16 @@ Touchline là game quản lý bóng đá độc lập dành cho một người c
 
 **Mục đích giải trí và hình ảnh:** Đây là dự án cá nhân phục vụ giải trí, không có liên kết chính thức với Football Manager, các CLB, giải đấu hay liên đoàn. Ảnh cầu thủ, logo, tên và tài sản của bên thứ ba thuộc các chủ sở hữu tương ứng; việc xuất hiện trong game không cấp quyền sử dụng lại. Tác giả không cấp phép khai thác thương mại các tài sản đó và không chịu trách nhiệm, trong phạm vi pháp luật cho phép, về việc người dùng sử dụng thương mại, phân phối lại hoặc vi phạm bản quyền hình ảnh/quyền hình ảnh. Người sử dụng tự chịu trách nhiệm xin các quyền cần thiết. Giấy phép MIT của mã nguồn dự án không cấp lại giấy phép cho tài sản của bên thứ ba.
 
-Bản **1.7.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+Bản **1.7.1**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
 
 ## Mở game
 
 Nhấp đúp **Choi-Touchline.command**; game mở tại **http://127.0.0.1:4179**. Giữ Terminal chạy trong lúc chơi, `Ctrl+C` để dừng. Hoặc chạy `npm start` trong thư mục này. Máy chủ chỉ lắng nghe trên `127.0.0.1`. Database, mã game, ảnh và logo đã tải nằm trên máy; chơi được khi mất mạng. Liên kết nguồn cần Internet.
+
+## Mới ở bản 1.7.1
+
+- **Khôi phục sân 2D:** sửa lỗi trùng tên biến độ cao bóng/chiều cao sân làm vòng vẽ dừng ngay từ khung hình đầu. Sân, cầu thủ và bóng hiển thị cả khi tạm dừng hoặc tải lại trận đang chơi.
+- **Chuẩn bị trước trận:** Tiếp tục và các nút vào trận mở màn hình chọn đội hình chính, dự bị và chiến thuật. Chỉ tạo trận sau khi bấm xác nhận; danh sách không hợp lệ cần được sửa trước khi vào sân. Người chơi có thể quay lại văn phòng mà chưa bắt đầu trận.
 
 ## Mới ở bản 1.7.0
 

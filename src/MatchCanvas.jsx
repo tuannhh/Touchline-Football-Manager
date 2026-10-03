@@ -69,10 +69,10 @@ export default function MatchCanvas({g,m,names,frameRef,showMovement=false}){
      let textW=labelWidths.get(label);if(textW===undefined){textW=ctx.measureText(label).width;labelWidths.set(label,textW);}ctx.fillStyle='rgba(11,25,17,.85)';ctx.fillRect(x-textW/2-3,y+rad+4,textW+6,14);ctx.fillStyle=showMovement&&actor.task?'#d6f177':'#f6f8ef';ctx.fillText(label,x,y+rad+11);
     }
    }
-   const ball=frame.ball,bx=X(ball.x),groundY=Y(ball.y),height=(ball.z||0)*22;
-   ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(bx+1,groundY+3,4+height*.07,2.6,0,0,7);ctx.fill();
-   ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(bx,groundY-height,4.1+height*.025,0,7);ctx.fill();ctx.strokeStyle='#20372a';ctx.lineWidth=.8;ctx.stroke();
-   ctx.fillStyle='#253428';ctx.beginPath();ctx.arc(bx,groundY-height,1.6,0,7);ctx.fill();
+   const ball=frame.ball,bx=X(ball.x),groundY=Y(ball.y),ballElevation=(ball.z||0)*22;
+   ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(bx+1,groundY+3,4+ballElevation*.07,2.6,0,0,7);ctx.fill();
+   ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(bx,groundY-ballElevation,4.1+ballElevation*.025,0,7);ctx.fill();ctx.strokeStyle='#20372a';ctx.lineWidth=.8;ctx.stroke();
+   ctx.fillStyle='#253428';ctx.beginPath();ctx.arc(bx,groundY-ballElevation,1.6,0,7);ctx.fill();
    ctx.textAlign='left';ctx.fillStyle='rgba(225,238,218,.55)';ctx.font='600 9px system-ui';ctx.fillText(`${g.clubs[m.home].abbreviation||translate('CHỦ NHÀ')} →`,X(0),h-9);
    ctx.textAlign='right';ctx.fillText(`← ${g.clubs[m.away].abbreviation||translate('ĐỘI KHÁCH')}`,X(100),h-9);
    ctx.textAlign='center';ctx.fillStyle='rgba(219,232,216,.3)';ctx.fillText('TOUCHLINE / 2D',w/2,h-9);
