@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import * as E from '../src/engine.mjs';
+import {competitionSuspension} from '../src/discipline.mjs';
 import {beginNegotiation,submitClubOffer,submitContractOffer} from '../src/transfers.mjs';
 const db=JSON.parse(fs.readFileSync(new URL('../public/data/database.json',import.meta.url),'utf8'));
 const fresh=(club='e83')=>E.newGame(db,club,'Test',42);
@@ -41,7 +42,7 @@ test('played result commits once to every league and conserves goals and standin
 });
 test('existing bans expire after exclusion; new red cards and injuries last into next round',()=>{
  const g=fresh();const banned=g.players[g.lineup[4]];banned.suspension=1;E.repairLineup(g);assert.ok(!g.lineup.includes(banned.id));
- const m=E.simulate(g,E.currentFixture(g));const red=m.lineups[m.home===g.clubId?0:1].find(id=>id);m.red.push(red);E.advanceRound(g,m);assert.equal(banned.appearances,0);assert.equal(banned.suspension,0);assert.equal(g.players[red].suspension,1);assert.ok(!g.lineup.includes(red));
+ const competitionId=E.currentFixture(g).leagueId,m=E.simulate(g,E.currentFixture(g));const red=m.lineups[m.home===g.clubId?0:1].find(id=>id);m.red.push(red);E.advanceRound(g,m);assert.equal(banned.appearances,0);assert.equal(banned.suspension,0);assert.equal(g.players[red].suspension,0);assert.equal(competitionSuspension(g,g.players[red],competitionId),1);assert.ok(!E.autoLineup(g,g.clubId,g.formation,competitionId).includes(red));
 });
 test('editor finances and all 20 attributes survive serialization and affect ability',()=>{
  const g=fresh(),p=g.players[g.lineup[8]];E.editClub(g,g.clubId,{cash:1e9,budget:1e9,wageBudget:1e7});E.editPlayer(g,p.id,{attributes:Object.fromEntries(Object.keys(E.ATTRS).map(k=>[k,20])),fitness:100,morale:100,potential:100});
@@ -58,8 +59,8 @@ test('buying transfers exactly one identity, charges buyer, credits seller and g
  E.editClub(g,g.clubId,{budget:1e9,cash:1e9});E.buyPlayer(g,p.id,deal.id);
  assert.equal(p.clubId,g.clubId);assert.equal(g.clubs[g.clubId].budget,1e9-upfront);assert.equal(g.clubs[old].cash,sellerCash+fee);assert.equal(Object.values(g.players).filter(x=>x.id===p.id).length,1);assert.equal(E.clubPlayers(g,g.clubId).filter(x=>String(x.number)===String(p.number)).length,1);assert.throws(()=>E.buyPlayer(g,p.id,deal.id));assert.ok(E.validateGame(g));
 });
-test('selling a starting player repairs the lineup and conserves combined cash',()=>{
- const g=fresh();const p=g.players[g.lineup[4]];p.value=500000;const cash=Object.values(g.clubs).reduce((s,c)=>s+c.cash,0);E.sellPlayer(g,p.id);assert.notEqual(p.clubId,g.clubId);assert.ok(!g.lineup.includes(p.id));assert.equal(g.lineup.filter(Boolean).length,11);assert.equal(Object.values(g.clubs).reduce((s,c)=>s+c.cash,0),cash);
+test('selling a starting player repairs the lineup and accounts for signing costs',()=>{
+ const g=fresh();const p=g.players[g.lineup[4]];p.value=500000;const cash=Object.values(g.clubs).reduce((s,c)=>s+c.cash,0);E.sellPlayer(g,p.id);assert.notEqual(p.clubId,g.clubId);assert.ok(!g.lineup.includes(p.id));assert.equal(g.lineup.filter(Boolean).length,11);assert.equal(Object.values(g.clubs).reduce((s,c)=>s+c.cash,0),cash-g.transfers[0].terms.signingBonus-g.transfers[0].terms.agentFee);
 });
 test('attribute strength changes outcomes across deterministic matches',()=>{
  const g=fresh();const f=E.currentFixture(g);const own=f.home===g.clubId?0:1;for(const p of E.clubPlayers(g,g.clubId))E.editPlayer(g,p.id,{attributes:Object.fromEntries(Object.keys(E.ATTRS).map(k=>[k,20])),morale:100});

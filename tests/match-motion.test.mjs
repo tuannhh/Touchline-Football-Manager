@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {buildMatchScene,restingMatchFrame,sampleMatchScene} from '../src/matchMotion.mjs';
+import {buildMatchScene,restingMatchFrame,sampleMatchScene,offsideLine,passingLaneRisk,rankPassingOptions,dribbleSpace,tacticalTargets} from '../src/matchMotion.mjs';
 import {createPhaseTactics} from '../src/tactics.mjs';
 
 const ids=xs=>xs.map(p=>p.id).sort();
@@ -47,9 +47,10 @@ test('continuous ball travel, bounded independent runs and feet-to-feet receivin
  const motions=new Set(middle.players.filter(p=>p.side===0).map(p=>{const old=first.players.find(q=>q.id===p.id);return `${(p.x-old.x).toFixed(1)},${(p.y-old.y).toFixed(1)}`;}));assert.ok(motions.size>8,'players do not translate as one block');
 });
 
-test('short passing produces one-twos; direct attacks produce through balls; width affects shape and crosses',()=>{
+test('short passing produces clear one-twos; direct chances produce through balls; width affects shape and crosses',()=>{
  const short=fixture({passing:'short',width:2}),direct=fixture({passing:'direct',width:2}),wide=fixture({passing:'mixed',width:5});
  assert.ok(buildMatchScene(short.g,short.before,short.after).frames.some(f=>f.action.type==='one-two'));
+ addShot(direct.after,0,'wide');
  assert.ok(buildMatchScene(direct.g,direct.before,direct.after).frames.some(f=>f.action.type==='throughball'));
  addShot(wide.after,0,'wide');assert.ok(buildMatchScene(wide.g,wide.before,wide.after).frames.some(f=>f.action.type==='cross'&&f.ball.z>.2));
  const a=restingMatchFrame(short.g,short.before),b=restingMatchFrame(wide.g,wide.before);
@@ -125,4 +126,80 @@ test('higher tempo sends passes faster without changing the authoritative match 
  const slow=fixture({passing:'direct',tempo:1}),fast=fixture({passing:'direct',tempo:5});
  const velocity=scene=>Math.max(...scene.frames.slice(1).map((f,i)=>['pass','throughball'].includes(scene.frames[i].action.type)?dist(f.ball,scene.frames[i].ball)/(f.at-scene.frames[i].at):0));
  const a=buildMatchScene(slow.g,slow.before,slow.after),b=buildMatchScene(fast.g,fast.before,fast.after);assert.ok(velocity(b)>velocity(a)*1.15);assert.deepEqual(a.frames.at(-1).score,b.frames.at(-1).score);
+});
+
+test('a screened forward pass loses to an unmarked lateral outlet',()=>{
+ const {g,before}=fixture({passing:'short'});
+ const players=[
+  {id:'0-6',side:0,seat:6,role:'CM',x:45,y:50},
+  {id:'0-9',side:0,seat:9,role:'ST',x:65,y:50},
+  {id:'0-7',side:0,seat:7,role:'CM',x:45,y:70},
+  {id:'1-2',side:1,seat:2,role:'CB',x:55,y:50},
+  {id:'1-3',side:1,seat:3,role:'CB',x:83,y:45},
+  {id:'1-0',side:1,seat:0,role:'GK',x:95,y:50},
+ ];
+ assert.equal(passingLaneRisk(g,players[0],players[1],players.slice(3)),1);
+ assert.equal(passingLaneRisk(g,players[0],players[2],players.slice(3)),0);
+ assert.equal(rankPassingOptions(g,before,players,players[0])[0].player.id,'0-7');
+});
+
+test('carrier moves into free space instead of running directly through a defender',()=>{
+ const {g}=fixture(),owner={id:'0-6',side:0,role:'CM',x:45,y:50};
+ const defender={id:'1-2',side:1,role:'CB',x:53,y:50};
+ const destination=dribbleSpace(g,[owner,defender],owner);
+ assert.ok(Math.abs(destination.y-50)>=6,'takes the available diagonal/lateral space');
+ assert.ok(dist(destination,defender)>6);
+});
+
+test('off-ball forwards wait onside, including when the goalkeeper is not the deepest defender',()=>{
+ const {g,before}=fixture(),players=restingMatchFrame(g,before).players;
+ for(const p of players.filter(p=>p.side===1)){p.x=55;p.y=10+p.seat*7;}
+ const keeper=players.find(p=>p.id==='1-0');keeper.x=61;
+ players.find(p=>p.id==='1-2').x=80;
+ const owner=players.find(p=>p.id==='0-6');owner.x=46;owner.y=50;
+ assert.equal(offsideLine(players,0,owner),61);
+ const targets=tacticalTargets(g,before,players,0,owner,owner.id);
+ for(const id of ['0-8','0-9','0-10'])assert.ok(targets.get(id).x<61,`${id} must wait before the pass`);
+ const options=rankPassingOptions(g,before,players,owner);
+ assert.ok(options.some(o=>o.offside),'already offside recipients are identified');
+ assert.ok(!options[0].offside,'do not select an offside pass when onside outlets exist');
+});
+
+test('central midfield offers distinct support triangles on both sides of possession',()=>{
+ const {g,before}=fixture(),players=restingMatchFrame(g,before).players;
+ const owner=players.find(p=>p.id==='0-9');owner.x=70;owner.y=50;
+ const targets=tacticalTargets(g,before,players,0,owner,owner.id),left=targets.get('0-6'),right=targets.get('0-7'),pivot=targets.get('0-5');
+ assert.ok(left.y<owner.y-10&&right.y>owner.y+10);
+ assert.ok(left.x<owner.x&&right.x<owner.x,'two diagonal passing outlets behind the striker');
+ assert.ok(pivot.x<Math.min(left.x,right.x)-5,'pivot protects the transition behind those outlets');
+ assert.ok(dist(left,right)>20,'support players do not converge into one clump');
+});
+
+test('defenders share separate threats while one presser closes the ball goal-side',()=>{
+ const {g,before}=fixture({pressing:5}),players=restingMatchFrame(g,before).players;
+ const owner=players.find(p=>p.id==='0-6');owner.x=59;owner.y=38;
+ const targets=tacticalTargets(g,before,players,0,owner,owner.id),defending=[...targets].filter(([id])=>id.startsWith('1-'));
+ const pressing=defending.filter(([,p])=>p.task==='press'),marking=defending.filter(([,p])=>p.task==='mark');
+ assert.equal(pressing.length,1);assert.ok(pressing[0][1].x>owner.x,'presser stays between carrier and defended goal');
+ assert.ok(marking.length>=3);assert.equal(new Set(marking.map(([,p])=>p.markId)).size,marking.length);
+ for(const [,p] of marking){const threat=players.find(q=>q.id===p.markId);assert.ok(p.x>threat.x,'marker stays goal-side of their own runner');}
+ assert.ok(defending.some(([,p])=>p.task==='screen'),'other players protect passing lanes');
+ const keeper=targets.get('1-0');assert.ok(keeper.y<50&&keeper.y>owner.y,'keeper narrows the angle towards the ball');
+});
+
+test('regroup protects shape rather than sending all defenders towards the ball',()=>{
+ const {g,before}=fixture({pressing:5,transition:'regroup'}),players=restingMatchFrame(g,before).players;
+ const owner=players.find(p=>p.id==='0-6');owner.x=60;owner.y=20;
+ const targets=tacticalTargets(g,before,players,0,owner,owner.id),defending=[...targets].filter(([id])=>id.startsWith('1-'));
+ assert.equal(defending.filter(([,p])=>p.task==='press').length,0);
+ assert.ok(defending.filter(([,p])=>dist(p,owner)>12).length>=8);
+});
+
+test('tactical objectives mirror correctly for the away attack',()=>{
+ const {g,before}=fixture(),players=restingMatchFrame(g,before).players,owner=players.find(p=>p.id==='0-6');
+ owner.x=60;owner.y=36;
+ const original=tacticalTargets(g,before,players,0,owner,owner.id);
+ const mirrored=players.map(p=>({...p,side:1-p.side,x:100-p.x})),mirrorOwner=mirrored.find(p=>p.id===owner.id);
+ const reflected=tacticalTargets(g,before,mirrored,1,mirrorOwner,owner.id);
+ for(const p of players){assert.ok(Math.abs(original.get(p.id).x+reflected.get(p.id).x-100)<.001);assert.ok(Math.abs(original.get(p.id).y-reflected.get(p.id).y)<.001);}
 });

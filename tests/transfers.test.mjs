@@ -72,8 +72,8 @@ test('release clauses unlock the seller price and prior sell-on payments reach t
  const g=fresh(),p=g.players['c1-p14'];p.contractTerms={wage:p.wage,signingBonus:0,agentFee:0,appearanceBonus:0,goalBonus:0,years:3,releaseClause:100000,annualRise:0,squadRole:'starter',sellOnClubId:'c2',sellOnPercent:20,signedAt:'2025-08-01',signedYear:2025};
  const {deal:d}=T.beginNegotiation(g,p.id);assert.equal(d.clubDemand.fee,100000);T.submitClubOffer(g,d.id,{fee:100000,sellOnPercent:10});assert.equal(d.stage,'contract');T.submitContractOffer(g,d.id,{...d.playerDemand});
  const oldOwner=g.clubs.c2.cash,seller=g.clubs.c1.cash;T.finalizeNegotiation(g,d.id);assert.equal(g.clubs.c2.cash,oldOwner+20000);assert.equal(g.clubs.c1.cash,seller+80000);assert.equal(g.transfers[0].sellOnPayment,20000);
- const prior=g.clubs.c1.cash,bank=totalCash(g);const result=T.sellToAI(g,p.id);assert.equal(result.ok,true);assert.equal(result.transfer.sellOnPayment,Math.round(result.transfer.fee*.1));assert.equal(g.clubs.c1.cash,prior+result.transfer.sellOnPayment-(result.transfer.to==='c1'?result.transfer.fee:0));assert.equal(totalCash(g),bank);assert.equal(T.validateTransferMarket(g),true);
- const edited=fresh();edited.players['c0-p14'].wage=0;assert.equal(T.sellToAI(edited,'c0-p14').ok,true);assert.equal(edited.players['c0-p14'].wage,100);assert.equal(T.validateTransferMarket(edited),true);
+ const prior=g.clubs.c1.cash,bank=totalCash(g);const result=T.sellToAI(g,p.id);assert.equal(result.ok,true);assert.equal(result.transfer.sellOnPayment,Math.round(result.transfer.fee*.1));assert.equal(g.clubs.c1.cash,prior+result.transfer.sellOnPayment-(result.transfer.to==='c1'?result.transfer.upfrontCost:0));assert.equal(totalCash(g),bank-result.transfer.terms.signingBonus-result.transfer.terms.agentFee);assert.equal(T.validateTransferMarket(g),true);
+ const edited=fresh();edited.players['c0-p15'].wage=0;assert.equal(T.sellToAI(edited,'c0-p15').ok,true);assert.ok(edited.players['c0-p15'].wage>=100);assert.equal(T.validateTransferMarket(edited),true);
 });
 
 test('stale or expired agreements terminate safely and cannot sign a player who already moved',()=>{
@@ -117,4 +117,59 @@ test('assigned negotiating expertise changes the actual seller ask and every vis
  T.submitClubOffer(noDirector,a.id,{fee:Math.floor(a.clubDemand.fee*.8),sellOnPercent:3});
  T.submitClubOffer(noDirector,a.id,{fee:Math.floor(a.clubDemand.fee*.8),sellOnPercent:3});
  assert.equal(a.stage,'club');assert.equal(a.clubPatience,1);assert.equal(T.submitClubOffer(noDirector,a.id,{...a.clubDemand}).ok,true);assert.equal(a.stage,'contract');
+});
+
+test('unlimited money cannot force a content long-contract cornerstone to leave, but an actual transfer request changes availability',()=>{
+ const g=fresh(),p=g.players['c1-p14'];g.clubs.c1.reputation=90;g.clubs.c0.reputation=90;g.clubs.c0.cash=1e12;g.clubs.c0.budget=1e12;p.contractUntil=2031;
+ for(const key of Object.keys(p.attributes))p.attributes[key]=19;
+ const rejected=T.beginNegotiation(g,p.id).deal;assert.equal(rejected.stage,'rejected');assert.equal(rejected.assessment.cornerstone,true);assert.match(rejected.reason,/nền tảng/);
+ const snapshot=structuredClone(g);assert.equal(T.submitClubOffer(g,rejected.id,{fee:1e12,sellOnPercent:30}).ok,false);assert.deepEqual(g,snapshot);
+ p.dynamics={wantsToLeave:true};g.date='2026-08-30';assert.equal(T.beginNegotiation(g,p.id).deal.stage,'club');
+});
+
+test('direct competitors and scarce natural positions are priced differently; a release clause still permits talks',()=>{
+ const g=fresh(),p=g.players['c1-p14'];g.clubs.c0.reputation=86;g.clubs.c1.reputation=86;g.clubs.c1.leagueId=g.clubs.c0.leagueId;p.naturalPositions=['DM'];
+ for(const key of Object.keys(p.attributes))p.attributes[key]=17;
+ for(const mate of Object.values(g.players).filter(x=>x.clubId===p.clubId&&x.id!==p.id))mate.naturalPositions=['CM'];
+ const blocked=T.beginNegotiation(g,p.id).deal;assert.equal(blocked.stage,'rejected');assert.equal(blocked.assessment.replacements,0);assert.match(blocked.reason,/đối thủ/);
+ const open=fresh(),target=open.players['c1-p14'];Object.assign(open.clubs.c1,{reputation:86,leagueId:open.clubs.c0.leagueId});for(const key of Object.keys(target.attributes))target.attributes[key]=17;
+ target.contractTerms={releaseClause:4000000};const deal=T.beginNegotiation(open,target.id).deal;assert.equal(deal.stage,'club');assert.ok(deal.clubDemand.fee<=4000000);T.submitClubOffer(open,deal.id,{fee:4000000,sellOnPercent:0});assert.equal(deal.stage,'contract');
+});
+
+test('market value is separate from asking price and contract duration, injury and listing influence the quote',()=>{
+ const base=fresh(),long=structuredClone(base),short=structuredClone(base),injured=structuredClone(base),listed=structuredClone(base),id='c1-p14';
+ long.players[id].contractUntil=2031;short.players[id].contractUntil=2027;injured.players[id].injury=10;listed.players[id].listed=true;
+ const standard=T.beginNegotiation(base,id).deal.clubDemand.fee;
+ assert.notEqual(standard,base.players[id].value);
+ assert.ok(T.beginNegotiation(long,id).deal.clubDemand.fee>standard);
+ assert.ok(T.beginNegotiation(short,id).deal.clubDemand.fee<standard);
+ assert.ok(T.beginNegotiation(injured,id).deal.clubDemand.fee<standard);
+ assert.ok(T.beginNegotiation(listed,id).deal.clubDemand.fee<standard);
+ assert.ok([base,long,short,injured,listed].every(g=>g.players[id].value===base.players[id].value));
+});
+
+test('promised playing role cannot be bought out with an excessive salary; the published counteroffer remains reachable',()=>{
+ const g=fresh(),p=g.players['c1-p14'];g.clubs.c0.reputation=75;
+ const d=T.beginNegotiation(g,p.id).deal;T.submitClubOffer(g,d.id,{...d.clubDemand});assert.equal(d.playerDemand.squadRole,'star');
+ T.submitContractOffer(g,d.id,{...d.playerDemand,wage:d.playerDemand.wage*5,squadRole:'prospect'});assert.equal(d.stage,'contract');assert.match(d.history.at(-1).text,/thời gian thi đấu/);
+ T.submitContractOffer(g,d.id,{...d.playerDemand});assert.equal(d.stage,'agreed');
+});
+
+test('selling requires sporting need, acceptable wages and health even when other clubs have unlimited money',()=>{
+ for(const reason of ['position','salary','injury']){
+  const g=fresh(),p=g.players['c0-p14'];
+  for(const c of Object.values(g.clubs))if(c.id!==g.clubId){c.cash=1e12;c.budget=1e12;c.wageBudget=1e10;}
+  if(reason==='position')for(const mate of Object.values(g.players).filter(x=>x.clubId!==g.clubId))for(const key of Object.keys(mate.attributes))mate.attributes[key]=20;
+  if(reason==='salary')p.wage=1000000;
+  if(reason==='injury')p.injury=12;
+  const before=structuredClone(g),result=T.sellToAI(g,p.id);assert.equal(result.ok,false,reason);assert.deepEqual(g,before,reason);
+ }
+ const g=fresh(),p=g.players['c0-p15'];p.listed=true;const quote=T.saleQuote(g,p),result=T.sellToAI(g,p.id);assert.equal(result.ok,true);assert.equal(result.transfer.fee,quote);assert.ok(quote<p.value);assert.equal(p.clubId,result.transfer.to);
+});
+
+test('AI clubs honor cornerstone refusals and older saved negotiations require no assessment migration',()=>{
+ const g=fresh();for(const c of Object.values(g.clubs))c.reputation=90;
+ for(const p of Object.values(g.players)){p.listed=false;p.contractUntil=2031;for(const key of Object.keys(p.attributes))p.attributes[key]=19;}
+ const before=g.rng;assert.deepEqual(T.runAITransfers(g).transfers,[]);assert.equal(g.rng,before);
+ const legacy=fresh(),d=agreed(legacy);delete d.assessment;assert.equal(T.validateTransferMarket(legacy),true);const restored=JSON.parse(JSON.stringify(legacy));assert.equal(T.finalizeNegotiation(restored,d.id).ok,true);
 });

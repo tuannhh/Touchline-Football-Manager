@@ -1,6 +1,6 @@
 {
   "name": "touchline-manager",
-  "version": "1.7.1",
+  "version": "1.8.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,14 +12,16 @@
     "data:profiles": "python3 scripts/enrich-player-profiles.py --all",
     "data:portraits": "python3 scripts/refresh-portraits.py",
     "data:release": "node scripts/release-rosters.mjs",
-    "i18n:audit": "node scripts/audit-i18n.mjs --strict"
+    "i18n:audit": "node scripts/audit-i18n.mjs --strict",
+    "data:reality": "node scripts/import-player-reality.mjs"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
     "i18next": "^26.4.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-i18next": "^17.0.15"
+    "react-i18next": "^17.0.15",
+    "three": "^0.180.0"
   },
   "devDependencies": {
     "vite": "^7.3.0"

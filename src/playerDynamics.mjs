@@ -1,4 +1,5 @@
 import {makeMessage} from './mail.mjs';
+import {competitionSuspension} from './discipline.mjs';
 const clamp=n=>Math.max(0,Math.min(100,Math.round(n)));
 const days=(a,b)=>Math.floor((Date.parse(a)-Date.parse(b))/86400000);
 const addDays=(date,n)=>new Date(Date.parse(date)+n*86400000).toISOString().slice(0,10);
@@ -29,6 +30,8 @@ export function noteInjury(g,p,context='match'){
 }
 export function reviewPlayerDynamics(g,{training=true,playedClubs=null}={}){
  initializePlayerDynamics(g);
+ const playedCompetitions=new Map();
+ for(const f of g.fixtures)if(f.round===g.round&&f.result)for(const club of [f.home,f.away]){if(!playedCompetitions.has(club))playedCompetitions.set(club,[]);playedCompetitions.get(club).push(f.leagueId);}
  for(const p of Object.values(g.players)){
   let d=p.dynamics;
   if(d.clubId!==p.clubId||d.year!==g.year){p.dynamics=d={clubId:p.clubId,year:g.year,baselineMinutes:p.seasonMinutes,lastMinutes:p.seasonMinutes,unusedWeeks:0,concerns:[],wantsToLeave:false,startedAt:g.date};p.loanListed=false;}
@@ -38,7 +41,9 @@ export function reviewPlayerDynamics(g,{training=true,playedClubs=null}={}){
   const played=Math.max(0,p.seasonMinutes-d.lastMinutes);d.lastMinutes=p.seasonMinutes;
   // A club without a fixture, national duty, an injury or a ban is not refusal to use a player.
   const hadFixture=playedClubs?playedClubs.has(p.clubId):g.fixtures.some(f=>f.round===g.round&&f.result&&(f.home===p.clubId||f.away===p.clubId));
-  if(hadFixture&&!p.injury&&!p.suspension&&!p.internationalDuty?.active){
+  const servedBan=p.discipline?.lastServedDate===g.date&&p.discipline?.lastServedRound===g.round;
+  const scopedBan=(playedCompetitions.get(p.clubId)||[]).some(id=>competitionSuspension(g,p,id)>0);
+  if(hadFixture&&!p.injury&&!p.suspension&&!servedBan&&!scopedBan&&!p.internationalDuty?.active){
    d.unusedWeeks=played>=20?0:d.unusedWeeks+1;
    if(played>=20){d.concerns=d.concerns.filter(x=>x!=='Ít được thi đấu');if(d.unusedWeeks===0&&!d.wantsToLeave)p.morale=clamp(p.morale+1);}
    const expected=p.contractTerms?.squadRole!=='prospect'&&p.age>=21;

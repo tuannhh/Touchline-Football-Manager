@@ -5,5 +5,6 @@
 .match-action-strip>.action-minute{color:#a2b09e;font-variant-numeric:tabular-nums;white-space:nowrap}
 .match-action-strip.action-goal{background:#2b401e}.match-action-strip.action-shot>.action-dot{background:#f1c76d}
 .match-controls{flex-wrap:wrap}.match-controls .check-label{white-space:nowrap}
+.match-view-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:0 0 12px}.match-view-controls .segmented button{font-size:12px;padding:8px 14px}.match-view-controls label{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}.match-view-controls select{font-size:11px;padding:7px;min-height:32px}.match-view-controls small{margin-left:auto;color:var(--muted);font-size:10px}.match-canvas-3d{background:#12251f}
 .match-controls .motion-toggle{font-size:11px}.match-playback-help{margin:0 0 16px;color:var(--muted);font-size:11px;line-height:1.6}
 @media(max-width:650px){.match-action-strip{padding:10px 12px}.match-action-strip strong{font-size:11px}.match-action-strip>.action-minute{font-size:10px}.match-controls .motion-toggle{font-size:10px}}

@@ -1,5 +1,6 @@
 import {isoCountry} from './locale.mjs';
 import {verifiedTrainingStatus} from './homegrown.mjs';
+import {competitionSuspension} from './discipline.mjs';
 export const RULE_SOURCES={
  UEFA:'https://documents.uefa.com/r/Regulations-of-the-UEFA-Europa-League-2026/27/Article-31-Player-lists-Online',
  EN:'https://www.premierleague.com/en/news/4706139/see-all-the-202627-premier-league-squad-lists',
@@ -60,6 +61,7 @@ export function autoRegistration(g,competitionId,clubId,rank){
  return ids;
 }
 export function registered(g,p,competitionId){
+ if(competitionSuspension(g,p,competitionId)>0)return false;
  if(!competitionId)return true;const rule=registrationRule(g,competitionId);if(rule.mode!=='enforced')return true;
  if(exemptPlayer(g,p,competitionId))return true;
  const ids=g.registrations?.[competitionId]?.[p.clubId];return !ids||ids.includes(p.id);

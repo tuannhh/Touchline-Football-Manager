@@ -24,6 +24,36 @@ const wages=(g,id)=>squad(g,id).reduce((s,p)=>s+p.wage,0);
 const fail=message=>({ok:false,message});
 const answer=(deal,message,extra={})=>({ok:true,message,deal,...extra});
 const note=(g,d,side,text)=>{d.history.push({date:g.date,side,text});d.history=d.history.slice(-60);};
+const ROLE_RANK={prospect:0,rotation:1,starter:2,star:3};
+const desired={GK:3,DF:8,MF:8,FW:5};
+
+// Transparent simulation factors, not valuations or willingness attributed to real clubs.
+// A caller running the world market can pass its roster index to avoid full-world scans.
+export function transferAssessment(g,p,buyerId,roster){
+ const seller=g.clubs[p.clubId],buyer=g.clubs[buyerId],ps=roster?.get(p.clubId)||squad(g,p.clubId),bp=roster?.get(buyerId)||squad(g,buyerId);
+ const quality=ability(p),years=Math.max(0,p.contractUntil-g.year),positionPlayers=ps.filter(x=>x.position===p.position);
+ const replacements=positionPlayers.filter(x=>x.id!==p.id&&x.injury===0&&ability(x)>=quality-8&&(!p.naturalPositions?.length||!x.naturalPositions?.length||p.naturalPositions.some(pos=>[...x.naturalPositions,...(x.otherPositions||[])].includes(pos)))).length;
+ const average=ps.reduce((s,x)=>s+ability(x),0)/Math.max(1,ps.length);
+ const important=p.contractTerms?.squadRole==='star'||quality>=88||quality>=Math.max(80,average+6);
+ const cornerstone=important&&quality>=88&&seller.reputation>=84&&years>=3;
+ const wantsMove=p.listed||p.dynamics?.wantsToLeave||p.morale<45;
+ const competitor=seller.leagueId===buyer.leagueId&&seller.reputation>=80&&buyer.reputation>=80&&Math.abs(seller.reputation-buyer.reputation)<=12;
+ const release=Number.isFinite(p.contractTerms?.releaseClause)&&p.contractTerms.releaseClause>0?p.contractTerms.releaseClause:0;
+ const repGap=seller.reputation-buyer.reputation;
+ const recentSigning=p.contractTerms?.signedAt&&days(g.date,p.contractTerms.signedAt)>=0&&days(g.date,p.contractTerms.signedAt)<90;
+ const buyerPosition=bp.filter(x=>x.position===p.position),buyerAverage=buyerPosition.reduce((s,x)=>s+ability(x),0)/Math.max(1,buyerPosition.length);
+ const buyerNeedsPlayer=bp.length<36&&(buyerPosition.length<desired[p.position]||quality>=buyerAverage+3);
+ const expectedRole=p.age<21&&quality<buyer.reputation-10?'prospect':quality>=buyer.reputation-1?'star':quality>=buyer.reputation-10?'starter':'rotation';
+ let sellerRefusal=null,playerRefusal=null;
+ if(!wantsMove&&!release){
+  if(recentSigning)sellerRefusal='CLB vừa ký hợp đồng và chưa muốn bán cầu thủ trong 90 ngày đầu.';
+  else if(cornerstone&&buyer.reputation<=seller.reputation+5)sellerRefusal='CLB coi đây là ngôi sao nền tảng còn hợp đồng dài hạn và không mở đàm phán.';
+  else if(important&&years>=2&&competitor&&replacements<2)sellerRefusal='CLB không muốn tăng sức mạnh cho đối thủ trực tiếp khi chưa có người thay thế.';
+ }
+ if(buyer.reputation<quality-22||(!wantsMove&&important&&repGap>10))playerRefusal='Cầu thủ từ chối vì danh tiếng và mục tiêu cạnh tranh của CLB chưa phù hợp.';
+ const injuryWeeks=Math.max(0,Number(p.injury)||0);
+ return {modelVersion:2,quality,contractYears:years,important,cornerstone,replacements,competitor,release,wantsMove:!!wantsMove,expectedRole,buyerNeedsPlayer,buyerPositionQuality:Math.round(buyerAverage),injuryWeeks,sellerRefusal,playerRefusal,difficulty:sellerRefusal||playerRefusal?'unavailable':important||competitor||years>=4?'difficult':wantsMove||years<=1?'open':'normal'};
+}
 
 export function initializeTransferMarket(g){
  if(g.marketVersion===1)return g;
@@ -57,25 +87,27 @@ function current(g,id,stage){
  if(d.stage!==stage)return fail('Hãy hoàn tất đúng bước đàm phán trước khi tiếp tục.');
  return {deal:d};
 }
-function clubTerms(g,p,buyerId){
+function clubTerms(g,p,buyerId,assessment=transferAssessment(g,p,buyerId)){
  const seller=g.clubs[p.clubId],buyer=g.clubs[buyerId];
  const age=p.age<24?1.16:p.age>32?.86:1;
- const contractYears=Math.max(0,p.contractUntil-g.year);
- const yearsFactor=contractYears<=1?.9:contractYears>=4?1.14:1;
- const qualityPremium=ability(p)>=seller.reputation?1.13:1;
+ const yearsFactor=assessment.contractYears<=1?.75:assessment.contractYears>=4?1.22:1;
+ const qualityPremium=assessment.important?1.35:ability(p)>=seller.reputation?1.13:1;
+ const replacementPremium=assessment.replacements===0?1.2:assessment.replacements===1?1.08:1;
+ const competitionPremium=assessment.competitor?1.2:1;
+ const medicalDiscount=1-clamp(assessment.injuryWeeks*.008,0,.25);
  const richBuyer=1+clamp(buyer.reputation-seller.reputation,0,30)/200;
  const discount=staffEffects(g,buyerId).transferDiscount;
- let fee=Math.max(1000,rounded(p.value*(p.listed?.95:1.27)*age*yearsFactor*qualityPremium*richBuyer*(1-discount),1000));
+ let fee=Math.max(1000,rounded(p.value*(assessment.wantsMove?.92:1.2)*age*yearsFactor*qualityPremium*replacementPremium*competitionPremium*medicalDiscount*richBuyer*(1-discount),1000));
  const release=p.contractTerms?.releaseClause;
  if(Number.isFinite(release)&&release>0)fee=Math.min(fee,release);
  return {fee:Math.min(TRANSFER_RULES.maxMoney,Math.round(fee)),sellOnPercent:p.age<24?10:5};
 }
-function playerTerms(g,p,buyerId,fee){
+function playerTerms(g,p,buyerId,fee,assessment=transferAssessment(g,p,buyerId)){
  const rep=g.clubs[buyerId].reputation,quality=ability(p);
- const rise=1.15+clamp(quality-rep,0,25)/50;
- const wage=clamp(rounded(Math.max(100,p.wage*rise,p.value/480)),100,TRANSFER_RULES.maxWage);
- const squadRole=p.age<20&&quality<rep-8?'prospect':quality>=rep-1?'star':quality>=rep-10?'starter':'rotation';
- return {wage,signingBonus:rounded(wage*10),agentFee:rounded(wage*5),appearanceBonus:rounded(wage*.12,10),goalBonus:rounded(wage*(p.position==='FW'?.15:.06),10),years:p.age>31?2:p.age<25?4:3,releaseClause:fee*1.1>TRANSFER_RULES.maxMoney?0:clamp(rounded(Math.max(fee*1.6,p.value*1.8),1000),minimumReleaseClause(fee),TRANSFER_RULES.maxMoney),annualRise:5,squadRole};
+ const ambitionPremium=clamp(g.clubs[p.clubId].reputation-rep,0,20)/60;
+ const rise=(assessment.wantsMove?1.05:1.18)+clamp(quality-rep,0,25)/60+ambitionPremium;
+ const wage=clamp(rounded(Math.max(100,p.wage*rise,p.value/600)),100,TRANSFER_RULES.maxWage);
+ return {wage,signingBonus:rounded(wage*(assessment.important?14:10)),agentFee:rounded(wage*5),appearanceBonus:rounded(wage*.12,10),goalBonus:rounded(wage*(p.position==='FW'?.15:.06),10),years:p.age>31?2:p.age<25?4:3,releaseClause:fee*1.1>TRANSFER_RULES.maxMoney?0:clamp(rounded(Math.max(fee*1.6,p.value*1.8),1000),minimumReleaseClause(fee),TRANSFER_RULES.maxMoney),annualRise:5,squadRole:assessment.expectedRole};
 }
 export function beginNegotiation(g,playerId){
  const p=g.players[playerId];
@@ -86,12 +118,12 @@ export function beginNegotiation(g,playerId){
  if(old?.cooldownUntil>g.date&&old.sellerId===p.clubId)return fail(`Phía cầu thủ/CLB chưa muốn trở lại bàn đàm phán trước ${old.cooldownUntil}.`);
  initializeTransferMarket(g);
  if(old&&ACTIVE.has(old.stage))close(g,old,'expired','Thỏa thuận cũ đã hết hiệu lực.',0);
- const sellerId=p.clubId,clubDemand=clubTerms(g,p,g.clubId);
- const d={id:`deal-${++g.transferMarket.sequence}`,playerId,buyerId:g.clubId,sellerId,stage:'club',createdAt:g.date,expiresOn:dayAdd(g.date,28),clubDemand,playerDemand:playerTerms(g,p,g.clubId,clubDemand.fee),originalClubDemand:{...clubDemand},clubRounds:0,playerRounds:0,maxRounds:4,clubPatience:4,playerPatience:4,history:[]};
+ const sellerId=p.clubId,assessment=transferAssessment(g,p,g.clubId),clubDemand=clubTerms(g,p,g.clubId,assessment);
+ const d={id:`deal-${++g.transferMarket.sequence}`,playerId,buyerId:g.clubId,sellerId,stage:'club',createdAt:g.date,expiresOn:dayAdd(g.date,28),assessment,clubDemand,playerDemand:playerTerms(g,p,g.clubId,clubDemand.fee,assessment),originalClubDemand:{...clubDemand},clubRounds:0,playerRounds:0,maxRounds:4,clubPatience:4,playerPatience:4,history:[]};
  d.originalPlayerDemand={...d.playerDemand};g.negotiations.unshift(d);g.negotiations=g.negotiations.filter((x,i)=>i<1000||ACTIVE.has(x.stage));
- const refusal=canSell(g,p);
+ const refusal=canSell(g,p)||assessment.sellerRefusal;
  if(refusal){note(g,d,'club',refusal);return close(g,d,'rejected',refusal);}
- if(g.clubs[g.clubId].reputation<ability(p)-22){const text=`${p.name} chưa muốn chuyển tới CLB có danh tiếng thấp hơn mục tiêu sự nghiệp. Hãy cải thiện vị thế đội bóng.`;note(g,d,'player',text);return close(g,d,'rejected',text);}
+ if(assessment.playerRefusal){note(g,d,'player',assessment.playerRefusal);return close(g,d,'rejected',assessment.playerRefusal);}
  note(g,d,'club',`${g.clubs[sellerId].name} yêu cầu ${money(clubDemand.fee)} và ${clubDemand.sellOnPercent}% phí lần bán tiếp theo.`);
  note(g,d,'player',`Người đại diện dự kiến lương ${money(d.playerDemand.wage)}/tuần, vai trò ${SQUAD_ROLES[d.playerDemand.squadRole]}. Điều khoản cá nhân được chốt sau khi hai CLB đồng ý.`);
  return answer(d,'Đã mở đàm phán phí chuyển nhượng với CLB chủ quản.');
@@ -102,7 +134,8 @@ function validPlayerTerms(o){return !!o&&MONEY_KEYS.every(k=>whole(o[k],k==='wag
 export function submitClubOffer(g,dealId,offer){
  if(!validClubTerms(offer))return fail('Phí phải là số nguyên không âm; phần trăm bán tiếp từ 0 đến 30.');
  const check=current(g,dealId,'club');if(!check.deal||check.ok!==undefined)return check;const d=check.deal,p=g.players[d.playerId];
- const refusal=canSell(g,p);if(refusal)return close(g,d,'rejected',refusal);
+ const assessment=transferAssessment(g,p,d.buyerId);
+ const refusal=canSell(g,p)||assessment.sellerRefusal||assessment.playerRefusal;if(refusal)return close(g,d,'rejected',refusal);
  const o={fee:offer.fee,sellOnPercent:offer.sellOnPercent};d.clubRounds++;d.clubPatience=4-d.clubRounds;d.lastClubOffer=o;
  note(g,d,'manager',`Đề nghị ${money(o.fee)}, ${o.sellOnPercent}% phí lần bán tiếp theo.`);
  const release=p.contractTerms?.releaseClause;
@@ -122,11 +155,11 @@ export function submitClubOffer(g,dealId,offer){
 }
 function contractProblems(d,o){
  const a=d.playerDemand,base=d.originalPlayerDemand;
- const ranks={prospect:0,rotation:1,starter:2,star:3};
- const roleShort=Math.max(0,ranks[a.squadRole]-ranks[o.squadRole]);
+ const roleShort=Math.max(0,ROLE_RANK[a.squadRole]-ROLE_RANK[o.squadRole]);
  const needWage=a.wage*(1+roleShort*.12);
  const annualWorth=t=>t.wage*52+t.signingBonus/t.years+Math.min(t.appearanceBonus,base.wage*.4)*20+Math.min(t.goalBonus,base.wage*.4)*5+t.wage*52*t.annualRise/100*.5;
  const needed={...a,wage:needWage};const problems=[];
+ if(roleShort)problems.push('Vai trò được hứa thấp hơn yêu cầu; cầu thủ ưu tiên thời gian thi đấu');
  if(o.wage<Math.max(base.wage*.82,needWage*.85)||annualWorth(o)<annualWorth(needed)*.965)problems.push(`Tổng đãi ngộ chưa đạt yêu cầu ${money(a.wage)}/tuần và các khoản thưởng dự kiến${roleShort?' do vai trò thấp hơn mong muốn':''}`);
  if(o.agentFee<a.agentFee*.9)problems.push(`Phí đại diện cần ít nhất ${money(Math.ceil(a.agentFee*.9))}`);
  if(o.years<Math.max(1,a.years-1))problems.push(`Cầu thủ muốn hợp đồng ít nhất ${Math.max(1,a.years-1)} năm`);
@@ -190,15 +223,30 @@ export function finalizeNegotiation(g,dealId,hooks={}){
  return answer(d,'Đã hoàn tất thương vụ.',{transfer:record});
 }
 
-export function saleQuote(g,p){return Math.min(Math.max(1000,rounded(p.value*.86,1000)),p.contractTerms?.releaseClause||Infinity);}
+export function saleQuote(g,p){
+ const years=Math.max(0,p.contractUntil-g.year),contract=years<=1?.75:1,medical=1-clamp((p.injury||0)*.015,0,.4),age=p.age>32?.8:1;
+ return Math.min(Math.max(1000,rounded(p.value*(p.listed?.78:.86)*contract*medical*age,1000)),p.contractTerms?.releaseClause||Infinity);
+}
 export function sellToAI(g,playerId,hooks={}){
  const p=g.players[playerId];if(!p||p.clubId!==g.clubId)return fail('Cầu thủ không thuộc CLB của bạn.');
  if(g.liveMatch)return fail('Hoàn tất trận đấu trước khi bán cầu thủ.');const shortage=canSell(g,p);if(shortage)return fail(shortage);
  if(p.wage>TRANSFER_RULES.maxWage)return fail('Mức lương hiện tại cao hơn giới hạn hợp đồng của thị trường. Hãy điều chỉnh lương trước khi bán.');
- const fee=saleQuote(g,p);
- const terms={wage:Math.max(100,Math.round(p.wage)),signingBonus:0,agentFee:0,appearanceBonus:0,goalBonus:0,years:3,releaseClause:0,annualRise:0,squadRole:'rotation'};
- const buyer=Object.values(g.clubs).filter(c=>c.id!==g.clubId&&c.reputation>=ability(p)-22&&!affordability(g,p,c.id,fee,terms)).sort((a,b)=>Math.abs(a.reputation-ability(p))-Math.abs(b.reputation-ability(p))||a.id.localeCompare(b.id))[0];
- if(!buyer)return fail('Chưa có CLB phù hợp đủ ngân sách, quỹ lương và đáp ứng mục tiêu của cầu thủ.');
+ if(p.injury>=8)return fail('Các CLB quan tâm đang chờ cầu thủ hồi phục chấn thương dài hạn trước khi ra giá.');
+ const fee=saleQuote(g,p),roster=new Map(Object.keys(g.clubs).map(id=>[id,[]]));for(const player of Object.values(g.players))roster.get(player.clubId)?.push(player);
+ const candidates=[];
+ for(const buyer of Object.values(g.clubs)){
+  if(buyer.id===g.clubId)continue;
+  const assessment=transferAssessment(g,p,buyer.id,roster);
+  if(assessment.playerRefusal||!assessment.buyerNeedsPlayer||assessment.quality<buyer.reputation-22)continue;
+  const terms=playerTerms(g,p,buyer.id,fee,assessment),bp=roster.get(buyer.id),typicalWage=bp.reduce((s,x)=>s+x.wage,0)/Math.max(1,bp.length);
+  // A wealthy club still rejects a wage that breaks its sporting salary structure.
+  if(terms.wage>Math.max(500,typicalWage*3,p.value/400)||affordability(g,p,buyer.id,fee,terms))continue;
+  candidates.push({buyer,terms,fit:assessment.quality-assessment.buyerPositionQuality});
+ }
+ candidates.sort((a,b)=>b.fit-a.fit||Math.abs(a.buyer.reputation-ability(p))-Math.abs(b.buyer.reputation-ability(p))||a.buyer.id.localeCompare(b.buyer.id));
+ const selected=candidates[0];
+ if(!selected)return fail('Chưa có CLB muốn mua với giá và mức lương này. Các đội còn cân nhắc nhu cầu vị trí, chất lượng và tham vọng của cầu thủ.');
+ const {buyer,terms}=selected;
  initializeTransferMarket(g);const record=move(g,p,buyer.id,fee,terms,0,false,hooks);hooks.repairLineup?.(g);
  mail(g,`${p.name} gia nhập ${buyer.name}`,[`CLB đồng ý bán ${p.name} cho ${buyer.name} với phí ${money(fee)}.`,record.sellOnPayment?`Đã trả ${money(record.sellOnPayment)} cho ${g.clubs[record.sellOnClubId].name} theo điều khoản bán tiếp trước đó.`:'Không có khoản chia sẻ phí cho CLB trước.',`Số tiền thực nhận ${money(fee-record.sellOnPayment)} được cộng vào số dư và ngân sách chuyển nhượng. Đội hình đã được rà soát sau giao dịch.`],p.id);
  return {ok:true,message:'Đã bán cầu thủ.',transfer:record};
@@ -214,7 +262,7 @@ export function runAITransfers(g,hooks={}){
  const clubs=Object.values(g.clubs).filter(c=>c.id!==g.clubId);
  const roster=new Map(clubs.map(c=>[c.id,[]]));for(const p of Object.values(g.players))roster.get(p.clubId)?.push(p);
  const lastMoved=new Map();for(const t of g.transfers)if(!lastMoved.has(t.playerId||t.id))lastMoved.set(t.playerId||t.id,t.date);
- const positions=['GK','DF','MF','FW'],desired={GK:3,DF:8,MF:8,FW:5};
+ const positions=['GK','DF','MF','FW'];
  for(let attempt=0;attempt<100&&records.length<target;attempt++){
   const buyers=clubs.filter(c=>!touched.has(c.id)&&c.budget>50000&&c.cash>50000&&(roster.get(c.id)?.length||0)<36);
   if(!buyers.length)break;const buyer=buyers[Math.floor(random(market)*buyers.length)],bp=roster.get(buyer.id);
@@ -229,17 +277,19 @@ export function runAITransfers(g,hooks={}){
     if(lastMoved.has(p.id)&&days(g.date,lastMoved.get(p.id))<28)continue;
     const quality=ability(p);if(quality<Math.max(35,buyer.reputation-26)||quality>buyer.reputation+16)continue;
     if(p.age>36||p.injury>5)continue;
-    const quoted=clubTerms(g,p,buyer.id);const fee=Math.min(quoted.fee,p.contractTerms?.releaseClause||Infinity,Math.max(1000,rounded(quoted.fee*(p.listed?.93:.99),1000)));
-    const wage=clamp(rounded(Math.max(100,p.wage*1.1)),100,TRANSFER_RULES.maxWage);
-    if(fee+wage*6>Math.min(buyer.budget,buyer.cash)||bp.reduce((s,x)=>s+x.wage,0)+wage>buyer.wageBudget)continue;
+    const assessment=transferAssessment(g,p,buyer.id,roster);
+    if(assessment.sellerRefusal||assessment.playerRefusal||!assessment.buyerNeedsPlayer)continue;
+    const quoted=clubTerms(g,p,buyer.id,assessment);const fee=Math.min(quoted.fee,p.contractTerms?.releaseClause||Infinity,Math.max(1000,rounded(quoted.fee*(p.listed?.93:.99),1000)));
+    const terms=playerTerms(g,p,buyer.id,fee,assessment),wage=terms.wage;
+    const payroll=bp.reduce((s,x)=>s+x.wage,0);
+    if(wage>Math.max(500,payroll/Math.max(1,bp.length)*3,p.value/400)||fee+terms.signingBonus+terms.agentFee>Math.min(buyer.budget,buyer.cash)||payroll+wage>buyer.wageBudget)continue;
     const fit=(quality-positionQuality)*1.2+(p.age<25?7:0)+(p.listed?8:0)-fee/Math.max(1000,buyer.budget)*5;
-    candidates.push({p,fee,wage,fit});
+    candidates.push({p,fee,terms,fit});
    }
   }
   candidates.sort((a,b)=>b.fit-a.fit||a.p.id.localeCompare(b.p.id));
   const pool=candidates.slice(0,10);if(!pool.length)continue;
-  const {p,fee,wage}=pool[Math.floor(random(market)*pool.length)];
-  const terms={wage,signingBonus:wage*4,agentFee:wage*2,appearanceBonus:rounded(wage*.08,10),goalBonus:rounded(wage*.05,10),years:p.age>31?2:3,releaseClause:0,annualRise:3,squadRole:ability(p)>=buyer.reputation-5?'starter':'rotation'};
+  const {p,fee,terms}=pool[Math.floor(random(market)*pool.length)];
   if(affordability(g,p,buyer.id,fee,terms))continue;
   const from=p.clubId,record=move(g,p,buyer.id,fee,terms,p.age<24?10:0,true,hooks);records.push(record);touched.add(from);touched.add(buyer.id);
   roster.set(from,roster.get(from).filter(x=>x.id!==p.id));roster.get(buyer.id).push(p);lastMoved.set(p.id,g.date);

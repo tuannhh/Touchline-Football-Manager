@@ -7,10 +7,10 @@ export const LANGUAGE_OPTIONS = Object.freeze([
  {value:'pt',label:'Português',locale:'pt-PT'},
 ]);
 export const DEFAULT_PREFERENCES = Object.freeze({
- language:'vi',currency:'EUR',distanceUnit:'metric',heightUnit:'cm',weightUnit:'kg',
+ language:'vi',currency:'EUR',distanceUnit:'metric',heightUnit:'cm',weightUnit:'kg',matchView:'2d',matchCamera:'broadcast',
  exchangeRates:Object.freeze({USD:1.1,GBP:0.85}),
 });
-const choices={language:LANGUAGE_OPTIONS.map(x=>x.value),currency:['EUR','USD','GBP'],distanceUnit:['metric','imperial'],heightUnit:['cm','ft'],weightUnit:['kg','lb']};
+const choices={language:LANGUAGE_OPTIONS.map(x=>x.value),currency:['EUR','USD','GBP'],distanceUnit:['metric','imperial'],heightUnit:['cm','ft'],weightUnit:['kg','lb'],matchView:['2d','3d'],matchCamera:['broadcast','tactical','goal']};
 const listeners=new Set();
 export function normalizePreferences(input={}){
  const next={...DEFAULT_PREFERENCES,exchangeRates:{...DEFAULT_PREFERENCES.exchangeRates}};

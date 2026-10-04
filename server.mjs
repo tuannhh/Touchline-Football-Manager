@@ -27,7 +27,7 @@ const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url,'http://127.0.0.1');
   if(req.headers.host&&!['127.0.0.1','localhost','[::1]'].some(h=>req.headers.host===`${h}:${port}`||req.headers.host===h))return json(res,403,{error:'Local access only'});
   if(req.method!=='GET'&&req.headers.origin&&!new Set(['http://127.0.0.1:'+port,'http://localhost:'+port,'http://127.0.0.1:5179','http://localhost:5179']).has(req.headers.origin))return json(res,403,{error:'Origin is not allowed'});
-  if(url.pathname==='/api/health')return json(res,200,{ok:true,name:'Touchline',version:3,appVersion:'1.7.1'});
+  if(url.pathname==='/api/health')return json(res,200,{ok:true,name:'Touchline',version:3,appVersion:'1.8.0'});
   if(url.pathname==='/api/roster-releases'&&req.method==='GET')return json(res,200,await listRosterReleases({rootDir:root}));
   const roster=url.pathname.match(/^\/api\/roster-releases\/([a-zA-Z0-9-]{1,100})$/);
   if(roster&&req.method==='GET')return json(res,200,await loadRosterRelease(roster[1],{rootDir:root}));

@@ -20,6 +20,10 @@
 .negotiation-notice>svg{flex-shrink:0;margin-top:2px}
 .negotiation-notice.error{background:#3a2925;border-color:#785448;color:#ffc9b2}
 .negotiation-context{display:flex;justify-content:space-between;gap:15px;padding:19px 28px 0;font-size:10px;color:#a2b592;flex-wrap:wrap}
+.negotiation-assessment{margin:20px 28px 0;padding:16px 18px;background:#1c291e;border:1px solid var(--transfer-border);border-radius:7px}
+.negotiation-assessment>div{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:15px}
+.negotiation-assessment h3{font-size:13px;margin:0}.negotiation-assessment p{font-size:10px;line-height:1.7;color:#a2b592;margin:13px 0 0}
+.negotiation-difficulty{font-size:10px;color:#c3d8ad}.negotiation-difficulty.difficult,.negotiation-difficulty.unavailable{color:#efbb83}
 .negotiation-layout{display:grid;grid-template-columns:minmax(0,1fr) 285px;gap:22px;padding:20px 28px 26px;align-items:start}
 .negotiation-section-heading h3{font-size:15px;margin:7px 0 14px;line-height:1.5}
 .negotiation-section-heading .eyebrow{font-size:9px;letter-spacing:1.1px;color:#a5bd92}

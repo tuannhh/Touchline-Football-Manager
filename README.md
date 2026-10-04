@@ -8,7 +8,20 @@ Touchline là game quản lý bóng đá độc lập dành cho một người c
 
 **Mục đích giải trí và hình ảnh:** Đây là dự án cá nhân phục vụ giải trí, không có liên kết chính thức với Football Manager, các CLB, giải đấu hay liên đoàn. Ảnh cầu thủ, logo, tên và tài sản của bên thứ ba thuộc các chủ sở hữu tương ứng; việc xuất hiện trong game không cấp quyền sử dụng lại. Tác giả không cấp phép khai thác thương mại các tài sản đó và không chịu trách nhiệm, trong phạm vi pháp luật cho phép, về việc người dùng sử dụng thương mại, phân phối lại hoặc vi phạm bản quyền hình ảnh/quyền hình ảnh. Người sử dụng tự chịu trách nhiệm xin các quyền cần thiết. Giấy phép MIT của mã nguồn dự án không cấp lại giấy phép cho tài sản của bên thứ ba.
 
-Bản **1.7.1**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+Bản **1.8.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+
+## Mới ở bản 1.8.0
+
+- **Dữ liệu có ngày nguồn:** snapshot `2026-10-04-reality` giữ danh sách cầu thủ của bản 03/10, bổ sung 5.319 hồ sơ quan sát, 4.588 định giá, 3.596 điểm thi đấu và 440 báo cáo chấn thương/nghi ngờ chấn thương. Giá từ FotMob/SciSports là **ước tính thị trường**, không phải báo giá bán. Phạm vi chưa đủ 16.440 cầu thủ, nhất là các hạng dưới. Kỹ năng vẫn là ước tính game; 1.962 hồ sơ có hiệu chỉnh phong độ nhỏ dựa trên số phút, điểm thi đấu và mùa nguồn.
+- **Tình trạng thật và sự nghiệp:** hồ sơ tách thống kê thẻ mùa nguồn, báo cáo y tế có ngày và tình trạng hiện tại trong game. Không suy số thẻ thành án treo giò. New Game có tùy chọn dùng chấn thương của snapshot làm điều kiện khởi đầu (298 trường hợp đủ xác nhận); lịch game vẫn bắt đầu tháng 8, hồi phục là ước tính, không tái hiện lịch sử y tế. Các bản lưu cũ không bị thay giá, chỉ số hoặc chấn thương; có thể xem dữ liệu mới như tham khảo.
+- **Thẻ theo giải:** tích lũy và chấp hành án theo từng giải, không dùng giao hữu để xóa án. Premier League và ba cúp UEFA có nguồn điều lệ; các giải khác ghi rõ quy tắc mô phỏng. Án tăng nặng, khiếu nại và vòng sơ loại chưa được mô phỏng. Chi tiết có trong hồ sơ cầu thủ.
+- **Chuyển nhượng khó hơn:** trụ cột, hợp đồng dài, cầu thủ mới ký, đối thủ cạnh tranh, người thay thế và tham vọng ảnh hưởng khả năng đàm phán. Cầu thủ có thể từ chối vai trò thấp dù được đề nghị lương cao. Bán cầu thủ cần bên mua có nhu cầu vị trí và cơ cấu lương phù hợp; AI dùng cùng mô hình.
+- **Di chuyển theo tình huống:** xét nguy cơ bị cắt bóng, áp lực quanh người nhận, việt vị, các lựa chọn hỗ trợ hai bên; chia người kèm và người áp sát; giảm đổi hướng đột ngột. Đây là lớp diễn hoạt chiến thuật trên kết quả mô phỏng, chưa phải mô phỏng vật lý quyết định mọi lần chạm bóng.
+- **3D thử nghiệm:** trong trận chọn `3D · Thử nghiệm`, đổi góc truyền hình/toàn cảnh/sau cầu môn. Mô hình đơn giản có tay chân chạy và động tác đá; dùng cùng khung hình và kết quả với 2D. Tạm dừng dừng cả hoạt cảnh. WebGL2 không hoạt động thì quay lại 2D. Đây chưa phải chất lượng nhân vật, motion capture hoặc match engine của FM2026.
+
+Nguồn: [FotMob](https://www.fotmob.com/teams/8634/overview/barcelona), [SciSports ETV](https://www.scisports.com/etv-v2-redefining-player-valuation/), [Premier League](https://www.premierleague.com/en/news/4110053), [UEFA 2026/27 Article 63](https://documents.uefa.com/r/Regulations-of-the-UEFA-Champions-League-2026/27/Article-63-Yellow-and-red-cards-Online). Ngày quan sát hồ sơ chi tiết và ngày kiểm tra danh sách đội có thể khác nhau; metadata giữ cả hai.
+
+Nhập lại quan sát công khai bằng `npm run data:reality -- --as-of YYYY-MM-DD` (cần Internet; `--offline` dùng cache). Lệnh chỉ cập nhật file tham khảo, không chạm save hoặc release đã đóng băng. Sau khi rà soát dữ liệu, ghép bằng `applyPlayerRealitySnapshot` vào file ứng viên và xuất **release mới** qua `npm run data:release`; không thay thế snapshot cũ. Lịch phát hành đội hình định kỳ vẫn là 03/02 và 05/09.
 
 ## Mở game
 

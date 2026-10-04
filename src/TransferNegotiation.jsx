@@ -17,6 +17,19 @@ const clubDraft=offer=>({fee:numeric(offer?.fee),sellOnPercent:numeric(offer?.se
 const contractDraft=offer=>({wage:numeric(offer?.wage),signingBonus:numeric(offer?.signingBonus),agentFee:numeric(offer?.agentFee),appearanceBonus:numeric(offer?.appearanceBonus),goalBonus:numeric(offer?.goalBonus),years:numeric(offer?.years,4),releaseClause:numeric(offer?.releaseClause),annualRise:numeric(offer?.annualRise),squadRole:ROLES[offer?.squadRole]?offer.squadRole:'rotation'});
 const fmtDate=value=>value?dateLabel(value):'—';
 
+function TransferAssessment({player,deal}){
+ const assessment=deal?.assessment;
+ if(!assessment)return null;
+ const difficulty={unavailable:'Không mở đàm phán',difficult:'Khó',open:'Sẵn sàng thương lượng',normal:'Có thể thương lượng'};
+ return <section className="negotiation-assessment" aria-label="Đánh giá khả năng chuyển nhượng">
+  <div><h3>Đánh giá khả năng chuyển nhượng</h3><span className={'negotiation-difficulty '+assessment.difficulty}>{difficulty[assessment.difficulty]}</span></div>
+  <dl className="negotiation-terms compact"><div><dt>Giá trị cầu thủ</dt><dd>{money(player.value)}</dd></div><div><dt>Giá CLB yêu cầu</dt><dd>{assessment.sellerRefusal?'Không chào bán':money(deal.clubDemand.fee)}</dd></div><div><dt>Hợp đồng còn lại</dt><dd>{number(assessment.contractYears)} năm</dd></div><div><dt>Vai trò tại CLB chủ quản</dt><dd>{assessment.important?'Trụ cột':'Thành viên đội một'}</dd></div></dl>
+  <p>Giá yêu cầu và mức độ khó được mô phỏng theo hợp đồng, vai trò, người thay thế và tham vọng của hai bên; không phải báo giá từ CLB ngoài đời.</p>
+  {assessment.competitor&&<p className="amber">CLB chủ quản xem đội của bạn là đối thủ cạnh tranh trực tiếp.</p>}
+  {player.injury>0&&<p className="amber">Cầu thủ đang chấn thương. Thương vụ không xóa thời gian hồi phục; hãy cân nhắc trước khi ký.</p>}
+ </section>;
+}
+
 function AmountField({label,value,onChange,min=0,max=1e12,decimals=0,hint,monetary=false}){
  const Input=monetary?MoneyInput:NumberInput;
  return <label className="field negotiation-field"><span>{moneyLabel(label)}</span><Input {...(monetary?{wholeEuro:true}:{})} required value={value} onChange={onChange} min={min} max={max} decimals={monetary?2:decimals}/>{hint&&<small>{hint}</small>}</label>;
@@ -109,6 +122,7 @@ export default function TransferNegotiation({g,playerId,mutate,onClose,onComplet
   <div className="negotiation-player"><Portrait player={player} size={66}/><div><span className="eyebrow" title={positionDescription(player)}>{positionLabel(player)} · {player.age} TUỔI</span><h2>{player.name}</h2><div className="negotiation-club-route">{onOpenClub?<button className="text-button" onClick={()=>onOpenClub(seller.id)}><Badge club={seller} size={20}/>{seller.shortName}</button>:<span><Badge club={seller} size={20}/>{seller?.shortName}</span>}<ArrowRight size={15}/><span><Badge club={buyer} size={20}/>{buyer.shortName}</span></div></div><span className={'negotiation-status '+(stage||'')}>{NEGOTIATION_STATUS[stage]||'Bắt đầu đàm phán'}</span></div>
   <ol className="negotiation-steps" aria-label="Tiến trình chuyển nhượng">{['Thỏa thuận với CLB','Điều khoản cá nhân','Ký hợp đồng'].map((label,i)=><li className={i===step?'current':i<step?'done':''} aria-current={i===step?'step':undefined} key={label}><span>{i<step?<Check size={15}/>:i+1}</span>{label}</li>)}</ol>
   {notice&&<div className={'negotiation-notice '+(notice.error?'error':'')} role={notice.error?'alert':'status'}>{notice.error?<WarningCircle size={18}/>:<Handshake size={18}/>}<span>{notice.text}</span></div>}
+  <TransferAssessment player={player} deal={deal}/>
   {active&&<div className="negotiation-context"><span>{stage==='agreed'?'Chờ quyết định cuối cùng của bạn':`Đã gửi ${number(rounds||0)} / ${deal.maxRounds||TRANSFER_RULES.maxRounds} đề nghị ở bước này`}</span>{deal.expiresOn&&<span>Hạn trả lời: {fmtDate(deal.expiresOn)}</span>}</div>}
   {stage==='club'&&<ClubProposal key={deal.id+'-club'} g={g} player={player} deal={deal} act={act}/>}
   {stage==='contract'&&<ContractProposal key={deal.id+'-contract'} g={g} player={player} deal={deal} act={act}/>}

@@ -4,6 +4,12 @@ Chụp trực tiếp ngày 03/10/2026 từ một sự nghiệp demo Barcelona ri
 
 Ảnh cầu thủ và logo xuất hiện trong giao diện thuộc chủ sở hữu tương ứng. Các lưu ý về mục đích giải trí và tài sản bên thứ ba trong [README](../README.md) cũng áp dụng cho bộ ảnh này.
 
+## Trận 3D thử nghiệm / Experimental 3D match — 1.8.0
+
+Chụp ngày 04/10/2026 từ sự nghiệp kiểm thử riêng, sử dụng mô hình cầu thủ đơn giản và góc máy truyền hình theo bóng. 2D và 3D dùng cùng diễn biến mô phỏng.
+
+![Trận đấu với góc máy 3D](screenshots/07-match-3d.jpg)
+
 ## Chuẩn bị trước trận / Pre-match preparation — 1.7.1
 
 ![Chuẩn bị đội hình trước trận](screenshots/06-prematch.jpg)
