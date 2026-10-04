@@ -68,8 +68,8 @@ function mail(g,title,paragraphs,playerId){
  const body=paragraphs.join('\n\n');const m=makeMessage(g,title,body,'transfer',{paragraphs:[`Kính gửi HLV ${g.manager},`,...paragraphs,'Trân trọng,','Giám đốc thể thao'],...(playerId?{playerIds:[playerId]}:{}),action:{page:'transfers',label:'Mở thị trường chuyển nhượng'}});
  g.messages.unshift(m);g.messages=g.messages.slice(0,250);
 }
-function canSell(g,p){
- const ps=squad(g,p.clubId);
+function canSell(g,p,roster){
+ const ps=roster?.get(p.clubId)||squad(g,p.clubId);
  if(ps.length<=TRANSFER_RULES.minSquad)return 'CLB chủ quản cần giữ tối thiểu 16 cầu thủ.';
  const atPosition=ps.filter(x=>x.position===p.position).length;
  if(atPosition<=(p.position==='GK'?1:2))return p.position==='GK'?'CLB không bán thủ môn duy nhất.':'CLB thiếu phương án thay thế ở vị trí này.';
@@ -109,6 +109,11 @@ function playerTerms(g,p,buyerId,fee,assessment=transferAssessment(g,p,buyerId))
  const rise=(assessment.wantsMove?1.05:1.18)+clamp(quality-rep,0,25)/60+ambitionPremium;
  const wage=clamp(rounded(Math.max(100,p.wage*rise,p.value/600)),100,TRANSFER_RULES.maxWage);
  return {wage,signingBonus:rounded(wage*(assessment.important?14:10)),agentFee:rounded(wage*5),appearanceBonus:rounded(wage*.12,10),goalBonus:rounded(wage*(p.position==='FW'?.15:.06),10),years:p.age>31?2:p.age<25?4:3,releaseClause:fee*1.1>TRANSFER_RULES.maxMoney?0:clamp(rounded(Math.max(fee*1.6,p.value*1.8),1000),minimumReleaseClause(fee),TRANSFER_RULES.maxMoney),annualRise:5,squadRole:assessment.expectedRole};
+}
+/** Read-only recruitment estimate using the same demands and refusals as negotiation. */
+export function scoutingTransferEstimate(g,p,buyerId=g.clubId,roster){
+ const assessment=transferAssessment(g,p,buyerId,roster),fee=clubTerms(g,p,buyerId,assessment).fee;
+ return {assessment,fee,terms:playerTerms(g,p,buyerId,fee,assessment),sellRefusal:canSell(g,p,roster)};
 }
 export function beginNegotiation(g,playerId){
  const p=g.players[playerId];

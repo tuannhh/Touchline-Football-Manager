@@ -7,7 +7,7 @@ import {POSITION_DETAIL,FORMATION_SLOTS} from './tactics.mjs';
 import {positionCode} from './playerPositions.mjs';
 import {squadDepth,recruitmentMatches,setRecruitmentPlan} from './recruitment.mjs';
 import './recruitment.css';
-export default function RecruitmentPlanner({g,mutate,openPlayer,onNegotiate}){
+export default function RecruitmentPlanner({g,mutate,openPlayer,onNegotiate,nav}){
  const [expanded,setExpanded]=useState(false),[phase,setPhase]=useState('inPossession');
  const [draft,setDraft]=useState(()=>g.recruitmentPlan||{position:'ST',maxAge:28,maxFee:g.clubs[g.clubId].budget,maxWage:150000});
  const formation=g.phaseTactics?.enabled?g.phaseTactics[phase].formation:g.formation;
@@ -27,7 +27,7 @@ export default function RecruitmentPlanner({g,mutate,openPlayer,onNegotiate}){
    <label className="field">{moneyLabel('Lương hiện tại tối đa (€/tuần)')}<MoneyInput min={0} max={1e8} required value={draft.maxWage} onChange={v=>update('maxWage',v)}/></label>
    <button className="primary">Lưu yêu cầu & tìm ứng viên</button>
   </form>
-  {g.recruitmentPlan&&<><h3>Ứng viên · {positionCode(g.recruitmentPlan.position)}</h3><p className="fine-print">Ưu tiên cầu thủ đang được rao bán. Phí là ước tính; lương đang hưởng có thể khác mức cầu thủ yêu cầu khi đàm phán.</p><div className="recruitment-candidates">{matches.map(({player:p,fee,wage})=><article key={p.id}><PlayerName player={p} onClick={openPlayer}/><div><strong>{money(fee)}</strong><small>{money(wage)}/tuần</small></div><button className="small-button" onClick={()=>mutate(x=>{x.shortlist=x.shortlist.includes(p.id)?x.shortlist.filter(id=>id!==p.id):[...x.shortlist,p.id];})}>{g.shortlist.includes(p.id)?'Bỏ theo dõi':'Theo dõi'}</button><button className="small-button" onClick={()=>onNegotiate(p.id)}>Đàm phán</button></article>)}</div>{!matches.length&&<Empty>Chưa có ứng viên khớp tiêu chí. Có thể tăng ngân sách hoặc nới độ tuổi.</Empty>}</>}
+  {g.recruitmentPlan&&<><button className="secondary" onClick={()=>nav?.('scouting')}>Mở trung tâm tuyển trạch</button><h3>Ứng viên · {positionCode(g.recruitmentPlan.position)}</h3><p className="fine-print">Ưu tiên cầu thủ đang được rao bán. Phí là ước tính; lương đang hưởng có thể khác mức cầu thủ yêu cầu khi đàm phán.</p><div className="recruitment-candidates">{matches.map(({player:p,fee,wage})=><article key={p.id}><PlayerName player={p} onClick={openPlayer}/><div><strong>{money(fee)}</strong><small>{money(wage)}/tuần</small></div><button className="small-button" onClick={()=>mutate(x=>{x.shortlist=x.shortlist.includes(p.id)?x.shortlist.filter(id=>id!==p.id):[...x.shortlist,p.id];})}>{g.shortlist.includes(p.id)?'Bỏ theo dõi':'Theo dõi'}</button><button className="small-button" onClick={()=>onNegotiate(p.id)}>Đàm phán</button></article>)}</div>{!matches.length&&<Empty>Chưa có ứng viên khớp tiêu chí. Có thể tăng ngân sách hoặc nới độ tuổi.</Empty>}</>}
   <p className="fine-print">Lấy cảm hứng từ <a href="https://www.footballmanager.com/fm26/features/powered-transferroom-fm26s-recruitment-revamp" target="_blank" rel="noreferrer">khu tuyển dụng FM26</a>. Phân tích và ứng viên thuộc thế giới game, không kết nối TransferRoom.</p>
  </div>:<p className="recruitment-summary">Xem người dự phòng, hợp đồng và tìm ứng viên theo vị trí, tuổi, phí, lương.</p>}
  </Panel>;

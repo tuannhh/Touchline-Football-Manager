@@ -8,7 +8,16 @@ Touchline là game quản lý bóng đá độc lập dành cho một người c
 
 **Mục đích giải trí và hình ảnh:** Đây là dự án cá nhân phục vụ giải trí, không có liên kết chính thức với Football Manager, các CLB, giải đấu hay liên đoàn. Ảnh cầu thủ, logo, tên và tài sản của bên thứ ba thuộc các chủ sở hữu tương ứng; việc xuất hiện trong game không cấp quyền sử dụng lại. Tác giả không cấp phép khai thác thương mại các tài sản đó và không chịu trách nhiệm, trong phạm vi pháp luật cho phép, về việc người dùng sử dụng thương mại, phân phối lại hoặc vi phạm bản quyền hình ảnh/quyền hình ảnh. Người sử dụng tự chịu trách nhiệm xin các quyền cần thiết. Giấy phép MIT của mã nguồn dự án không cấp lại giấy phép cho tài sản của bên thứ ba.
 
-Bản **1.10.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+Bản **1.11.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+
+## Mới ở bản 1.11.0
+
+- **Trung tâm tuyển trạch:** giao người phụ trách tìm cầu thủ theo vị trí chi tiết hoặc tài năng trẻ, giới hạn tuổi, phí chuyển nhượng và lương hiện tại; khảo sát trong 1–4 tuần của lịch game.
+- **Báo cáo có đánh giá:** khoảng năng lực/tiềm năng, độ tin cậy, độ phù hợp, phí dự kiến và khả năng chiêu mộ. Chuyên môn, khối lượng công việc và thời gian theo dõi ảnh hưởng chất lượng báo cáo. Đề xuất là đánh giá mô phỏng tại ngày báo cáo, không bảo đảm chuyển nhượng thành công.
+- **Hành động từ báo cáo:** xem hồ sơ, thêm vào danh sách theo dõi hoặc mở đàm phán. Tuyển trạch viên gửi thư đầy đủ và tiếp tục giới thiệu tài năng trẻ khi không có nhiệm vụ riêng. Không tự chi tiền hoặc ký hợp đồng.
+- Nhiệm vụ và báo cáo lưu cùng sự nghiệp; save cũ được bổ sung khi tải. Có bản dịch Việt/Anh/Pháp/Tây Ban Nha/Bồ Đào Nha.
+
+[Hướng dẫn tuyển trạch](docs/scouting.md).
 
 ## Mới ở bản 1.10.0
 
