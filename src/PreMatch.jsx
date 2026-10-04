@@ -5,6 +5,7 @@ import {dateLabel} from './locale.mjs';
 import {competition} from './competitions.mjs';
 import {preMatchReport} from './prematch.mjs';
 import MatchEnvironment from './MatchEnvironment.jsx';
+import {RestWarningPanel} from './PhysicalReadiness.jsx';
 import TacticsPage from './TacticsPage.jsx';
 import './prematch.css';
 
@@ -20,6 +21,7 @@ export default function PreMatch({g,fixture,onConfirm,onBack,mutate,openPlayer,n
     <div><strong>{report.valid?'Đội hình đủ điều kiện thi đấu':'Cần kiểm tra danh sách trận'}</strong><p>{`Xuất phát: ${report.starters}/11 · Dự bị: ${report.reserves}/${report.rule.maxBench}`}</p>{report.starters<11&&<p>Đội hình chưa đủ 11 cầu thủ. Bạn vẫn có thể bổ sung trước khi xác nhận.</p>}</div>
    </div>
    {!report.valid&&<div role="alert" className="prematch-errors"><ul>{report.errors.map(error=><li key={error}>{error}</li>)}</ul><button className="text-button" onClick={()=>nav('registration')}>Đăng ký đội hình</button></div>}
+   <RestWarningPanel g={g} players={(g.lineup||[]).map(id=>g.players[id])} date={fixture.date||g.date} title="Cảnh báo thể lực đội hình xuất phát" onProfile={openPlayer}/>
    <div className="prematch-actions"><span>Ngày thi đấu và thời gian trận đấu chưa được tiếp tục.</span><button className="primary" disabled={!report.valid} onClick={onConfirm}><Play size={17} weight="fill"/>Xác nhận đội hình & vào trận</button></div>
   </section>
   <MatchEnvironment g={g} fixture={fixture} forecast/>

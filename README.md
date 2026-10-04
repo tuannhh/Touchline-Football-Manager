@@ -8,7 +8,16 @@ Touchline là game quản lý bóng đá độc lập dành cho một người c
 
 **Mục đích giải trí và hình ảnh:** Đây là dự án cá nhân phục vụ giải trí, không có liên kết chính thức với Football Manager, các CLB, giải đấu hay liên đoàn. Ảnh cầu thủ, logo, tên và tài sản của bên thứ ba thuộc các chủ sở hữu tương ứng; việc xuất hiện trong game không cấp quyền sử dụng lại. Tác giả không cấp phép khai thác thương mại các tài sản đó và không chịu trách nhiệm, trong phạm vi pháp luật cho phép, về việc người dùng sử dụng thương mại, phân phối lại hoặc vi phạm bản quyền hình ảnh/quyền hình ảnh. Người sử dụng tự chịu trách nhiệm xin các quyền cần thiết. Giấy phép MIT của mã nguồn dự án không cấp lại giấy phép cho tài sản của bên thứ ba.
 
-Bản **1.11.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+Bản **1.12.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+
+## Mới ở bản 1.12.0
+
+- **Thể lực và mệt mỏi tích lũy:** số phút đá cho CLB, giao hữu và đội tuyển cùng ảnh hưởng thể trạng. Lịch dày, pressing/cường độ cao và ít ngày nghỉ làm tăng tải; cường độ tập nhẹ và đội ngũ hồi phục giúp cầu thủ lấy lại sức. AI cũng xét thể trạng khi chọn đội hình.
+- **Chấn thương trong trận:** nguy cơ mô phỏng tăng theo thể lực thấp, mệt mỏi và tải gần đây. Cầu thủ bị chấn thương dừng thi đấu; số phút và tải dừng khi rời sân. Trận tự tạm dừng khi cầu thủ của bạn chấn thương hoặc thể lực xuống dưới 60%, với cảnh báo xuống sức một lần mỗi cầu thủ/trận.
+- **Cảnh báo để xoay tua:** xem ở Đội hình, Chiến thuật, màn hình chuẩn bị và trong trận; mở **Chiến thuật & nhân sự** để thay người. Hồ sơ có phút thi đấu 7/14 ngày, mức mệt mỏi và số ngày nghỉ đề xuất. Huấn luyện có danh sách cần hồi phục. Cầu thủ khỏe nhưng mệt vẫn được phép đá nếu HLV quyết định.
+- **Tương thích bản lưu:** tự thêm hệ thống khi tải save cũ, giữ thể lực/chấn thương hiện tại; chỉ tích lũy lịch sử mới từ lúc nâng cấp. Lưu giữa trận không cộng tải hai lần. Editor → Hồi phục toàn đội xóa cả mệt mỏi.
+
+[Hướng dẫn thể lực và tải thi đấu](docs/player-fitness.md).
 
 ## Mới ở bản 1.11.0
 

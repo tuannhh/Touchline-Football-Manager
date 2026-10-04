@@ -1,4 +1,6 @@
 import {makeMessage} from './mail.mjs';
+import {playerReadiness,injuryRiskMultiplier,recoverPlayerPhysical,recordPhysicalMatch} from './playerPhysical.mjs';
+import {staffEffects} from './staff.mjs';
 import {isoCountry} from './locale.mjs';
 import {internationalWindows,addInternationalDays,INTERNATIONAL_SOURCES} from './international-data.mjs';
 export {internationalWindows,INTERNATIONAL_SOURCES} from './international-data.mjs';
@@ -96,19 +98,35 @@ export function respondToCallUp(g,id,{accept,reason=''}={}){
  if(p.internationalDuty?.callUpId===c.id)delete p.internationalDuty;return {ok:true,message:c.reason};
 }
 export function internationalAvailability(g,p){const d=p?.internationalDuty;return !d?.active||!!g?.date&&g.date>=d.to;}
-function nationalXI(g,w,teamId){const ps=g.international.callups.filter(c=>c.windowId===w.id&&c.teamId===teamId&&c.status==='released').map(c=>g.players[c.playerId]).filter(p=>p.injury===0&&p.fitness>=25).sort((a,b)=>(internationalAbility(b)+b.fitness*.2)-(internationalAbility(a)+a.fitness*.2)||a.id.localeCompare(b.id));const out=[];for(const [position,count]of [['GK',1],['DF',4],['MF',3],['FW',3]])out.push(...ps.filter(p=>p.position===position).slice(0,count));for(const p of ps)if(out.length<11&&!out.includes(p))out.push(p);return out.slice(0,11);}
+function nationalXI(g,w,teamId,date=g.date){
+ const rank=p=>{if(!g.physical)return internationalAbility(p)+p.fitness*.2;const r=playerReadiness(g,p,{date});return internationalAbility(p)+r.fitness*.35-r.fatigue*.35-(r.needsRest?12:0)-(r.risk==='high'?25:0);};
+ const ps=g.international.callups.filter(c=>c.windowId===w.id&&c.teamId===teamId&&c.status==='released').map(c=>g.players[c.playerId]).filter(p=>p.injury===0&&p.fitness>=25).sort((a,b)=>rank(b)-rank(a)||a.id.localeCompare(b.id));
+ const out=[];for(const [position,count]of [['GK',1],['DF',4],['MF',3],['FW',3]])out.push(...ps.filter(p=>p.position===position).slice(0,count));for(const p of ps)if(out.length<11&&!out.includes(p))out.push(p);return out.slice(0,11);
+}
 function score(s,power){let n=0;for(let j=0;j<6;j++)if(random(s)<clamp(power,.08,.5))n++;return n;}
 function playNational(g,w,f){
- const s=g.international,teams=[nationalXI(g,w,f.home),nationalXI(g,w,f.away)];
+ const s=g.international,teams=[nationalXI(g,w,f.home,f.date),nationalXI(g,w,f.away,f.date)];
  if(teams.some(ps=>ps.length<11||!ps.some(p=>p.position==='GK'))){f.result={cancelled:true,reason:'Không đủ 11 cầu thủ được nhả quân và khỏe mạnh trong database.',score:[0,0],events:[]};return;}
- const strength=teams.map(ps=>ps.reduce((v,p)=>v+internationalAbility(p),0)/11),goals=[score(s,.2+(strength[0]-strength[1])/180),score(s,.2+(strength[1]-strength[0])/180)],events=[],statistics=[];
+ const strength=teams.map(ps=>ps.reduce((v,p)=>{const r=g.physical?playerReadiness(g,p,{date:f.date}):null;return v+internationalAbility(p)*(r?(.7+r.fitness*.003)*(1-r.fatigue*.001):1);},0)/11),goals=[score(s,.2+(strength[0]-strength[1])/180),score(s,.2+(strength[1]-strength[0])/180)],events=[],statistics=[];
  for(let side=0;side<2;side++){
   const scorers=teams[side].filter(p=>p.position!=='GK'),scored={};for(let i=0;i<goals[side];i++){const p=scorers[Math.floor(random(s)*scorers.length)];scored[p.id]=(scored[p.id]||0)+1;events.push({type:'goal',minute:1+Math.floor(random(s)*90),playerId:p.id,teamId:side?f.away:f.home,text:p.name+' ghi bàn.'});}
-  for(const p of teams[side]){const c=s.callups.find(c=>c.windowId===w.id&&c.playerId===p.id),minutes=90,newGoals=scored[p.id]||0;p.nationalStats||={appearances:0,goals:0,minutes:0};p.nationalStats.appearances++;p.nationalStats.goals+=newGoals;p.nationalStats.minutes+=minutes;c.appearances++;c.goals+=newGoals;c.minutes+=minutes;p.fitness=clamp(p.fitness-(p.position==='GK'?5:12+random(s)*5),0,100);p.morale=clamp(p.morale+(goals[side]>goals[1-side]?2:goals[side]<goals[1-side]?-1:0),0,100);
-   if(random(s)<.008){p.injury=Math.max(p.injury,1+Math.floor(random(s)*3));events.push({type:'injury',minute:45+Math.floor(random(s)*44),playerId:p.id,teamId:side?f.away:f.home,text:p.name+' chấn thương khi lên tuyển.'});c.status='injured';c.reason='Trở lại CLB điều trị chấn thương khi lên tuyển.';delete p.internationalDuty;}
+  for(const p of teams[side]){
+   const c=s.callups.find(c=>c.windowId===w.id&&c.playerId===p.id),newGoals=scored[p.id]||0;let minutes=90;
+   // Keep minimal legacy simulation's recovery and RNG order unchanged.
+   if(!g.physical)p.fitness=clamp(p.fitness-(p.position==='GK'?5:12+random(s)*5),0,100);
+   const risk=g.physical?injuryRiskMultiplier(g,p,{date:f.date,minutes:{[p.id]:90},workload:{[p.id]:90}}):1;
+   if(random(s)<.008*risk){
+    p.injury=Math.max(p.injury,1+Math.floor(random(s)*3));const injuryMinute=45+Math.floor(random(s)*44);
+    events.push({type:'injury',minute:injuryMinute,playerId:p.id,teamId:side?f.away:f.home,text:p.name+' chấn thương khi lên tuyển.'});
+    if(g.physical){minutes=injuryMinute;for(const e of events)if(e.type==='goal'&&e.playerId===p.id&&e.minute>=injuryMinute)e.minute=injuryMinute-1;}
+    c.status='injured';c.reason='Trở lại CLB điều trị chấn thương khi lên tuyển.';delete p.internationalDuty;
+   }
+   p.nationalStats||={appearances:0,goals:0,minutes:0};p.nationalStats.appearances++;p.nationalStats.goals+=newGoals;p.nationalStats.minutes+=minutes;c.appearances++;c.goals+=newGoals;c.minutes+=minutes;
+   p.morale=clamp(p.morale+(goals[side]>goals[1-side]?2:goals[side]<goals[1-side]?-1:0),0,100);
    statistics.push({playerId:p.id,minutes,goals:newGoals});
   }
  }
+ if(g.physical){const minutes=Object.fromEntries(statistics.map(stat=>[stat.playerId,stat.minutes]));recordPhysicalMatch(g,{fixtureId:f.id,date:f.date,kind:'international',minutes,workload:minutes});}
  f.result={score:goals,events:events.sort((a,b)=>a.minute-b.minute),statistics};
  if(['qf','sf','final'].includes(f.stage)){if(goals[0]===goals[1]){const side=random(s)<.5?0:1;f.result.penalties=side===0?[5,4]:[4,5];f.result.winner=side===0?f.home:f.away;}else f.result.winner=goals[0]>goals[1]?f.home:f.away;}
  const own=statistics.filter(x=>g.players[x.playerId].clubId===g.clubId);if(own.length)send(g,`${nationalTeamName(f.home)} ${goals.join(' – ')} ${nationalTeamName(f.away)}`,[`${s.competitions.find(c=>c.id===f.competitionId)?.name}. Kết quả mô phỏng ngày ${f.date}.`,...own.map(x=>`${g.players[x.playerId].name}: ${x.minutes} phút, ${x.goals} bàn; thể lực còn ${Math.round(g.players[x.playerId].fitness)}%.`),...events.filter(e=>e.type==='injury'&&g.players[e.playerId].clubId===g.clubId).map(e=>e.text),'Số trận và bàn thắng đội tuyển được lưu riêng, không cộng vào thành tích hoặc thưởng thi đấu của CLB.'],f.date);
@@ -129,9 +147,17 @@ function shortenTournamentDuty(g,w,date){
 /** Handles all intervening national dates. Does not advance the club clock, calendar, RNG or finances. */
 export function processInternationalDate(g,date=g.date){
  if(g.liveMatch)return {ok:false,message:'Đợi trận đang diễn ra kết thúc.',matches:0};initializeInternational(g);const s=g.international;if(s.lastProcessedDate&&date<=s.lastProcessedDate)return {ok:true,matches:0};addWindows(g,g.year);
- const lower=s.lastProcessedDate||addInternationalDays(s.startedAt,-1),dates=new Set([date]);for(const w of s.windows)for(const d of [w.noticeDate,w.start,...w.matchDates,w.returnDate])if(d>lower&&d<=date&&d>=s.startedAt)dates.add(d);let matches=0;
+ const lower=s.lastProcessedDate||addInternationalDays(s.startedAt,-1),dates=new Set([date]);for(const w of s.windows)for(const d of [w.noticeDate,w.start,...w.matchDates,w.returnDate])if(d>lower&&d<=date&&d>=s.startedAt&&(!g.physical||d>=g.physical.startedAt))dates.add(d);let matches=0;
+ // The physical system owns all elapsed-time recovery here. Moving every player
+ // through event dates in order prevents club recovery from jumping past a
+ // national appearance, and lets returned players resume their club schedule.
+ const recoverySupport=g.physical?Object.fromEntries(Object.keys(g.clubs).map(id=>[id,staffEffects(g,id).recoveryBonus])):null;
  for(const current of [...dates].sort()){
-  for(const p of Object.values(g.players)){const d=p.internationalDuty;if(!d?.active)continue;const from=d.recoveredThrough||d.from,elapsed=Math.max(0,(Date.parse(current)-Date.parse(from))/86400000);p.fitness=clamp(p.fitness+elapsed*3,0,100);d.recoveredThrough=current;}
+  for(const p of Object.values(g.players)){
+   const d=p.internationalDuty;
+   if(g.physical){recoverPlayerPhysical(g,p,current,{intensity:d?.active?'normal':p.clubId===g.clubId?(g.intensity||'normal'):'normal',recoveryBonus:d?.active?0:recoverySupport[p.clubId]||0});if(d?.active)d.recoveredThrough=current;}
+   else if(d?.active){const from=d.recoveredThrough||d.from,elapsed=Math.max(0,(Date.parse(current)-Date.parse(from))/86400000);p.fitness=clamp(p.fitness+elapsed*3,0,100);d.recoveredThrough=current;}
+  }
   for(const w of s.windows){if(current<w.noticeDate||current>w.returnDate)continue;if(!w.announced)announce(g,w,current);if(current>=w.start&&!w.started)startWindow(g,w);advanceTournament(g,w,current);for(const f of s.matches.filter(f=>f.windowId===w.id&&f.date===current&&!f.result)){playNational(g,w,f);matches++;}shortenTournamentDuty(g,w,current);if(current>=w.returnDate&&!w.finished)finishWindow(g,w,current);}
   const returned=[];for(const c of s.callups)if(c.status==='released'&&c.to<=current){c.status='returned';const p=g.players[c.playerId];if(p.internationalDuty?.callUpId===c.id)delete p.internationalDuty;if(p.clubId===g.clubId)returned.push(c);}
   if(returned.length)send(g,'Cầu thủ trở lại sau khi kết thúc hành trình đội tuyển',returned.map(c=>`${g.players[c.playerId].name} trở lại từ ${nationalTeamName(c.teamId)}: ${c.appearances} trận, ${c.minutes} phút, ${c.goals} bàn; thể lực ${Math.round(g.players[c.playerId].fitness)}%.`),current);

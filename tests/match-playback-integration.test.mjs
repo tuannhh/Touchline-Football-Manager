@@ -201,7 +201,7 @@ test('scene score and revealed events follow both shots in order, including two 
 });
 
 test('a scorer substituted in the same minute takes his shot and then leaves the rendered field',()=>{
- const before=fresh(91,61);before.minutes.e388601=61;
+ const before=fresh(91,61);before.minutes.e388601=61;before.workload.e388601=61;
  const after=E.tickMatch(g,before),scene=buildMatchScene(g,before,after);
  const goal=after.events[before.events.length],subIndex=before.events.length+1,sub=after.events[subIndex];
  assert.equal(goal.type,'goal');assert.equal(sub.type,'sub');assert.ok(after.off.includes(goal.playerId));

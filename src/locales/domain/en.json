@@ -461,5 +461,14 @@
   "Dữ liệu tuyển trạch không hợp lệ.": "Invalid scouting data.",
   "{{0}} · Tuyển trạch viên": "{{0}} · Scout",
   "{{0}} · Giám đốc thể thao": "{{0}} · Sporting director",
-  "{{0}} · Trợ lý HLV trưởng": "{{0}} · Assistant manager"
+  "{{0}} · Trợ lý HLV trưởng": "{{0}} · Assistant manager",
+  "Dữ liệu thể lực và tải thi đấu không hợp lệ.": "Invalid condition and match workload data.",
+  "Đang chấn thương; cần điều trị trước khi trở lại thi đấu.": "Injured; needs treatment before returning to play.",
+  "Thể lực quá thấp để duy trì cường độ thi đấu.": "Condition is too low to sustain match intensity.",
+  "Thể lực chưa hồi phục đầy đủ; nên nghỉ hoặc vào sân từ ghế dự bị.": "Condition has not fully recovered; consider rest or an appearance from the bench.",
+  "Mệt mỏi tích lũy rất cao; cần nghỉ thi đấu để hồi phục.": "Accumulated fatigue is very high; needs a break from matches to recover.",
+  "Mệt mỏi tích lũy cao do thi đấu liên tục.": "High accumulated fatigue from consecutive matches.",
+  "Đã thi đấu ít nhất 240 phút trong 7 ngày gần nhất.": "Has played at least 240 minutes in the last 7 days.",
+  "Thời gian nghỉ giữa hai trận quá ngắn.": "Too little recovery time between matches.",
+  "{{0}} xuống sức rõ rệt; hãy cân nhắc thay người.": "{{0}} is visibly tiring; consider a substitution."
 }

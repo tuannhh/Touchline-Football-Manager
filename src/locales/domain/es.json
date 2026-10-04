@@ -461,5 +461,14 @@
   "Dữ liệu tuyển trạch không hợp lệ.": "Datos de ojeo no válidos.",
   "{{0}} · Tuyển trạch viên": "{{0}} · Ojeador",
   "{{0}} · Giám đốc thể thao": "{{0}} · Director deportivo",
-  "{{0}} · Trợ lý HLV trưởng": "{{0}} · Segundo entrenador"
+  "{{0}} · Trợ lý HLV trưởng": "{{0}} · Segundo entrenador",
+  "Dữ liệu thể lực và tải thi đấu không hợp lệ.": "Datos de condición física y carga de partidos no válidos.",
+  "Đang chấn thương; cần điều trị trước khi trở lại thi đấu.": "Lesionado; necesita tratamiento antes de volver a jugar.",
+  "Thể lực quá thấp để duy trì cường độ thi đấu.": "La condición física es demasiado baja para mantener la intensidad del partido.",
+  "Thể lực chưa hồi phục đầy đủ; nên nghỉ hoặc vào sân từ ghế dự bị.": "La condición física no se ha recuperado del todo; considera darle descanso o que entre desde el banquillo.",
+  "Mệt mỏi tích lũy rất cao; cần nghỉ thi đấu để hồi phục.": "La fatiga acumulada es muy alta; necesita descansar de los partidos para recuperarse.",
+  "Mệt mỏi tích lũy cao do thi đấu liên tục.": "Fatiga acumulada alta por jugar partidos seguidos.",
+  "Đã thi đấu ít nhất 240 phút trong 7 ngày gần nhất.": "Ha jugado al menos 240 minutos en los últimos 7 días.",
+  "Thời gian nghỉ giữa hai trận quá ngắn.": "Muy poco tiempo de recuperación entre partidos.",
+  "{{0}} xuống sức rõ rệt; hãy cân nhắc thay người.": "{{0}} muestra signos claros de cansancio; considera sustituirlo."
 }

@@ -64,5 +64,5 @@ export function createPlaybackClock(){
 export function shouldPauseMatch(before,after,clubId){
  const own=after.home===clubId?0:1;
  return after.completed||after.minute===45||after.extraTime&&[90,105].includes(after.minute)
-  ||after.events.slice(before.events.length).some(e=>e.type==='injury'&&e.side===own);
+  ||after.events.slice(before.events.length).some(e=>['injury','fatigue'].includes(e.type)&&e.side===own);
 }

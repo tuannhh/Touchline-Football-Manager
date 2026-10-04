@@ -461,5 +461,14 @@
   "Dữ liệu tuyển trạch không hợp lệ.": "Dados de observação inválidos.",
   "{{0}} · Tuyển trạch viên": "{{0}} · Observador",
   "{{0}} · Giám đốc thể thao": "{{0}} · Diretor desportivo",
-  "{{0}} · Trợ lý HLV trưởng": "{{0}} · Treinador adjunto"
+  "{{0}} · Trợ lý HLV trưởng": "{{0}} · Treinador adjunto",
+  "Dữ liệu thể lực và tải thi đấu không hợp lệ.": "Dados de condição física e carga de jogos inválidos.",
+  "Đang chấn thương; cần điều trị trước khi trở lại thi đấu.": "Lesionado; precisa de tratamento antes de voltar a jogar.",
+  "Thể lực quá thấp để duy trì cường độ thi đấu.": "A condição física é demasiado baixa para manter a intensidade do jogo.",
+  "Thể lực chưa hồi phục đầy đủ; nên nghỉ hoặc vào sân từ ghế dự bị.": "A condição física ainda não recuperou totalmente; considere dar descanso ou fazê-lo entrar a partir do banco.",
+  "Mệt mỏi tích lũy rất cao; cần nghỉ thi đấu để hồi phục.": "A fadiga acumulada é muito elevada; precisa de descansar dos jogos para recuperar.",
+  "Mệt mỏi tích lũy cao do thi đấu liên tục.": "Fadiga acumulada elevada devido a jogos consecutivos.",
+  "Đã thi đấu ít nhất 240 phút trong 7 ngày gần nhất.": "Jogou pelo menos 240 minutos nos últimos 7 dias.",
+  "Thời gian nghỉ giữa hai trận quá ngắn.": "Tempo de recuperação demasiado curto entre jogos.",
+  "{{0}} xuống sức rõ rệt; hãy cân nhắc thay người.": "{{0}} apresenta sinais claros de cansaço; considere uma substituição."
 }
