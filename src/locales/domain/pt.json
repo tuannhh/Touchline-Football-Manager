@@ -470,5 +470,9 @@
   "Mệt mỏi tích lũy cao do thi đấu liên tục.": "Fadiga acumulada elevada devido a jogos consecutivos.",
   "Đã thi đấu ít nhất 240 phút trong 7 ngày gần nhất.": "Jogou pelo menos 240 minutos nos últimos 7 dias.",
   "Thời gian nghỉ giữa hai trận quá ngắn.": "Tempo de recuperação demasiado curto entre jogos.",
-  "{{0}} xuống sức rõ rệt; hãy cân nhắc thay người.": "{{0}} apresenta sinais claros de cansaço; considere uma substituição."
+  "{{0}} xuống sức rõ rệt; hãy cân nhắc thay người.": "{{0}} apresenta sinais claros de cansaço; considere uma substituição.",
+  "Bản lưu này đã bị xóa. Hãy dùng Lưu thành bản mới để tiếp tục.": "Esta gravação foi eliminada. Usa Guardar como nova para continuar.",
+  "Mã bản lưu không hợp lệ.": "Identificador de gravação inválido.",
+  "Không thể xóa bản lưu này.": "Não é possível eliminar esta gravação.",
+  "Không thể thao tác bản lưu: đường dẫn không phải tệp thông thường.": "Não é possível realizar esta operação com a gravação: o caminho não corresponde a um ficheiro normal."
 }

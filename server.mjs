@@ -1,11 +1,12 @@
 import http from 'node:http';
-import { readFile, writeFile, rename, readdir, stat, mkdir, copyFile } from 'node:fs/promises';
+import { readFile, readdir, stat, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { validateGame } from './src/engine.mjs';
 import { mergePortraits } from './src/portraits.mjs';
 import {listRosterReleases,loadRosterRelease} from './src/rosterReleases.mjs';
 import {saveSummary,normalizeSlotName,validateSaveMetadata} from './src/saveSlots.mjs';
+import {saveStorageBytes,readSaveSnapshot,writeSaveSnapshot,deleteSaveSnapshot} from './src/saveStorage.mjs';
 
 const root=path.dirname(fileURLToPath(import.meta.url));
 const saves=process.env.TOUCHLINE_SAVE_DIR||path.join(root,'saves');
@@ -27,29 +28,29 @@ const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url,'http://127.0.0.1');
   if(req.headers.host&&!['127.0.0.1','localhost','[::1]'].some(h=>req.headers.host===`${h}:${port}`||req.headers.host===h))return json(res,403,{error:'Local access only'});
   if(req.method!=='GET'&&req.headers.origin&&!new Set(['http://127.0.0.1:'+port,'http://localhost:'+port,'http://127.0.0.1:5179','http://localhost:5179']).has(req.headers.origin))return json(res,403,{error:'Origin is not allowed'});
-  if(url.pathname==='/api/health')return json(res,200,{ok:true,name:'Touchline',version:3,appVersion:'1.12.0'});
+  if(url.pathname==='/api/health')return json(res,200,{ok:true,name:'Touchline',version:3,appVersion:'1.13.0'});
   if(url.pathname==='/api/roster-releases'&&req.method==='GET')return json(res,200,await listRosterReleases({rootDir:root}));
   const roster=url.pathname.match(/^\/api\/roster-releases\/([a-zA-Z0-9-]{1,100})$/);
   if(roster&&req.method==='GET')return json(res,200,await loadRosterRelease(roster[1],{rootDir:root}));
   if(url.pathname==='/data/portraits.json'&&req.method==='GET')return json(res,200,await portraitData());
   if(url.pathname==='/api/saves'&&req.method==='GET'){
     const files=(await readdir(saves)).filter(f=>/^[\w-]+\.json$/.test(f));const entries=[];
-    for(const f of files){try{const g=JSON.parse(await readFile(path.join(saves,f),'utf8'));const s=await stat(path.join(saves,f));entries.push(saveSummary(g,s.mtime.toISOString()));}catch{}}
+    for(const f of files){try{const id=f.slice(0,-5),{game:g,updatedAt}=await readSaveSnapshot(saves,id);if(g.id!==id)continue;entries.push({...saveSummary(g,updatedAt),storageBytes:await saveStorageBytes(saves,id)});}catch{}}
     return json(res,200,entries.sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt)));
   }
   const match=url.pathname.match(/^\/api\/saves\/([a-zA-Z0-9-]{1,100})$/);
-  if(match){const file=path.join(saves,match[1]+'.json');
-    if(req.method==='GET'){try{return json(res,200,await refreshPortraits(JSON.parse(await readFile(file,'utf8'))));}catch{return json(res,404,{error:'Không tìm thấy file lưu.'});}}
+  if(match){const id=match[1];
+    if(req.method==='GET'){const {game}=await readSaveSnapshot(saves,id);return json(res,200,await refreshPortraits(game));}
     if(req.method==='PUT'||req.method==='POST'){
       const g=await refreshPortraits(await body(req));validateGame(g);validateSaveMetadata(g);if(g.id!==match[1])return json(res,400,{error:'Save ID mismatch'});
-      const serialized=JSON.stringify(g);const write=writeQueue.catch(()=>{}).then(async()=>{
-       if(req.method==='POST'){try{await stat(file);throw Object.assign(Error('Bản lưu này đã tồn tại; hãy lưu thành một bản mới.'),{status:409});}catch(e){if(e.code!=='ENOENT')throw e;}}
-       try{await copyFile(file,file+'.bak');}catch(e){if(e.code!=='ENOENT')throw e;}const temp=file+'.tmp';await writeFile(temp,serialized,{mode:0o600});await rename(temp,file);
-      });writeQueue=write;await write;return json(res,200,{ok:true,savedAt:new Date().toISOString()});
+      const serialized=JSON.stringify(g);const write=writeQueue.catch(()=>{}).then(()=>writeSaveSnapshot(saves,id,serialized,{exclusive:req.method==='POST'}));writeQueue=write;await write;return json(res,200,{ok:true,savedAt:new Date().toISOString()});
     }
     if(req.method==='PATCH'){
       const input=await body(req);if(!input||Object.keys(input).some(k=>k!=='name'))throw Error('Chỉ đổi tên bản lưu ở thao tác này.');
-      const name=normalizeSlotName(input.name);const write=writeQueue.catch(()=>{}).then(async()=>{const g=JSON.parse(await readFile(file,'utf8'));g.saveName=name;validateGame(g);validateSaveMetadata(g);await copyFile(file,file+'.bak');await writeFile(file+'.tmp',JSON.stringify(g),{mode:0o600});await rename(file+'.tmp',file);});writeQueue=write;await write;return json(res,200,{ok:true,name});
+      const name=normalizeSlotName(input.name);const write=writeQueue.catch(()=>{}).then(async()=>{const {game:g}=await readSaveSnapshot(saves,id);g.saveName=name;validateGame(g);validateSaveMetadata(g);await writeSaveSnapshot(saves,id,JSON.stringify(g));});writeQueue=write;await write;return json(res,200,{ok:true,name});
+    }
+    if(req.method==='DELETE'){
+      const write=writeQueue.catch(()=>{}).then(()=>deleteSaveSnapshot(saves,id));writeQueue=write;return json(res,200,await write);
     }
   }
   if(url.pathname.startsWith('/api/'))return json(res,404,{error:'Not found'});

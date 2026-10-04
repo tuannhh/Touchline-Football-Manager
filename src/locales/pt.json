@@ -1634,5 +1634,22 @@
   "Thể trạng cầu thủ trên sân": "Condição dos jogadores em campo",
   "Cảnh báo thể lực đội hình xuất phát": "Avisos de condição física do onze inicial",
   "· Cần nghỉ ngơi": "· Precisa de descanso",
-  "· Nghỉ": "· Descanso"
+  "· Nghỉ": "· Descanso",
+  "Không thể xóa bản lưu đang chơi. Hãy về màn hình bắt đầu trước.": "Não podes eliminar a gravação em utilização. Volta primeiro ao ecrã inicial.",
+  "Không xóa được bản lưu.": "Não foi possível eliminar a gravação.",
+  "Đã xóa bản lưu. Đã giải phóng {{0}}.": "Gravação eliminada. Foram libertados {{0}}.",
+  "Dung lượng trên máy:": "Espaço utilizado neste dispositivo:",
+  "· Gồm bản sao dự phòng.": "· Inclui cópias de segurança.",
+  "Dung lượng": "Espaço utilizado",
+  "Gồm bản sao dự phòng": "Inclui cópias de segurança",
+  "Về màn hình bắt đầu để xóa bản đang chơi.": "Volta ao ecrã inicial para eliminar a gravação em utilização.",
+  "Xóa bản lưu để giải phóng dung lượng trên máy.": "Elimina uma gravação para libertar espaço neste dispositivo.",
+  "Xóa bản lưu {{0}}": "Eliminar a gravação {{0}}",
+  "Xóa bản lưu": "Eliminar gravação",
+  "Xóa bản lưu?": "Eliminar esta gravação?",
+  "Bản lưu này và các bản sao dự phòng trên máy sẽ bị xóa vĩnh viễn. Không thể hoàn tác.": "Esta gravação e as suas cópias de segurança locais serão eliminadas permanentemente. Esta ação não pode ser anulada.",
+  "Dung lượng có thể giải phóng": "Espaço a libertar",
+  "Các file đã xuất riêng và những bản lưu khác vẫn được giữ nguyên.": "Os ficheiros exportados separadamente e as outras gravações serão mantidos.",
+  "Đang xóa…": "A eliminar…",
+  "Xóa vĩnh viễn bản lưu": "Eliminar gravação permanentemente"
 }

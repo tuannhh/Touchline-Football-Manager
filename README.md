@@ -8,7 +8,15 @@ Touchline là game quản lý bóng đá độc lập dành cho một người c
 
 **Mục đích giải trí và hình ảnh:** Đây là dự án cá nhân phục vụ giải trí, không có liên kết chính thức với Football Manager, các CLB, giải đấu hay liên đoàn. Ảnh cầu thủ, logo, tên và tài sản của bên thứ ba thuộc các chủ sở hữu tương ứng; việc xuất hiện trong game không cấp quyền sử dụng lại. Tác giả không cấp phép khai thác thương mại các tài sản đó và không chịu trách nhiệm, trong phạm vi pháp luật cho phép, về việc người dùng sử dụng thương mại, phân phối lại hoặc vi phạm bản quyền hình ảnh/quyền hình ảnh. Người sử dụng tự chịu trách nhiệm xin các quyền cần thiết. Giấy phép MIT của mã nguồn dự án không cấp lại giấy phép cho tài sản của bên thứ ba.
 
-Bản **1.12.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+Bản **1.13.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+
+## Mới ở bản 1.13.0
+
+- **Xóa bản lưu cũ:** vào Saved Games → Xóa bản lưu, kiểm tra tên, CLB và ngày chơi rồi xác nhận. Bản đang chơi được bảo vệ; về màn hình bắt đầu nếu muốn xóa bản đó.
+- **Theo dõi dung lượng:** hiển thị dung lượng từng bản lưu và tổng dung lượng, gồm file lưu chính, bản sao dự phòng tự động `.bak` và file tạm `.tmp`. Sau khi xóa, game báo số MB đã giải phóng.
+- **Xóa vĩnh viễn:** xóa đúng file lưu và các file tự động đi kèm. Những bản lưu khác, file đã xuất và thư mục lưu trữ riêng không bị tác động. Muốn giữ một bản để phục hồi, hãy xuất file trước khi xóa.
+- **Bảo vệ khi mở nhiều tab:** một dấu xóa rất nhỏ được giữ lại trên máy để chặn tab cũ tự ghi lại bản đã xóa, kể cả sau khi khởi động lại. Nếu còn sự nghiệp trong tab khác, có thể chọn Lưu thành bản mới để giữ tiến trình dưới một bản riêng.
+- Có bản dịch Việt/Anh/Pháp/Tây Ban Nha/Bồ Đào Nha; áp dụng ngay cho các save hiện có, không cần New Game.
 
 ## Mới ở bản 1.12.0
 

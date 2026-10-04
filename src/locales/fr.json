@@ -1634,5 +1634,22 @@
   "Thể trạng cầu thủ trên sân": "Condition des joueurs sur le terrain",
   "Cảnh báo thể lực đội hình xuất phát": "Alertes de condition physique du onze de départ",
   "· Cần nghỉ ngơi": "· Repos nécessaire",
-  "· Nghỉ": "· Repos"
+  "· Nghỉ": "· Repos",
+  "Không thể xóa bản lưu đang chơi. Hãy về màn hình bắt đầu trước.": "Impossible de supprimer la sauvegarde en cours. Revenez d’abord à l’écran d’accueil.",
+  "Không xóa được bản lưu.": "Impossible de supprimer la sauvegarde.",
+  "Đã xóa bản lưu. Đã giải phóng {{0}}.": "Sauvegarde supprimée. {{0}} libérés.",
+  "Dung lượng trên máy:": "Espace utilisé sur cet appareil :",
+  "· Gồm bản sao dự phòng.": "· Copies de secours incluses.",
+  "Dung lượng": "Espace utilisé",
+  "Gồm bản sao dự phòng": "Copies de secours incluses",
+  "Về màn hình bắt đầu để xóa bản đang chơi.": "Revenez à l’écran d’accueil pour supprimer la sauvegarde en cours.",
+  "Xóa bản lưu để giải phóng dung lượng trên máy.": "Supprimez une sauvegarde pour libérer de l’espace sur cet appareil.",
+  "Xóa bản lưu {{0}}": "Supprimer la sauvegarde {{0}}",
+  "Xóa bản lưu": "Supprimer la sauvegarde",
+  "Xóa bản lưu?": "Supprimer cette sauvegarde ?",
+  "Bản lưu này và các bản sao dự phòng trên máy sẽ bị xóa vĩnh viễn. Không thể hoàn tác.": "Cette sauvegarde et ses copies de secours locales seront supprimées définitivement. Cette action est irréversible.",
+  "Dung lượng có thể giải phóng": "Espace à libérer",
+  "Các file đã xuất riêng và những bản lưu khác vẫn được giữ nguyên.": "Les fichiers exportés séparément et les autres sauvegardes seront conservés.",
+  "Đang xóa…": "Suppression…",
+  "Xóa vĩnh viễn bản lưu": "Supprimer définitivement"
 }

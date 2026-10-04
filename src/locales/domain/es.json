@@ -470,5 +470,9 @@
   "Mệt mỏi tích lũy cao do thi đấu liên tục.": "Fatiga acumulada alta por jugar partidos seguidos.",
   "Đã thi đấu ít nhất 240 phút trong 7 ngày gần nhất.": "Ha jugado al menos 240 minutos en los últimos 7 días.",
   "Thời gian nghỉ giữa hai trận quá ngắn.": "Muy poco tiempo de recuperación entre partidos.",
-  "{{0}} xuống sức rõ rệt; hãy cân nhắc thay người.": "{{0}} muestra signos claros de cansancio; considera sustituirlo."
+  "{{0}} xuống sức rõ rệt; hãy cân nhắc thay người.": "{{0}} muestra signos claros de cansancio; considera sustituirlo.",
+  "Bản lưu này đã bị xóa. Hãy dùng Lưu thành bản mới để tiếp tục.": "Esta partida guardada se ha eliminado. Usa Guardar como nueva para continuar.",
+  "Mã bản lưu không hợp lệ.": "Identificador de partida guardada no válido.",
+  "Không thể xóa bản lưu này.": "No se puede eliminar esta partida guardada.",
+  "Không thể thao tác bản lưu: đường dẫn không phải tệp thông thường.": "No se puede realizar esta operación con la partida guardada: la ruta no corresponde a un archivo normal."
 }

@@ -1634,5 +1634,22 @@
   "Thể trạng cầu thủ trên sân": "Condición de los jugadores en el campo",
   "Cảnh báo thể lực đội hình xuất phát": "Avisos de condición física del once inicial",
   "· Cần nghỉ ngơi": "· Necesita descanso",
-  "· Nghỉ": "· Descanso"
+  "· Nghỉ": "· Descanso",
+  "Không thể xóa bản lưu đang chơi. Hãy về màn hình bắt đầu trước.": "No puedes eliminar la partida que estás jugando. Vuelve primero a la pantalla de inicio.",
+  "Không xóa được bản lưu.": "No se ha podido eliminar la partida guardada.",
+  "Đã xóa bản lưu. Đã giải phóng {{0}}.": "Partida guardada eliminada. Se han liberado {{0}}.",
+  "Dung lượng trên máy:": "Espacio usado en este dispositivo:",
+  "· Gồm bản sao dự phòng.": "· Incluye copias de seguridad.",
+  "Dung lượng": "Espacio usado",
+  "Gồm bản sao dự phòng": "Incluye copias de seguridad",
+  "Về màn hình bắt đầu để xóa bản đang chơi.": "Vuelve a la pantalla de inicio para eliminar la partida que estás jugando.",
+  "Xóa bản lưu để giải phóng dung lượng trên máy.": "Elimina una partida guardada para liberar espacio en este dispositivo.",
+  "Xóa bản lưu {{0}}": "Eliminar la partida guardada {{0}}",
+  "Xóa bản lưu": "Eliminar partida guardada",
+  "Xóa bản lưu?": "¿Eliminar esta partida guardada?",
+  "Bản lưu này và các bản sao dự phòng trên máy sẽ bị xóa vĩnh viễn. Không thể hoàn tác.": "Esta partida guardada y sus copias de seguridad locales se eliminarán permanentemente. Esta acción no se puede deshacer.",
+  "Dung lượng có thể giải phóng": "Espacio que se liberará",
+  "Các file đã xuất riêng và những bản lưu khác vẫn được giữ nguyên.": "Se conservarán los archivos exportados por separado y las demás partidas guardadas.",
+  "Đang xóa…": "Eliminando…",
+  "Xóa vĩnh viễn bản lưu": "Eliminar partida permanentemente"
 }

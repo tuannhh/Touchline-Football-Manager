@@ -470,5 +470,9 @@
   "Mệt mỏi tích lũy cao do thi đấu liên tục.": "Fatigue accumulée élevée due à l’enchaînement des matchs.",
   "Đã thi đấu ít nhất 240 phút trong 7 ngày gần nhất.": "A joué au moins 240 minutes au cours des 7 derniers jours.",
   "Thời gian nghỉ giữa hai trận quá ngắn.": "Temps de récupération trop court entre deux matchs.",
-  "{{0}} xuống sức rõ rệt; hãy cân nhắc thay người.": "{{0}} montre des signes de fatigue ; envisagez un remplacement."
+  "{{0}} xuống sức rõ rệt; hãy cân nhắc thay người.": "{{0}} montre des signes de fatigue ; envisagez un remplacement.",
+  "Bản lưu này đã bị xóa. Hãy dùng Lưu thành bản mới để tiếp tục.": "Cette sauvegarde a été supprimée. Utilisez Créer une nouvelle sauvegarde pour continuer.",
+  "Mã bản lưu không hợp lệ.": "Identifiant de sauvegarde non valide.",
+  "Không thể xóa bản lưu này.": "Impossible de supprimer cette sauvegarde.",
+  "Không thể thao tác bản lưu: đường dẫn không phải tệp thông thường.": "Impossible d’effectuer cette opération sur la sauvegarde : le chemin ne correspond pas à un fichier ordinaire."
 }

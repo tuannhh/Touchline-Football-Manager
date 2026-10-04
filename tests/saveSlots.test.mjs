@@ -51,3 +51,11 @@ test('saving to new slots preserves next training injuries, morale and later ini
  assert.ok(Object.values(g.players).some(p=>p.injury>0),'fixture exercises actual training injuries');assert.ok(Object.values(g.players).some(p=>p.morale>80),'fixture exercises playing-time morale');
  for(const world of [copy,again]){assert.deepEqual(world.players,g.players);assert.equal(world.rng,g.rng);assert.equal(world.international.rng,g.international.rng);assert.equal(world.transferMarket.rng,g.transferMarket.rng);}
 });
+
+test('storage size survives summary normalization, search and sort without inventing unknown sizes',()=>{
+ const saves=[{...saveSummary(game()),storageBytes:12345678},{...saveSummary(game()),id:'old-save',name:'Old'}];
+ assert.equal(saveSummary(saves[0]).storageBytes,12345678);
+ assert.equal(filterSortSaves(saves,{query:'Barcelona'})[0].storageBytes,12345678);
+ assert.equal(filterSortSaves(saves,{query:'Old'})[0].storageBytes,undefined);
+ for(const storageBytes of [-1,Infinity,'123',null])assert.equal(saveSummary({...game(),storageBytes}).storageBytes,undefined);
+});

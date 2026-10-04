@@ -1634,5 +1634,22 @@
   "Thể trạng cầu thủ trên sân": "On-pitch player condition",
   "Cảnh báo thể lực đội hình xuất phát": "Starting lineup condition warnings",
   "· Cần nghỉ ngơi": "· Needs rest",
-  "· Nghỉ": "· Rest"
+  "· Nghỉ": "· Rest",
+  "Không thể xóa bản lưu đang chơi. Hãy về màn hình bắt đầu trước.": "Cannot delete the save currently in use. Return to the start screen first.",
+  "Không xóa được bản lưu.": "Could not delete the save.",
+  "Đã xóa bản lưu. Đã giải phóng {{0}}.": "Save deleted. Freed {{0}}.",
+  "Dung lượng trên máy:": "Local storage used:",
+  "· Gồm bản sao dự phòng.": "· Includes backups.",
+  "Dung lượng": "Storage used",
+  "Gồm bản sao dự phòng": "Includes backups",
+  "Về màn hình bắt đầu để xóa bản đang chơi.": "Return to the start screen to delete the save currently in use.",
+  "Xóa bản lưu để giải phóng dung lượng trên máy.": "Delete a save to free up space on this device.",
+  "Xóa bản lưu {{0}}": "Delete save {{0}}",
+  "Xóa bản lưu": "Delete save",
+  "Xóa bản lưu?": "Delete this save?",
+  "Bản lưu này và các bản sao dự phòng trên máy sẽ bị xóa vĩnh viễn. Không thể hoàn tác.": "This save and its local backups will be permanently deleted. This cannot be undone.",
+  "Dung lượng có thể giải phóng": "Space to free up",
+  "Các file đã xuất riêng và những bản lưu khác vẫn được giữ nguyên.": "Separately exported files and other saves will be kept.",
+  "Đang xóa…": "Deleting…",
+  "Xóa vĩnh viễn bản lưu": "Permanently delete save"
 }

@@ -40,3 +40,28 @@ test('unavailable browser workers fall back to ordered full saves instead of los
   assert.deepEqual(writes.map(g=>g.liveMatch.minute),[1,2]);
  }finally{globalThis.Worker=previousWorker;globalThis.fetch=previousFetch;}
 });
+
+test('deleted-slot errors preserve HTTP status through the worker and direct fallback',async()=>{
+ const url=new URL('../src/save.worker.mjs',import.meta.url).href;
+ const worker=new Worker(`const {parentPort}=require('node:worker_threads');globalThis.self={postMessage:data=>parentPort.postMessage(data)};globalThis.fetch=async()=>({ok:false,status:410,json:async()=>({error:'Deleted slot'})});import(${JSON.stringify(url)}).then(()=>{parentPort.on('message',data=>self.onmessage({data}));parentPort.postMessage({ready:true});});`,{eval:true});
+ try{
+  await new Promise((resolve,reject)=>{worker.once('error',reject);worker.once('message',resolve);});
+  const response=new Promise((resolve,reject)=>{worker.once('error',reject);worker.once('message',resolve);});
+  worker.postMessage({requestId:1,payload:savePayload(null,{id:'deleted-career',liveMatch:null})});
+  assert.deepEqual(await response,{requestId:1,error:'Deleted slot',errorStatus:410});
+ }finally{await worker.terminate();}
+ const beforeFetch=globalThis.fetch,beforeWorker=globalThis.Worker;
+ try{
+  globalThis.Worker=undefined;globalThis.fetch=async()=>({ok:false,status:410,json:async()=>({error:'Deleted slot'})});
+  const {persistCareer}=await import('../src/saveClient.mjs?deleted-direct-test');
+  await assert.rejects(persistCareer({id:'deleted-career',liveMatch:null}),error=>error.status===410&&error.message==='Deleted slot');
+ }finally{globalThis.fetch=beforeFetch;globalThis.Worker=beforeWorker;}
+});
+
+test('save-as can rescue a deleted career, while connection and disk errors still block switching',async()=>{
+ const {saveBeforeSwitch}=await import('../src/saveClient.mjs');
+ let copies=0;await saveBeforeSwitch(async()=>{throw Object.assign(Error('Deleted slot'),{status:410});});copies++;
+ assert.equal(copies,1);
+ for(const status of [400,403,500,undefined])await assert.rejects(saveBeforeSwitch(async()=>{throw Object.assign(Error('Cannot save'),{status});}),/Cannot save/);
+ await saveBeforeSwitch(async()=>({ok:true}));
+});
