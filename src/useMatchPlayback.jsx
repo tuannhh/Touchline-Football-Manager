@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState,useCallback} from 'react';
-import {tickMatch} from './engine.mjs';
+import {finishMatchAutomatically} from './engine.mjs';
 import {createMatchPlayback,createPlaybackClock,shouldPauseMatch} from './matchPlayback.mjs';
 import {createScenePlanner} from './matchSceneWorker.mjs';
 
@@ -50,7 +50,7 @@ export default function useMatchPlayback(g,m,onChange,notify){
   controller.current.replace(latest.current.g,next);latest.current.onChange(next);publish(true);
  };
  const skip=()=>{
-  let next=finishAction();while(!next.completed)next=tickMatch(latest.current.g,next);
+  const next=finishMatchAutomatically(latest.current.g,finishAction());
   controller.current.replace(latest.current.g,next);latest.current.onChange(next);publish(true);
  };
  return {running,setRunning,speed,setSpeed,frameRef,view,change,skip,finishAction};

@@ -1,3 +1,5 @@
+import {dailyCareer,validateCareerClock} from './careerClock.mjs';
+import {validateFriendlyInvitations} from './friendlyInvitations.mjs';
 import {playerAbility,LEGACY_ABILITY_KEYS} from './playerAbility.mjs';
 import {applyAbilityAssessment,validatePlayerAssessments} from './playerAssessment.mjs';
 import {initializePlayerDevelopment,reviewPlayerDevelopment,resetDevelopmentSeason,resetPlayerDevelopment,validatePlayerDevelopment} from './playerDevelopment.mjs';
@@ -81,7 +83,8 @@ export function newGame(db,clubId='e83',manager='HLV',seed=Date.now(),options={}
   if(!db.clubs.some(c=>c.id===clubId))throw Error('CLB không tồn tại.');
   const seasonYear=Number(String(db.release?.season||db.meta?.season||'2026/27').slice(0,4));
   if(!Number.isInteger(seasonYear)||seasonYear<2026||seasonYear>2200)throw Error('Mùa của bản đội hình không hợp lệ.');
-  const g={schema:SCHEMA,id:`career-${Date.now()}-${Math.floor(Math.random()*1e6)}`,manager:manager.trim().slice(0,40)||'HLV',clubId,year:seasonYear,round:0,date:`${seasonYear}-08-15`,rng:seed>>>0,dbMeta:structuredClone(db.meta),leagues:structuredClone(db.leagues),clubs:{},players:{},fixtures:[],lineup:[],formation:'4-3-3',mentality:'balanced',training:'balanced',intensity:'normal',shortlist:[],messages:[],transfers:[],history:[],ledger:[],liveMatch:null,editorUsed:false,editorLog:[]};
+  const g={schema:SCHEMA,id:`career-${Date.now()}-${Math.floor(Math.random()*1e6)}`,manager:manager.trim().slice(0,40)||'HLV',clubId,year:seasonYear,round:0,date:options.dailyCalendar===true?`${seasonYear}-07-20`:`${seasonYear}-08-15`,rng:seed>>>0,dbMeta:structuredClone(db.meta),leagues:structuredClone(db.leagues),clubs:{},players:{},fixtures:[],lineup:[],formation:'4-3-3',mentality:'balanced',training:'balanced',intensity:'normal',shortlist:[],messages:[],transfers:[],history:[],ledger:[],liveMatch:null,editorUsed:false,editorLog:[]};
+  if(options.dailyCalendar===true){g.careerClock={version:1,startedAt:g.date,lastProcessedDate:g.date,lastWeeklyDate:g.date,lastRumourDate:null,seasonReadyDate:null};g.friendlyInvitations={version:1,sequence:0,items:[]};}
   for(const c of db.clubs){const tier=db.leagues.find(l=>l.id===c.leagueId)?.tier||1;const reputation=repMap[c.name]??(c.leagueId.startsWith('vie.')?56-tier*4:['por.1','ned.1'].includes(c.leagueId)?69:c.leagueId==='eur.other'?68:76-(tier-1)*9);const budget=Math.round(Math.pow(reputation/70,5)*(c.leagueId.startsWith('vie.')?500000:23000000)/tier);g.clubs[c.id]={...c,reputation,budget,cash:budget*2,wageBudget:0};}
   for(const p of db.players)g.players[p.id]=profile(p,g.clubs[p.clubId],seasonYear);
   initializeSnapshotInjuries(g,{enabled:options.sourceInjuries===true});
@@ -90,6 +93,7 @@ export function newGame(db,clubId='e83',manager='HLV',seed=Date.now(),options={}
   g.lineup=autoLineup(g,clubId);addMessage(g,'Chào mừng đến '+g.clubs[clubId].name,`Ban lãnh đạo dành ${money(g.clubs[clubId].budget)} cho chuyển nhượng. Chọn đội hình, thiết lập chiến thuật và bắt đầu vòng đấu đầu tiên.`, 'board');
   initializeStaff(g);initializeScouting(g);initializeMatchEnvironment(g);initializeFinancials(g);initializeTransferMarket(g);initializePlayerDynamics(g);initializeMatchday(g);repairBench(g,{eligible:p=>available(p)&&registered(g,p,currentFixture(g)?.leagueId),rank:overall,fill:true});mergeInternationalCalendar(g,{fresh:true});processInternationalDate(g,g.date);
   initializePlayerDevelopment(g);
+  if(dailyCareer(g)){g.financials.lastWeeklyDate=g.date;addMessage(g,'Lịch từng ngày đã sẵn sàng','Tiếp tục 1 ngày để theo dõi thư và phản hồi đàm phán. Đến trận đấu kế tiếp sẽ dừng trước giờ bóng lăn hoặc khi có phản hồi cần xem. Bạn có thể gửi lời mời giao hữu từ Lịch thi đấu.');}
   return g;
 }
 export function addMessage(g,title,body,type='news',details={}){const m=makeMessage(g,title,body,type,details);m.paragraphs??=mailParagraphs(m,g);g.messages.unshift(m);g.messages=g.messages.slice(0,250);return m;}
@@ -104,7 +108,7 @@ export function table(g,leagueId){
   }
   return rows.sort((a,b)=>b.points-a.points||(b.gf-b.ga)-(a.gf-a.ga)||b.gf-a.gf||g.clubs[a.clubId].name.localeCompare(g.clubs[b.clubId].name));
 }
-export const currentFixture=g=>g.fixtures.find(f=>f.round===g.round&&!f.result&&(f.home===g.clubId||f.away===g.clubId));
+export const currentFixture=g=>dailyCareer(g)?[...g.fixtures,...(g.friendlies||[])].find(f=>!f.result&&!f.cancelled&&f.date<=g.date&&(f.home===g.clubId||f.away===g.clubId)):g.fixtures.find(f=>f.round===g.round&&!f.result&&(f.home===g.clubId||f.away===g.clubId));
 export const fixtureById=(g,id)=>g.fixtures.find(f=>f.id===id)||(g.friendlies||[]).find(f=>f.id===id);
 export const maxRounds=g=>g.calendar?.length||Math.max(...g.fixtures.map(f=>f.round))+1;
 export function repairLineup(g){
@@ -272,7 +276,8 @@ export function tickMatch(g,original){
     const susceptibility=pickPhysicalRisk(g,m,active(g,m,side));
     if(random(m)<.0008*susceptibility.total/11){const p=susceptibility.pick();if(p){m.injured.push(p.id);event(m,'injury',`${p.name} bị đau và không thể tiếp tục.`,{side,playerId:p.id});}}
     // AI rotates tired players; injury replacements use the same five-substitution limit.
-    if((m.minute===62||m.minute===74||m.minute===83||m.injured.some(id=>m.lineups[side].includes(id)))&&[m.home,m.away][side]!==g.clubId&&canSubstitute(m,side)){
+    if(dailyCareer(g)&&([m.home,m.away][side]!==g.clubId||m.autoManage))autoManageMatch(g,m,side);
+    else if(!dailyCareer(g)&&(m.minute===62||m.minute===74||m.minute===83||m.injured.some(id=>m.lineups[side].includes(id)))&&[m.home,m.away][side]!==g.clubId&&canSubstitute(m,side)){
       const outgoing=m.lineups[side].filter(id=>id&&!m.red.includes(id)).sort((a,b)=>(m.injured.includes(b)?1000:0)-matchCondition(g,g.players[b],m)-(m.injured.includes(a)?1000:0)+matchCondition(g,g.players[a],m))[0];
       if(outgoing){const incoming=m.bench[side].find(id=>g.players[id].position===g.players[outgoing].position)||m.bench[side][0];if(incoming)substitute(g,m,side,outgoing,incoming);}
     }
@@ -307,11 +312,56 @@ export function substitute(g,m,side,outId,inId){
   m.lineups[side][index]=inId;m.bench[side]=m.bench[side].filter(id=>id!==inId);m.off.push(outId);m.minutes[inId]=0;m.workload||={};m.workload[inId]=0;m.subs[side]++;
   event(m,'sub',`${g.players[inId].name} vào sân thay ${g.players[outId].name}.`,{side,playerId:inId});return m;
 }
+/** Deterministic assistant decisions; never spends a substitution on a dismissed player. */
+export function autoManageMatch(g,m,side){
+ if(!canSubstitute(m,side)||m.minute===0)return m;
+ const opponent=1-side,deficit=m.score[opponent]-m.score[side];
+ const windows=m.subWindows?.[side]||0,maxWindows=m.matchdayRules?.subWindows??99;
+ const scheduled=[45,60,70,80,105].includes(m.minute);
+ const roleAt=seat=>phaseSlot(m.phaseTactics?.[side],'inPossession',seat,m.formation[side])?.[0]||FORMATION_SLOTS[m.formation[side]][seat][0];
+ const eligibleBench=()=>m.bench[side].filter(id=>available(g.players[id])&&!m.off.includes(id)&&!m.red.includes(id)&&!m.injured.includes(id));
+ // Restore a goalkeeper after a dismissal by sacrificing an outfield player;
+ // the dismissed player's seat remains empty, so the team still has ten men.
+ if(!active(g,m,side).some(p=>p.position==='GK')){
+  const keeper=eligibleBench().filter(id=>g.players[id].position==='GK').sort((a,b)=>overall(g.players[b])-overall(g.players[a]))[0];
+  const keeperSeat=m.lineups[side].findIndex(id=>id&&g.players[id].position==='GK');
+  const keeperOut=m.lineups[side][keeperSeat];
+  const out=m.injured.includes(keeperOut)?keeperOut:active(g,m,side).filter(p=>p.position!=='GK').sort((a,b)=>(a.position==='FW'?-20:0)+overall(a)-(b.position==='FW'?-20:0)-overall(b))[0]?.id;
+  if(keeper&&out){substitute(g,m,side,out,keeper);const from=m.lineups[side].indexOf(keeper);if(keeperSeat>=0&&from!==keeperSeat){[m.lineups[side][from],m.lineups[side][keeperSeat]]=[m.lineups[side][keeperSeat],m.lineups[side][from]];event(m,'tactics','Trợ lý điều chỉnh đội hình để đưa thủ môn dự bị vào khung thành.',{side});}}
+ }
+ let normalChanges=0;
+ const candidates=m.lineups[side].filter(id=>id&&!m.red.includes(id)&&!m.off.includes(id)).map(id=>{
+  const p=g.players[id],condition=matchCondition(g,p,m),injured=m.injured.includes(id),booked=!!m.yellows[id];
+  return {id,p,condition,injured,priority:(injured?1000:0)+(100-condition)*2+(booked?12:0)+(deficit>0&&p.position==='FW'?6:0)};
+ }).sort((a,b)=>b.priority-a.priority||a.id.localeCompare(b.id));
+ for(const {id,p,condition,injured}of candidates){
+  if(!canSubstitute(m,side))break;
+  const urgent=injured||condition<48;
+  if(!urgent&&(!scheduled||p.position==='GK'||(m.minutes[id]||0)<20||normalChanges>=2))continue;
+  if(!urgent&&m.minute<80&&windows>=maxWindows-1&&m.minute!==45)continue;
+  if(!urgent&&condition>=88&&!m.yellows[id]&&!(m.minute>=60&&deficit>0))continue;
+  const seat=m.lineups[side].indexOf(id),role=roleAt(seat);
+  const candidates=eligibleBench().map(pid=>g.players[pid]).filter(x=>(p.position==='GK')===(x.position==='GK'));
+  const score=x=>overall(x)*roleFit(x,role)*(.6+matchCondition(g,x,m)/250)+(deficit>0?x.attributes.finishing+x.attributes.vision:deficit<0?x.attributes.tackling+x.attributes.positioning:0)*.12;
+  candidates.sort((a,b)=>score(b)-score(a)||a.id.localeCompare(b.id));
+  const incoming=candidates[0];if(!incoming)continue;
+  if(!urgent&&(roleFit(incoming,role)<.65||matchCondition(g,incoming,m)<condition+5&&score(incoming)<score(p)))continue;
+  substitute(g,m,side,id,incoming.id);normalChanges+=urgent?0:1;
+ }
+ return m;
+}
+export function finishMatchAutomatically(g,original){
+ let m=structuredClone(original);
+ if(dailyCareer(g)){m.autoManage=true;for(const side of [0,1])autoManageMatch(g,m,side);}
+ while(!m.completed)m=tickMatch(g,m);
+ return m;
+}
 export function simulate(g,f){let m=createMatch(g,f);while(!m.completed)m=tickMatch(g,m);return m;}
 export function arrangeFriendly(g,opponentId){
  if(g.liveMatch)throw Error('Hãy hoàn tất trận đấu đang diễn ra.');
  initializeStaff(g);
  if(!g.clubs[opponentId]||opponentId===g.clubId)throw Error('Hãy chọn một CLB khác để đá giao hữu.');
+ if(dailyCareer(g))throw Error('Hãy gửi lời mời giao hữu và đợi đối thủ xác nhận ngày thi đấu.');
  if(g.friendlies.some(f=>f.year===g.year&&f.round===g.round))throw Error('Mỗi mốc lịch chỉ tổ chức một trận giao hữu để tránh quá tải.');
  if(g.friendlies.some(f=>!f.result&&!f.cancelled))throw Error('Hãy hoàn tất hoặc hủy trận giao hữu đã lên lịch.');
  for(const id of [g.clubId,opponentId])if(clubPlayers(g,id).filter(available).length<7)throw Error('Hai đội cần ít nhất 7 cầu thủ đủ thể lực và điều kiện ra sân.');
@@ -324,13 +374,14 @@ export function cancelFriendly(g,id){
 export function startFriendly(g,id){
  if(g.liveMatch)throw Error('Hãy hoàn tất trận đấu đang diễn ra.');
  const f=g.friendlies?.find(f=>f.id===id);
- if(!f||f.result||f.cancelled||f.round!==g.round||f.year!==g.year||f.home!==g.clubId)throw Error('Trận giao hữu không còn ở mốc lịch hiện tại.');
+ if(!f||f.result||f.cancelled||(dailyCareer(g)?f.date!==g.date:f.round!==g.round||f.year!==g.year)||f.home!==g.clubId)throw Error('Trận giao hữu không còn ở mốc lịch hiện tại.');
  const coach=assignedStaff(g,'friendlies');
  const picked=autoPhaseLineup(g,'friendly');
  const own=coach?picked:g.lineup.map(id=>id&&available(g.players[id])?id:null),used=new Set(own.filter(Boolean));
  const lineup=own.map(id=>{if(id)return id;const p=picked.find(x=>x&&!used.has(x));if(p)used.add(p);return p||null;});
  const prepared={...g,lineup,bench:[...(g.bench||[])]};if(coach)repairBench(prepared,{eligible:available,rank:overall,competitionId:'friendly',fill:true});const m=createMatch(prepared,f);m.coachId=coach?.id||'manager';m.coachName=coach?.name||g.manager;f.coachId=m.coachId;f.coachName=m.coachName;
  if(!coach){g.liveMatch=m;return m;}
+ if(dailyCareer(g)){const played=finishMatchAutomatically(g,m);finishFriendly(g,played);return played;}
  let played=m;
  while(!played.completed){
   played=tickMatch(g,played);
@@ -350,7 +401,7 @@ function settlePhysical(g,f,m){
 }
 export function finishFriendly(g,m){
  const f=g.friendlies?.find(f=>f.id===m.fixtureId);
- if(!f||f.result||f.cancelled||!m.friendly||!m.completed||m.home!==f.home||m.away!==f.away||f.home!==g.clubId||f.year!==g.year||f.round!==g.round)throw Error('Kết quả giao hữu không hợp lệ hoặc đã được ghi nhận.');
+ if(!f||f.result||f.cancelled||!m.friendly||!m.completed||m.home!==f.home||m.away!==f.away||f.home!==g.clubId||(dailyCareer(g)?f.date!==g.date:f.year!==g.year||f.round!==g.round))throw Error('Kết quả giao hữu không hợp lệ hoặc đã được ghi nhận.');
  settlePhysical(g,f,m);
  f.result={environment:structuredClone(m.environment||matchEnvironment(g,f)),score:[...m.score],shots:[...m.shots],xg:[...m.xg],events:structuredClone(m.events),coachId:m.coachId||'manager',coachName:m.coachName||g.manager};
  settleMatchFinancials(g,f,f.result.environment);
@@ -453,12 +504,14 @@ export function postponeNationalAbsences(g){
  }
  g.fixtures.sort((a,b)=>a.round-b.round||a.id.localeCompare(b.id));
 }
-export function advanceRound(g,played=null){
+export function advanceRound(g,played=null,{daily=false}={}){
+ if(daily&&(!dailyCareer(g)||g.calendar?.[g.round]?.date!==g.date))throw Error('Mốc thi đấu chưa đến ngày.');
+ if(daily&&currentFixture(g)&&!played)throw Error('Hãy chuẩn bị và hoàn tất trận đấu hôm nay trước khi chuyển ngày.');
  if(g.round>=maxRounds(g))throw Error('Mùa giải đã kết thúc. Hãy bắt đầu mùa mới.');
  if(g.liveMatch?.friendly)throw Error('Hãy ghi nhận trận giao hữu trước khi chuyển ngày.');
  if(played){const own=currentFixture(g);if(!own||played.fixtureId!==own.id||!played.completed)throw Error('Trận đấu chưa kết thúc.');}
  processInternationalDate(g,g.date);postponeNationalAbsences(g);
- const slot=g.calendar?.[g.round];const weekly=!slot||slot.kind==='domestic';
+ const slot=g.calendar?.[g.round];const weekly=!daily&&(!slot||slot.kind==='domestic');
  const fixtures=g.fixtures.filter(f=>f.round===g.round&&!f.result),activeClubs=new Set(fixtures.flatMap(f=>[f.home,f.away]));
  const recovering=Object.values(g.players).filter(p=>p.injury>0).map(p=>p.id),banned=Object.values(g.players).filter(p=>p.suspension>0&&activeClubs.has(p.clubId)).map(p=>p.id);
  repairLineup(g);let ownMatch=null,ownFixture=null;
@@ -476,12 +529,12 @@ export function advanceRound(g,played=null){
  if(weekly&&(slot?.week??g.round)%4===0){const c=g.clubs[g.clubId],entry=g.ledger.find(l=>l.type==='weekly'&&l.date===g.date)||{income:0,expense:0};addMessage(g,'Báo cáo ngân sách và quỹ lương',`Số dư ${money(c.cash)}; ngân sách chuyển nhượng ${money(c.budget)}.`,'finance',{paragraphs:[`Kính gửi HLV ${g.manager},`,`Phòng tài chính xác nhận đã hạch toán tuần vừa qua: tài trợ và bản quyền ${money(entry.income)}, chi phí lương ${money(entry.expense)}, chênh lệch ${money(entry.income-entry.expense)}.`,`Số dư sau hạch toán: ${money(c.cash)}. Ngân sách chuyển nhượng còn lại: ${money(c.budget)}. Quỹ lương cho phép: ${money(c.wageBudget)}/tuần.`,`Các khoản trong báo cáo thuộc mô phỏng tài chính của sự nghiệp. Giao dịch sau ngày gửi sẽ được ghi ở báo cáo kế tiếp.`,`Trân trọng,`,`Giám đốc tài chính`],action:{page:'finances',label:'Mở sổ thu chi'}});}
  if(ownMatch)handlePress(g,{fixture:ownFixture,result:ownFixture.result,tone:g.pressTone});
  if(weekly){runStaffWeek(g);reviewSquadPromises(g);reviewPlayerDynamics(g,{playedClubs:activeClubs});}
- for(const f of g.friendlies||[])if(!f.result&&!f.cancelled&&f.year===g.year&&f.round===g.round)f.cancelled=true;
+ if(!daily)for(const f of g.friendlies||[])if(!f.result&&!f.cancelled&&f.year===g.year&&f.round===g.round)f.cancelled=true;
  updateCups(g,table,(title,body)=>addMessage(g,title,body,'season',{action:{page:'league',label:'Xem giải đấu'}}));
- g.rng=(g.rng+1)>>>0;g.round++;g.date=nextDate;g.liveMatch=null;processInternationalDate(g,g.date);postponeNationalAbsences(g);reviewPlayerDevelopment(g);repairLineup(g);
+ g.rng=(g.rng+1)>>>0;g.round++;if(!daily)g.date=nextDate;g.liveMatch=null;if(!daily){processInternationalDate(g,g.date);postponeNationalAbsences(g);reviewPlayerDevelopment(g);}repairLineup(g);
  if(weekly)runAITransfers(g,transferHooks);
- runScoutingWeek(g);
- if(g.round===maxRounds(g))addMessage(g,'Mùa giải đã khép lại','Bảng xếp hạng quốc nội và danh hiệu UEFA đã hoàn tất. Chọn Mùa giải mới để tiến hành chuyển mùa, phân lại suất UEFA và cập nhật các hạng đấu.','season');
+ if(!daily)runScoutingWeek(g);
+ if(g.round===maxRounds(g))addMessage(g,'Mùa giải đã khép lại',daily?'Lịch chính thức đã khép lại. Bạn có thể tiếp tục từng ngày, chuyển nhượng và sắp xếp giao hữu trong kỳ nghỉ hè. Mùa mới sẽ được chuẩn bị tự động.':'Bảng xếp hạng quốc nội và danh hiệu UEFA đã hoàn tất. Chọn Mùa giải mới để tiến hành chuyển mùa, phân lại suất UEFA và cập nhật các hạng đấu.','season');
  return g;
 }
 export function promotionMoves(g,standings){
@@ -498,7 +551,8 @@ export function promotionMoves(g,standings){
  }
  const assigned=new Set();for(const move of moves){if(assigned.has(move.clubId))continue;g.clubs[move.clubId].leagueId=move.to;assigned.add(move.clubId);}return moves.filter((m,i)=>moves.findIndex(x=>x.clubId===m.clubId)===i);
 }
-export function nextSeason(g){
+export function nextSeason(g,{daily=false}={}){
+ const continuingDate=g.date;
  if(g.round<maxRounds(g))throw Error('Mùa giải chưa kết thúc.');
  for(const f of g.friendlies||[])if(!f.result&&!f.cancelled)f.cancelled=true;
  const standings=Object.fromEntries(g.leagues.filter(l=>l.kind!=='external').map(l=>[l.id,table(g,l.id)]));const rank=standings[g.clubs[g.clubId].leagueId].findIndex(r=>r.clubId===g.clubId)+1;
@@ -506,16 +560,16 @@ export function nextSeason(g){
  g.cups=nextEurope(g,standings);history.movements=promotionMoves(g,standings);g.history.unshift(history);
  if(g.pendingExpansion){g.cups=structuredClone(g.pendingExpansion);delete g.pendingExpansion;}
  // Settle summer national appearances before the season's full rest reset.
- processInternationalDate(g,`${g.year+1}-08-15`);
- g.year++;g.round=0;g.date=`${g.year}-08-15`;
+ processInternationalDate(g,daily?g.date:`${g.year+1}-08-15`);
+ g.year++;g.round=0;g.date=daily?continuingDate:`${g.year}-08-15`;
  // Close the previous season before contractual pay rises become effective.
  rollFinancialSeason(g);
- for(const p of Object.values(g.players)){p.age++;p.appearances=0;p.goals=0;p.assists=0;p.seasonMinutes=0;p.competitionStats={};p.form=[];p.fitness=100;p.injury=0;p.suspension=0;p.morale=80;
+ for(const p of Object.values(g.players)){p.age++;p.appearances=0;p.goals=0;p.assists=0;p.seasonMinutes=0;p.competitionStats={};p.form=[];if(!daily){p.fitness=100;p.injury=0;p.suspension=0;p.morale=80;}
   startDisciplineSeason(g,p);
   if(p.contractTerms){if(p.contractUntil>=g.year&&p.contractTerms.signedYear<g.year)p.wage=Math.round(p.wage*(1+(p.contractTerms.annualRise||0)/100));p.contractTerms.promiseFrom=g.date;p.contractTerms.promiseStartMinutes=0;p.contractTerms.bonusPaidFixtures=[];delete p.contractTerms.lastPromiseReview;delete p.contractTerms.promiseWarned;}
   if(p.contractUntil<g.year)p.contractUntil=g.year+1;}
  resetDevelopmentSeason(g);
- resetPhysical(g);
+ if(!daily)resetPhysical(g);
  for(const c of Object.values(g.clubs)){const prize=Math.round(c.reputation*200000/Math.max(1,g.leagues.find(l=>l.id===c.leagueId)?.tier||1));c.cash+=prize;c.budget+=Math.round(prize*.6);}
  g.fixtures=makeSeasonFixtures(g,schedule,random);initializeInternational(g);mergeInternationalCalendar(g,{fresh:true});initializeRegistrations(g);initializePlayerDynamics(g);repairLineup(g);repairBench(g,{eligible:p=>available(p)&&registered(g,p,currentFixture(g)?.leagueId),rank:overall,fill:true});
  runScoutingWeek(g);
@@ -565,6 +619,7 @@ function afterTransfer(g,record){
  }
 }
 const transferHooks={invalidateRosters,repairLineup,onTransfer:afterTransfer};
+export const runCareerMarket=g=>runAITransfers(g,transferHooks);
 export function completeTransfer(g,dealId){return finalizeNegotiation(g,dealId,transferHooks);}
 export function buyPlayer(g,id,dealId){
  const deal=g.negotiations?.find(d=>d.id===dealId&&d.playerId===id&&d.stage==='agreed');
@@ -612,9 +667,9 @@ export function validateGame(g){
     for(const [cid,lists]of Object.entries(g.registrations)){if(!ids.has(cid)||!lists||typeof lists!=='object')fail();for(const [clubId,list]of Object.entries(lists))if(!g.clubs[clubId]||!Array.isArray(list)||list.length>200||new Set(list).size!==list.length||list.some(id=>!g.players[id]))fail();}
     for(const m of g.messages)if(!m||typeof m.id!=='string'||typeof m.title!=='string'||typeof m.body!=='string'||(m.paragraphs&&(!Array.isArray(m.paragraphs)||m.paragraphs.some(p=>typeof p!=='string'))))fail();
   }
-  validateStaff(g);validateTransferMarket(g);validateMatchday(g);validateInternational(g);validatePlayerDynamics(g);
+  validateCareerClock(g);validateFriendlyInvitations(g);validateStaff(g);validateTransferMarket(g);validateMatchday(g);validateInternational(g);validatePlayerDynamics(g);
   const fixtureIds=new Set();for(const f of [...g.fixtures,...(g.friendlies||[])]){if(fixtureIds.has(f.id)||!g.clubs[f.home]||!g.clubs[f.away]||f.home===f.away||!Number.isInteger(f.round)||f.round<0||f.round>400)fail();fixtureIds.add(f.id);if(f.result&&(!Array.isArray(f.result.score)||f.result.score.length!==2||f.result.score.some(n=>!Number.isInteger(n)||n<0||n>100)||!Array.isArray(f.result.events)))fail();}
   if(g.liveMatch){const m=g.liveMatch,f=fixtureById(g,m.fixtureId);if(!f||f.cancelled||m.home!==f.home||m.away!==f.away||!!m.friendly!==(f.leagueId==='friendly'))fail();}
-  if(g.liveMatch){const m=g.liveMatch;if(![...g.fixtures,...(g.friendlies||[])].some(f=>f.id===m.fixtureId&&f.round===g.round&&!f.result&&(f.leagueId!=='friendly'||f.year===g.year))||!Array.isArray(m.lineups)||m.lineups.length!==2||m.lineups.some(l=>!Array.isArray(l)||l.length!==11||l.some(id=>id&&!g.players[id]))||!Array.isArray(m.events)||!Number.isInteger(m.minute)||m.minute<0||m.minute>120||!Number.isInteger(m.rng))fail();}
+  if(g.liveMatch){const m=g.liveMatch;if(![...g.fixtures,...(g.friendlies||[])].some(f=>f.id===m.fixtureId&&!f.result&&(dailyCareer(g)?f.date===g.date:f.round===g.round&&(f.leagueId!=='friendly'||f.year===g.year)))||!Array.isArray(m.lineups)||m.lineups.length!==2||m.lineups.some(l=>!Array.isArray(l)||l.length!==11||l.some(id=>id&&!g.players[id]))||!Array.isArray(m.events)||!Number.isInteger(m.minute)||m.minute<0||m.minute>120||!Number.isInteger(m.rng))fail();}
   return true;
 }

@@ -28,7 +28,7 @@ export function noteInjury(g,p,context='match'){
  p.injuryDetail={kind:kinds[hash(p.id+g.date+context)%kinds.length],since:g.date,initialWeeks:p.injury,lastWeeks:p.injury,context,active:true};
  report(g,p,`Báo cáo y tế · ${p.name}`,`${p.name} bị ${p.injuryDetail.kind.toLowerCase()}, dự kiến nghỉ khoảng ${p.injury} tuần. Cầu thủ được loại khỏi danh sách đủ điều kiện; đội ngũ y tế sẽ theo dõi hồi phục. Tập nặng và thể lực thấp làm tăng rủi ro chấn thương trong mô phỏng.`);
 }
-export function reviewPlayerDynamics(g,{training=true,playedClubs=null}={}){
+export function reviewPlayerDynamics(g,{training=true,playedClubs=null,reviewMinutes=true}={}){
  initializePlayerDynamics(g);
  const playedCompetitions=new Map();
  for(const f of g.fixtures)if(f.round===g.round&&f.result)for(const club of [f.home,f.away]){if(!playedCompetitions.has(club))playedCompetitions.set(club,[]);playedCompetitions.get(club).push(f.leagueId);}
@@ -38,9 +38,9 @@ export function reviewPlayerDynamics(g,{training=true,playedClubs=null}={}){
   if(d.lastReviewed===g.date)continue;d.lastReviewed=g.date;
   if(p.injury>0){noteInjury(g,p,p.injuryDetail?.context||'match');}
   else if(p.injuryDetail?.active){p.injuryDetail.active=false;report(g,p,`${p.name} trở lại tập luyện`,`${p.name} đã hoàn tất hồi phục. Ban huấn luyện khuyến nghị theo dõi thể lực trước khi đưa cầu thủ trở lại đội hình chính.`);}
-  const played=Math.max(0,p.seasonMinutes-d.lastMinutes);d.lastMinutes=p.seasonMinutes;
+  const played=Math.max(0,p.seasonMinutes-d.lastMinutes);if(reviewMinutes)d.lastMinutes=p.seasonMinutes;
   // A club without a fixture, national duty, an injury or a ban is not refusal to use a player.
-  const hadFixture=playedClubs?playedClubs.has(p.clubId):g.fixtures.some(f=>f.round===g.round&&f.result&&(f.home===p.clubId||f.away===p.clubId));
+  const hadFixture=!reviewMinutes?false:playedClubs?playedClubs.has(p.clubId):g.fixtures.some(f=>f.round===g.round&&f.result&&(f.home===p.clubId||f.away===p.clubId));
   const servedBan=p.discipline?.lastServedDate===g.date&&p.discipline?.lastServedRound===g.round;
   const scopedBan=(playedCompetitions.get(p.clubId)||[]).some(id=>competitionSuspension(g,p,id)>0);
   if(hadFixture&&!p.injury&&!p.suspension&&!servedBan&&!scopedBan&&!p.internationalDuty?.active){

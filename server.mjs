@@ -30,7 +30,7 @@ const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url,'http://127.0.0.1');
   if(req.headers.host&&!['127.0.0.1','localhost','[::1]'].some(h=>req.headers.host===`${h}:${port}`||req.headers.host===h))return json(res,403,{error:'Local access only'});
   if(req.method!=='GET'&&req.headers.origin&&!new Set(['http://127.0.0.1:'+port,'http://localhost:'+port,'http://127.0.0.1:5179','http://localhost:5179']).has(req.headers.origin))return json(res,403,{error:'Origin is not allowed'});
-  if(url.pathname==='/api/health')return json(res,200,{ok:true,name:'Touchline',version:3,appVersion:'1.14.0'});
+  if(url.pathname==='/api/health')return json(res,200,{ok:true,name:'Touchline',version:3,appVersion:'1.15.0'});
   if(url.pathname==='/api/player-assessments/refresh'&&req.method==='GET')return json(res,200,assessmentRefresh.status());
   if(url.pathname==='/api/player-assessments/refresh'&&req.method==='POST')return json(res,202,assessmentRefresh.start());
   if(url.pathname==='/data/player-reality.json'&&req.method==='GET')return json(res,200,JSON.parse(await readFile(path.join(root,'public/data/player-reality.json'),'utf8')));

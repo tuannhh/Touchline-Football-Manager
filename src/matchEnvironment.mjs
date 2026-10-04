@@ -1,3 +1,4 @@
+import {tourStadium} from './friendlyInvitations.mjs';
 import stadiumSnapshot from './stadium-data.mjs';
 // Venue capacities are a dated source snapshot, never a promise that future
 // building work is complete. Weather, attendances and ticket prices are game
@@ -92,6 +93,7 @@ function neutralStadium(g,fixture){
 // Approximate seasonal envelopes for fictional match days, not observations or
 // a climate database. Northern and southern Vietnam use different winter curves.
 const TEMPERATURES={
+ US:[16,17,18,20,22,25,28,29,27,24,20,17],JP:[6,7,11,17,22,25,29,30,26,20,14,9],AU:[27,27,25,22,19,17,16,18,21,23,25,26],
  EN:[6,7,9,12,16,19,22,21,18,14,10,7],DE:[2,4,9,14,18,22,24,24,19,13,7,3],
  FR:[6,8,11,15,19,23,26,26,22,16,10,7],IT:[8,10,13,17,22,27,30,30,25,20,14,10],
  ES:[12,13,16,18,22,27,30,30,26,22,16,13],PT:[14,15,17,19,22,25,28,28,26,22,18,15],
@@ -118,7 +120,7 @@ export function matchEnvironment(g,fixture){
  if(!fixture||!g.clubs?.[fixture.home]||!g.clubs?.[fixture.away])throw Error('Trận đấu không hợp lệ.');
  const saved=fixture.environment||fixture.result?.environment||(g.liveMatch?.fixtureId===fixture.id?g.liveMatch.environment:null);
  if(saved)return structuredClone(saved);
- const date=fixtureDate(g,fixture),home=g.clubs[fixture.home],away=g.clubs[fixture.away],stadium=fixture.neutral?neutralStadium(g,fixture):stadiumForClub(g,fixture.home);
+ const date=fixtureDate(g,fixture),home=g.clubs[fixture.home],away=g.clubs[fixture.away],stadium=tourStadium(fixture,date)||(fixture.neutral?neutralStadium(g,fixture):stadiumForClub(g,fixture.home));
  const rand=generator(hash(`${g.year||2026}|${fixture.id||'fixture'}|${fixture.home}|${fixture.away}|${date}|environment-v1`));
  const weather=weatherFor(stadium,date,rand,home),friendly=fixture.friendly===true||fixture.leagueId==='friendly',europe=String(fixture.leagueId).startsWith('uefa.');
  const weatherFactor=weather.condition==='heavy-rain'||weather.condition==='snow'?.86:weather.condition==='rain'?.96:1;

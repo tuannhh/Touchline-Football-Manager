@@ -8,7 +8,18 @@ Touchline là game quản lý bóng đá độc lập dành cho một người c
 
 **Mục đích giải trí và hình ảnh:** Đây là dự án cá nhân phục vụ giải trí, không có liên kết chính thức với Football Manager, các CLB, giải đấu hay liên đoàn. Ảnh cầu thủ, logo, tên và tài sản của bên thứ ba thuộc các chủ sở hữu tương ứng; việc xuất hiện trong game không cấp quyền sử dụng lại. Tác giả không cấp phép khai thác thương mại các tài sản đó và không chịu trách nhiệm, trong phạm vi pháp luật cho phép, về việc người dùng sử dụng thương mại, phân phối lại hoặc vi phạm bản quyền hình ảnh/quyền hình ảnh. Người sử dụng tự chịu trách nhiệm xin các quyền cần thiết. Giấy phép MIT của mã nguồn dự án không cấp lại giấy phép cho tài sản của bên thứ ba.
 
-Bản **1.14.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+Bản **1.15.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+
+## Mới ở bản 1.15.0
+
+- **Lịch từng ngày dành cho New Game:** bắt đầu chuẩn bị mùa giải từ 20/07. **Tiếp tục 1 ngày** giữ thời gian để theo dõi thư và thị trường; **Đến trận đấu kế tiếp** xử lý từng ngày, dừng ở phản hồi cần xem hoặc ngày thi đấu. Bạn vẫn phải mở chuẩn bị đội hình và xác nhận giao bóng. Có thể dừng tua lịch tại ngày đang xử lý.
+- **Đàm phán có thời gian chờ:** đề nghị phí và hợp đồng nhận phản hồi sau 1–3 ngày trong mô phỏng. Có thể đóng cửa sổ, làm việc khác và đọc phản hồi trong hộp thư; không ký hay trừ tiền khi đang chờ.
+- **Giao hữu & du đấu:** chọn đối thủ, lọc quốc gia/cấp giải và gửi lời mời cho ngày cách 4–120 ngày. Đối thủ có thể đồng ý hoặc từ chối theo lịch, quân số, danh tiếng và kế hoạch di chuyển. Chọn sân nhà, châu Âu, Bắc Mỹ, châu Á hoặc châu Đại Dương; địa điểm du đấu là sân mô phỏng. Trận đã xác nhận xuất hiện trong lịch CLB. Lịch mới bị trùng hoặc thiếu quân sẽ có thư báo hủy.
+- **Nghỉ hè và đội tuyển:** thời gian nghỉ vẫn chạy từng ngày. Cầu thủ đang lên tuyển không thể có tên trong đội hình hoặc dự bị giao hữu. Quá ít cầu thủ/thủ môn thì hủy trận, không gọi cầu thủ về trái lệnh triệu tập. Chuyển mùa không tự xóa chấn thương và phục hồi thể lực toàn đội.
+- **Đến hết trận có trợ lý thay người:** cân nhắc chấn thương, thể lực, thẻ phạt, tỷ số và vị trí phù hợp; xử lý thủ môn bị truất quyền thi đấu bằng cách rút một cầu thủ khác. Giữ giới hạn người/đợt thay của giải và không cho cầu thủ đã rời sân trở lại.
+- Save cũ tiếp tục dùng nhịp lịch và quyền thay người trước đây. Bản dịch giao diện đã bổ sung đủ Anh/Pháp/Tây Ban Nha/Bồ Đào Nha.
+
+Chi tiết và giới hạn mô phỏng: [lịch từng ngày và giao hữu](docs/daily-calendar.md).
 
 ## Mới ở bản 1.14.0
 

@@ -1,3 +1,4 @@
+import {dailyCareer} from './careerClock.mjs';
 import {available,createMatch,currentFixture,fixtureById} from './engine.mjs';
 import {matchdayRule} from './matchday.mjs';
 import {registered,registrationReport,registrationRule} from './registration.mjs';
@@ -8,7 +9,7 @@ function fixtureForPreparation(g,id){
  const fixture=fixtureById(g,id);
  const own=fixture&&(fixture.home===g.clubId||fixture.away===g.clubId);
  const current=fixture?.leagueId==='friendly'
-  ?fixture.round===g.round&&fixture.year===g.year&&fixture.home===g.clubId
+  ?(dailyCareer(g)?fixture.date===g.date:fixture.round===g.round&&fixture.year===g.year)&&fixture.home===g.clubId
   :currentFixture(g)?.id===id;
  if(!own||!current||fixture.result||fixture.cancelled)throw Error('Trận đấu không còn ở mốc lịch hiện tại.');
  return fixture;

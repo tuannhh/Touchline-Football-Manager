@@ -1,3 +1,4 @@
+import {dailyCareer} from './careerClock.mjs';
 import {makeMessage} from './mail.mjs';
 import {playerAbility as ability} from './playerAbility.mjs';
 import {staffEffects} from './staff.mjs';
@@ -77,6 +78,7 @@ function canSell(g,p,roster){
  return null;
 }
 function close(g,d,stage,text,cooldown=14){
+ delete d.pendingOffer;
  d.stage=stage;d.closedAt=g.date;d.cooldownUntil=dayAdd(g.date,cooldown);d.reason=text;note(g,d,'system',text);return answer(d,text);
 }
 function current(g,id,stage){
@@ -138,7 +140,7 @@ export function beginNegotiation(g,playerId){
 const whole=(v,max=TRANSFER_RULES.maxMoney)=>Number.isSafeInteger(v)&&v>=0&&v<=max;
 function validClubTerms(o){return !!o&&whole(o.fee)&&whole(o.sellOnPercent,TRANSFER_RULES.maxSellOn);}
 function validPlayerTerms(o){return !!o&&MONEY_KEYS.every(k=>whole(o[k],k==='wage'?TRANSFER_RULES.maxWage:TRANSFER_RULES.maxMoney))&&o.wage>=100&&Number.isInteger(o.years)&&o.years>=1&&o.years<=5&&whole(o.annualRise,TRANSFER_RULES.maxAnnualRise)&&Object.hasOwn(SQUAD_ROLES,o.squadRole);}
-export function submitClubOffer(g,dealId,offer){
+function resolveClubOffer(g,dealId,offer){
  if(!validClubTerms(offer))return fail('Phí phải là số nguyên không âm; phần trăm bán tiếp từ 0 đến 30.');
  const check=current(g,dealId,'club');if(!check.deal||check.ok!==undefined)return check;const d=check.deal,p=g.players[d.playerId];
  const assessment=transferAssessment(g,p,d.buyerId);
@@ -174,7 +176,7 @@ function contractProblems(d,o){
  if(o.years>4&&base.years<=2)problems.push('Cầu thủ lớn tuổi chỉ muốn cam kết tối đa 4 năm');
  return problems;
 }
-export function submitContractOffer(g,dealId,terms){
+function resolveContractOffer(g,dealId,terms){
  if(!validPlayerTerms(terms))return fail('Hợp đồng không hợp lệ: tiền là số nguyên, lương 100–10.000.000 €/tuần, thời hạn 1–5 năm, tăng lương 0–20%, vai trò hợp lệ.');
  const check=current(g,dealId,'contract');if(!check.deal||check.ok!==undefined)return check;const d=check.deal;
  const o=Object.fromEntries([...MONEY_KEYS,'years','annualRise','squadRole'].map(k=>[k,terms[k]]));
@@ -187,6 +189,28 @@ export function submitContractOffer(g,dealId,terms){
  a.wage=rounded(Math.max(base.wage*.93,a.wage*.98));a.signingBonus=rounded(Math.max(base.signingBonus*.85,a.signingBonus*.96));a.agentFee=rounded(Math.max(base.agentFee*.9,a.agentFee*.97));
  note(g,d,'player',`${problems.join('. ')}. Đề nghị đối ứng: ${money(a.wage)}/tuần, lót tay ${money(a.signingBonus)}, phí đại diện ${money(a.agentFee)}; còn ${d.playerPatience} lượt.`);
  return answer(d,'Người đại diện đưa ra điều khoản đối ứng.');
+}
+function queueOffer(g,dealId,terms,kind){
+ const check=current(g,dealId,kind);if(!check.deal||check.ok!==undefined)return check;const d=check.deal;
+ if(d.pendingOffer)return fail('Đang chờ phản hồi đề nghị đã gửi. Hãy tiếp tục thời gian.');
+ if(!(kind==='club'?validClubTerms(terms):validPlayerTerms(terms)))return fail('Điều khoản đề nghị không hợp lệ.');
+ const replyOn=dayAdd(g.date,1+hash(`${d.id}:${d.clubRounds}:${d.playerRounds}:${kind}`)%3);
+ d.pendingOffer={kind,terms:structuredClone(terms),sentOn:g.date,replyOn};
+ note(g,d,'manager',`Đã gửi đề nghị. Dự kiến phản hồi ngày ${replyOn}.`);
+ return answer(d,`Đã gửi đề nghị. Hãy đóng cửa sổ và tiếp tục từng ngày; dự kiến phản hồi ${replyOn}.`);
+}
+export function submitClubOffer(g,id,terms){return dailyCareer(g)?queueOffer(g,id,terms,'club'):resolveClubOffer(g,id,terms);}
+export function submitContractOffer(g,id,terms){return dailyCareer(g)?queueOffer(g,id,terms,'contract'):resolveContractOffer(g,id,terms);}
+export function processNegotiationReplies(g){
+ if(!dailyCareer(g)||g.liveMatch)return [];
+ const replies=[];
+ for(const d of g.negotiations.filter(x=>ACTIVE.has(x.stage))){
+  let response;
+  if(g.date>d.expiresOn||g.players[d.playerId]?.clubId!==d.sellerId)response=close(g,d,'expired','Thỏa thuận đã hết hạn hoặc cầu thủ đã chuyển CLB.',0);
+  else if(d.pendingOffer?.replyOn<=g.date){const offer=d.pendingOffer;delete d.pendingOffer;response=offer.kind==='club'?resolveClubOffer(g,d.id,offer.terms):resolveContractOffer(g,d.id,offer.terms);}
+  if(response){mail(g,`Phản hồi chuyển nhượng · ${g.players[d.playerId].name}`,[response.message,d.history.at(-1)?.text||'Hãy xem diễn biến đàm phán.'],d.playerId);g.messages[0].requiresAttention=true;replies.push(d);}
+ }
+ return replies;
 }
 export function withdrawNegotiation(g,id){
  const d=g.negotiations?.find(x=>x.id===id);
@@ -300,12 +324,12 @@ export function runAITransfers(g,hooks={}){
  if(market.processedDates.includes(g.date))return {ok:true,message:'Đã xử lý thị trường ở ngày này.',transfers:[]};
  market.processedDates.push(g.date);market.processedDates=market.processedDates.slice(-2000);
  for(const d of g.negotiations)if(ACTIVE.has(d.stage)&&(g.date>d.expiresOn||g.players[d.playerId]?.clubId!==d.sellerId))close(g,d,'expired','Thỏa thuận không còn hiệu lực sau khi thị trường hoặc ngày hết hạn thay đổi.',0);
- const target=2+Math.floor(random(market)*5),records=[],touched=new Set(),financiallyLimited=new Set();let attempts=0;
+ const target=dailyCareer(g)?1+Math.floor(random(market)*2):2+Math.floor(random(market)*5),records=[],touched=new Set(),financiallyLimited=new Set();let attempts=0;
  const clubs=Object.values(g.clubs).filter(c=>c.id!==g.clubId);
  const roster=new Map(clubs.map(c=>[c.id,[]]));for(const p of Object.values(g.players))roster.get(p.clubId)?.push(p);
  const lastMoved=new Map();for(const t of g.transfers)if(!lastMoved.has(t.playerId||t.id))lastMoved.set(t.playerId||t.id,t.date);
  const positions=['GK','DF','MF','FW'];
- for(let attempt=0;attempt<100&&records.length<target;attempt++){
+ for(let attempt=0;attempt<(dailyCareer(g)?30:100)&&records.length<target;attempt++){
   attempts++;
   const buyers=clubs.filter(c=>!touched.has(c.id)&&c.budget>50000&&c.cash>50000&&(roster.get(c.id)?.length||0)<36);
   if(!buyers.length)break;const buyer=buyers[Math.floor(random(market)*buyers.length)],bp=roster.get(buyer.id),financialReport=financeReport(g,buyer.id);
@@ -353,6 +377,7 @@ export function validateTransferMarket(g){
  const ids=new Set();
  for(const d of g.negotiations){
   if(!d||typeof d.id!=='string'||ids.has(d.id)||!g.players[d.playerId]||!g.clubs[d.buyerId]||!g.clubs[d.sellerId]||d.buyerId===d.sellerId||!STAGES.has(d.stage)||![d.createdAt,d.expiresOn].every(validDate)||!whole(d.clubRounds,4)||!whole(d.playerRounds,4)||!validClubTerms(d.clubDemand)||!validPlayerTerms(d.playerDemand)||!validClubTerms(d.originalClubDemand)||!validPlayerTerms(d.originalPlayerDemand)||!Array.isArray(d.history)||d.history.length>60||d.history.some(h=>!h||!validDate(h.date)||typeof h.text!=='string'||!['manager','club','player','system'].includes(h.side)))invalid();
+  if(d.pendingOffer){const q=d.pendingOffer;if(!dailyCareer(g)||!['club','contract'].includes(q.kind)||q.kind!==d.stage||!validDate(q.sentOn)||!validDate(q.replyOn)||q.sentOn>=q.replyOn||q.sentOn>g.date||!(q.kind==='club'?validClubTerms(q.terms):validPlayerTerms(q.terms)))invalid();}
   if(d.clubAgreement!==undefined&&!validClubTerms(d.clubAgreement)||d.contractAgreement!==undefined&&!validPlayerTerms(d.contractAgreement))invalid();
   if(['contract','agreed','completed'].includes(d.stage)&&!d.clubAgreement||['agreed','completed'].includes(d.stage)&&!d.contractAgreement)invalid();
   if(d.cooldownUntil!==undefined&&!validDate(d.cooldownUntil))invalid();

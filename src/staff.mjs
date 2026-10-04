@@ -1,3 +1,4 @@
+import {dailyCareer} from './careerClock.mjs';
 import {makeMessage} from './mail.mjs';
 import {OFFICIAL_STAFF} from './staff-official.mjs';
 
@@ -137,8 +138,8 @@ export function validateStaff(g){
  for(const clubId of Object.keys(g.clubs))if(!g.staffAssignments[clubId]||TASK_KEYS.some(task=>g.staffAssignments[clubId][task]===undefined))fail();
  if(!PRESS_TONES[g.pressTone])fail();
  for(const [key,max]of [['friendlies',500],['staffReports',120],['pressHistory',500]])if(!Array.isArray(g[key])||g[key].length>max)fail();
- const fixtureIds=new Set((g.fixtures||[]).map(f=>f.id));for(const f of g.friendlies){if(!f||typeof f.id!=='string'||f.id.length>160||fixtureIds.has(f.id)||!g.clubs[f.home]||!g.clubs[f.away]||f.home===f.away||![f.home,f.away].includes(g.clubId)||f.leagueId!=='friendly'||f.stage!=='friendly'||!Number.isInteger(f.year)||f.year<1900||f.year>9999||!Number.isInteger(f.round)||f.round<0||f.round>150||!/^\d{4}-\d{2}-\d{2}$/.test(f.date)||!Number.isFinite(Date.parse(f.date))||(f.cancelled!==undefined&&typeof f.cancelled!=='boolean')||(f.cancelled&&f.result))fail();fixtureIds.add(f.id);if(f.result&&(!Array.isArray(f.result.score)||f.result.score.length!==2||f.result.score.some(n=>!Number.isInteger(n)||n<0||n>100)||!Array.isArray(f.result.events)))fail();}
- if(g.liveMatch?.friendly){const f=g.friendlies.find(f=>f.id===g.liveMatch.fixtureId);if(!f||f.cancelled||f.result||f.year!==g.year||f.round!==g.round||f.home!==g.liveMatch.home||f.away!==g.liveMatch.away)fail();}
+ const fixtureIds=new Set((g.fixtures||[]).map(f=>f.id));for(const f of g.friendlies){if(!f||typeof f.id!=='string'||f.id.length>160||fixtureIds.has(f.id)||!g.clubs[f.home]||!g.clubs[f.away]||f.home===f.away||![f.home,f.away].includes(g.clubId)||f.leagueId!=='friendly'||f.stage!=='friendly'||!Number.isInteger(f.year)||f.year<1900||f.year>9999||!Number.isInteger(f.round)||f.round<0||f.round>400||!/^\d{4}-\d{2}-\d{2}$/.test(f.date)||!Number.isFinite(Date.parse(f.date))||(f.cancelled!==undefined&&typeof f.cancelled!=='boolean')||(f.cancelled&&f.result))fail();fixtureIds.add(f.id);if(f.result&&(!Array.isArray(f.result.score)||f.result.score.length!==2||f.result.score.some(n=>!Number.isInteger(n)||n<0||n>100)||!Array.isArray(f.result.events)))fail();}
+ if(g.liveMatch?.friendly){const f=g.friendlies.find(f=>f.id===g.liveMatch.fixtureId);if(!f||f.cancelled||f.result||(dailyCareer(g)?f.date!==g.date:f.year!==g.year||f.round!==g.round)||f.home!==g.liveMatch.home||f.away!==g.liveMatch.away)fail();}
  for(const r of g.staffReports)if(!r||typeof r.id!=='string'||typeof r.title!=='string'||typeof r.body!=='string'||!Array.isArray(r.playerIds)||r.playerIds.length>1000||r.playerIds.some(id=>!g.players[id])||(r.staffId!=='manager'&&g.staff[r.staffId]?.clubId!==g.clubId)||typeof r.messageId!=='string')fail();
  const conferences=new Set();for(const h of g.pressHistory){if(!h||typeof h.fixtureId!=='string'||conferences.has(h.fixtureId)||!PRESS_TONES[h.tone]||!Number.isInteger(h.moraleChange)||Math.abs(h.moraleChange)>2||(h.staffId!=='manager'&&g.staff[h.staffId]?.clubId!==g.clubId)||typeof h.messageId!=='string')fail();conferences.add(h.fixtureId);}
  return true;
