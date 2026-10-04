@@ -6,6 +6,7 @@ import MoneyInput,{moneyLabel} from './MoneyInput.jsx';
 import NumberInput from './NumberInput.jsx';
 import {clubPlayers,completeTransfer,dateLabel,money,POSITION} from './engine.mjs';
 import {number} from './locale.mjs';
+import {assessTransferFinancials} from './financialSustainability.mjs';
 import {beginNegotiation,getNegotiation,submitClubOffer,submitContractOffer,withdrawNegotiation,minimumReleaseClause,SQUAD_ROLES,TRANSFER_RULES} from './transfers.mjs';
 import './transfers.css';
 
@@ -54,11 +55,13 @@ function BudgetSummary({g,player,clubOffer,contractOffer,agreed=false}){
  const club=g.clubs[g.clubId],fee=numeric(clubOffer?.fee),signing=numeric(contractOffer?.signingBonus),agent=numeric(contractOffer?.agentFee),wage=numeric(contractOffer?.wage);
  const upfront=fee+signing+agent,currentWages=clubPlayers(g,g.clubId).filter(p=>p.id!==player.id).reduce((sum,p)=>sum+numeric(p.wage),0),wageRoom=club.wageBudget-currentWages;
  const cashShort=upfront>club.cash,budgetShort=upfront>club.budget,wageShort=wage>wageRoom;
+ const sustainability=g.financeVersion?assessTransferFinancials(g,player,g.clubId,fee,contractDraft(contractOffer)):null;
  return <aside className="negotiation-budget" aria-label="Dự toán chuyển nhượng">
   <div className="negotiation-section-heading"><span className="eyebrow">NGÂN SÁCH CỦA BẠN</span><h3>{agreed?'Chi phí khi ký':'Dự toán theo đề nghị'}</h3></div>
   <dl><div><dt>Phí chuyển nhượng</dt><dd>{money(fee)}</dd></div><div><dt>Thưởng ký + phí đại diện</dt><dd>{money(signing+agent)}</dd></div><div className="negotiation-budget-total"><dt>Thanh toán ngay</dt><dd>{money(upfront)}</dd></div><div><dt>Tiền mặt hiện có</dt><dd className={cashShort?'status-bad':''}>{money(club.cash)}</dd></div><div><dt>Ngân sách chuyển nhượng</dt><dd className={budgetShort?'status-bad':''}>{money(club.budget)}</dd></div></dl>
   <dl><div><dt>Lương mới mỗi tuần</dt><dd>{money(wage)}</dd></div><div><dt>Quỹ lương cầu thủ còn lại</dt><dd className={wageShort?'status-bad':''}>{money(wageRoom)}</dd></div><div><dt>Lương cơ bản năm đầu</dt><dd>{money(wage*52)}</dd></div></dl>
   <p>Thưởng ra sân và ghi bàn được trả theo thực tế. Tăng lương và phần trăm bán lại tạo nghĩa vụ ở các mùa sau.</p>
+  {sustainability&&<div className="negotiation-sustainability"><strong>Kiểm tra bền vững tài chính</strong><p className={sustainability.ok?'status-good':'status-bad'}>{sustainability.ok?'Đề nghị nằm trong giới hạn tài chính mô phỏng.':sustainability.message}</p><dl><div><dt>Chi phí đội hình tăng mỗi năm</dt><dd>{money(sustainability.annualAddedCost||0)}</dd></div></dl><small>Gồm lương, dự phòng thưởng và phân bổ phí hợp đồng. Số dư Editor không tự tăng giới hạn chi tiêu.</small></div>}
   {!agreed&&<p>Điều khoản cá nhân chưa thống nhất là mức tham khảo từ người đại diện.</p>}
   {(cashShort||budgetShort||wageShort)&&<div className="negotiation-warning"><WarningCircle size={17}/><span>{[cashShort&&'Thiếu tiền mặt để thanh toán ngay.',budgetShort&&'Tổng chi phí ngay vượt ngân sách chuyển nhượng.',wageShort&&'Lương mới vượt quỹ lương còn lại.'].filter(Boolean).join(' ')}</span></div>}
  </aside>;

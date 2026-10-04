@@ -6,6 +6,12 @@ import {staffMembers,assignStaffTask,staffWeeklyWages} from '../src/staff.mjs';
 const db=JSON.parse(fs.readFileSync(new URL('../public/data/database.json',import.meta.url)));
 const fresh=()=>E.newGame(db,'e359','Staff QA',5179);
 const officialState=g=>({round:g.round,date:g.date,rng:g.rng,fixtures:structuredClone(g.fixtures),lineup:[...g.lineup],cash:g.clubs[g.clubId].cash,budget:g.clubs[g.clubId].budget,ledger:structuredClone(g.ledger),stats:Object.fromEntries(Object.values(g.players).map(p=>[p.id,[p.goals,p.assists,p.appearances,p.seasonMinutes,p.suspension,JSON.stringify(p.competitionStats)]]))});
+function assertFriendlyOnlyGate(g,before,fixture){
+ const after=officialState(g),gate=fixture.result.environment.gateReceipts;
+ assert.ok(gate>0);assert.equal(after.cash,before.cash+gate);assert.equal(after.ledger.length,before.ledger.length+1);
+ assert.deepEqual(after.ledger.slice(1),before.ledger);const entry=after.ledger[0];assert.equal(entry.type,'matchday');assert.equal(entry.fixtureId,fixture.id);assert.equal(entry.income,gate);assert.equal(entry.expense,0);
+ after.cash=before.cash;after.ledger=before.ledger;assert.deepEqual(after,before);
+}
 
 test('manual friendly uses 2D match lifecycle, survives halftime save, preserves official competitions',()=>{
  const g=fresh(),before=officialState(g),f=E.arrangeFriendly(g,'e83');
@@ -14,9 +20,9 @@ test('manual friendly uses 2D match lifecycle, survives halftime save, preserves
  for(let i=0;i<45;i++)m=E.tickMatch(g,m);g.liveMatch=m;
  const loaded=E.migrateGame(JSON.parse(JSON.stringify(g)),db);assert.ok(E.validateGame(loaded));
  let a=g.liveMatch,b=loaded.liveMatch;while(!a.completed)a=E.tickMatch(g,a);while(!b.completed)b=E.tickMatch(loaded,b);assert.deepEqual(a,b);
- E.finishFriendly(loaded,b);assert.equal(loaded.liveMatch,null);assert.deepEqual(officialState(loaded),before);
+ E.finishFriendly(loaded,b);assert.equal(loaded.liveMatch,null);assertFriendlyOnlyGate(loaded,before,loaded.friendlies.find(x=>x.id===f.id));
  assert.ok(Object.values(loaded.players).some(p=>p.friendlyStats?.minutes>0));assert.ok(loaded.messages.some(m=>m.type==='friendly'));
- assert.throws(()=>E.finishFriendly(loaded,b));assert.ok(E.validateGame(loaded));
+ const settledCash=loaded.clubs[loaded.clubId].cash;assert.throws(()=>E.finishFriendly(loaded,b));assert.equal(loaded.clubs[loaded.clubId].cash,settledCash);assert.equal(loaded.ledger.filter(e=>e.fixtureId===f.id).length,1);assert.ok(E.validateGame(loaded));
 });
 
 test('delegated assistant selects side, rotates players and sends one friendly and press result',()=>{
@@ -24,7 +30,7 @@ test('delegated assistant selects side, rotates players and sends one friendly a
  assignStaffTask(g,'friendlies',assistant.id);assignStaffTask(g,'press',assistant.id);
  const before=officialState(g),f=E.arrangeFriendly(g,'e83'),m=E.startFriendly(g,f.id);
  assert.ok(m.completed);assert.equal(m.coachId,assistant.id);assert.equal(g.liveMatch,null);assert.equal(f.result.coachName,assistant.name);
- assert.ok(m.subs[0]>0);assert.deepEqual(officialState(g),before);
+ assert.ok(m.subs[0]>0);assertFriendlyOnlyGate(g,before,f);
  assert.equal(g.pressHistory.filter(p=>p.fixtureId===f.id).length,1);assert.ok(E.validateGame(g));
 });
 

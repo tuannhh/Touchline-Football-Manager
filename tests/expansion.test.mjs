@@ -68,6 +68,9 @@ test('mail has distinct identities, durable read status and frozen send-time fin
 test('schema-1 migration preserves edits and transfers; active season waits for next season expansion',()=>{
  const leagues=db.leagues.filter(l=>l.tier===1),clubs=db.clubs.filter(c=>leagues.some(l=>l.id===c.leagueId));const original={meta:db.meta,leagues,clubs,players:db.players.filter(p=>clubs.some(c=>c.id===p.clubId))};
  const g=E.newGame(original,'e83','Old',123);g.schema=1;delete g.cups;delete g.calendar;delete g.registrations;g.fixtures=original.leagues.flatMap(l=>E.schedule(original.clubs.filter(c=>c.leagueId===l.id).map(c=>c.id),l.id,g.year));
+ // This fixture represents an actual schema-1 save, before financial books or
+ // stadium snapshots existed; its historical transfers have no modern assets.
+ for(const key of ['financeVersion','financials','environmentVersion','stadiums'])delete g[key];
  g.players.e347568=E.profile({...db.players.find(p=>p.id==='e347568'),clubId:'e102'},g.clubs.e102);E.invalidateRosters(g);
  E.editClub(g,g.clubId,{cash:123456789,budget:76543210,wageBudget:9876543});const p=g.players[g.lineup[0]];p.attributes.reflexes=20;g.messages[0].readAt=g.date;const id=g.id,xi=[...g.lineup],rng=g.rng;
  const upgraded=E.migrateGame(g,db);assert.equal(upgraded.id,id);assert.equal(upgraded.rng,rng);assert.equal(upgraded.clubs[g.clubId].cash,123456789);assert.equal(upgraded.players[p.id].attributes.reflexes,20);assert.deepEqual(upgraded.lineup,xi);assert.equal(upgraded.cups.length,3);assert.ok(E.validateGame(upgraded));assert.equal(E.migrateGame(upgraded,db).messages.length,upgraded.messages.length);assert.equal(upgraded.players.e347568.clubId,'f161771');

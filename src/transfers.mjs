@@ -1,5 +1,6 @@
 import {makeMessage} from './mail.mjs';
 import {staffEffects} from './staff.mjs';
+import {assessTransferFinancials,financeReport,recordTransferFinancials} from './financialSustainability.mjs';
 
 // These are game rules, not a reproduction of any country's transfer regulations.
 export const SQUAD_ROLES={star:'Ngôi sao',starter:'Đá chính',rotation:'Luân phiên',prospect:'Tài năng trẻ'};
@@ -191,6 +192,7 @@ function affordability(g,p,buyerId,fee,t){
  const buyer=g.clubs[buyerId];const upfront=fee+t.signingBonus+t.agentFee;
  if(!buyer||!Number.isSafeInteger(upfront)||buyer.budget<upfront||buyer.cash<upfront)return 'Ngân sách chuyển nhượng hoặc số dư không đủ trả phí, lót tay và phí đại diện.';
  if(wages(g,buyerId)+t.wage>buyer.wageBudget)return 'Không đủ quỹ lương hàng tuần để đăng ký hợp đồng mới.';
+ const financial=assessTransferFinancials(g,p,buyerId,fee,t);if(!financial.ok)return financial.message;
  return canSell(g,p);
 }
 function jersey(g,p,buyerId){
@@ -206,6 +208,7 @@ function move(g,p,buyerId,fee,terms,sellOnPercent,isAI,hooks,dealId){
  jersey(g,p,buyerId);p.clubId=buyerId;p.wage=terms.wage;p.contractUntil=g.year+terms.years;p.listed=false;p.morale=Math.max(p.morale,85);
  p.contractTerms={...terms,sellOnClubId:from,sellOnPercent,signedAt:g.date,signedYear:g.year};
  const record={eventId:`transfer-${++g.transferMarket.sequence}`,id:p.id,playerId:p.id,name:p.name,from,to:buyerId,fee,date:g.date,isAI,terms:{...p.contractTerms},upfrontCost:total,sellOnPayment,...(sellOnPayment?{sellOnClubId:oldOwner.id}:{}),...(dealId?{dealId}:{})};
+ recordTransferFinancials(g,record);
  g.transfers.unshift(record);g.transfers=g.transfers.slice(0,5000);
  for(const d of g.negotiations)if(d.playerId===p.id&&d.id!==dealId&&ACTIVE.has(d.stage))close(g,d,'expired','Cầu thủ đã ký hợp đồng với CLB khác; cuộc đàm phán hết hiệu lực.',0);
  if(from===g.clubId||buyerId===g.clubId){g.ledger.unshift({date:g.date,round:g.round+1,type:'transfer',description:buyerId===g.clubId?`Mua ${p.name} · phí, thưởng ký và đại diện`:`Bán ${p.name}`,income:from===g.clubId?fee-sellOnPayment:sellOnPayment&&oldOwner?.id===g.clubId?sellOnPayment:0,expense:buyerId===g.clubId?total:0,balance:g.clubs[g.clubId].cash,playerId:p.id,eventId:record.eventId});g.ledger=g.ledger.slice(0,100);}
@@ -258,14 +261,15 @@ export function runAITransfers(g,hooks={}){
  if(market.processedDates.includes(g.date))return {ok:true,message:'Đã xử lý thị trường ở ngày này.',transfers:[]};
  market.processedDates.push(g.date);market.processedDates=market.processedDates.slice(-2000);
  for(const d of g.negotiations)if(ACTIVE.has(d.stage)&&(g.date>d.expiresOn||g.players[d.playerId]?.clubId!==d.sellerId))close(g,d,'expired','Thỏa thuận không còn hiệu lực sau khi thị trường hoặc ngày hết hạn thay đổi.',0);
- const target=2+Math.floor(random(market)*5),records=[],touched=new Set();
+ const target=2+Math.floor(random(market)*5),records=[],touched=new Set(),financiallyLimited=new Set();let attempts=0;
  const clubs=Object.values(g.clubs).filter(c=>c.id!==g.clubId);
  const roster=new Map(clubs.map(c=>[c.id,[]]));for(const p of Object.values(g.players))roster.get(p.clubId)?.push(p);
  const lastMoved=new Map();for(const t of g.transfers)if(!lastMoved.has(t.playerId||t.id))lastMoved.set(t.playerId||t.id,t.date);
  const positions=['GK','DF','MF','FW'];
  for(let attempt=0;attempt<100&&records.length<target;attempt++){
+  attempts++;
   const buyers=clubs.filter(c=>!touched.has(c.id)&&c.budget>50000&&c.cash>50000&&(roster.get(c.id)?.length||0)<36);
-  if(!buyers.length)break;const buyer=buyers[Math.floor(random(market)*buyers.length)],bp=roster.get(buyer.id);
+  if(!buyers.length)break;const buyer=buyers[Math.floor(random(market)*buyers.length)],bp=roster.get(buyer.id),financialReport=financeReport(g,buyer.id);
   const counts=Object.fromEntries(positions.map(pos=>[pos,bp.filter(p=>p.position===pos).length]));
   const need=positions.slice().sort((a,b)=>counts[a]/desired[a]-counts[b]/desired[b])[0];
   const positionQuality=bp.filter(p=>p.position===need).reduce((s,p)=>s+ability(p),0)/Math.max(1,counts[need]);
@@ -283,6 +287,7 @@ export function runAITransfers(g,hooks={}){
     const terms=playerTerms(g,p,buyer.id,fee,assessment),wage=terms.wage;
     const payroll=bp.reduce((s,x)=>s+x.wage,0);
     if(wage>Math.max(500,payroll/Math.max(1,bp.length)*3,p.value/400)||fee+terms.signingBonus+terms.agentFee>Math.min(buyer.budget,buyer.cash)||payroll+wage>buyer.wageBudget)continue;
+    if(!assessTransferFinancials(g,p,buyer.id,fee,terms,financialReport).ok){financiallyLimited.add(buyer.id);continue;}
     const fit=(quality-positionQuality)*1.2+(p.age<25?7:0)+(p.listed?8:0)-fee/Math.max(1000,buyer.budget)*5;
     candidates.push({p,fee,terms,fit});
    }
@@ -294,6 +299,7 @@ export function runAITransfers(g,hooks={}){
   const from=p.clubId,record=move(g,p,buyer.id,fee,terms,p.age<24?10:0,true,hooks);records.push(record);touched.add(from);touched.add(buyer.id);
   roster.set(from,roster.get(from).filter(x=>x.id!==p.id));roster.get(buyer.id).push(p);lastMoved.set(p.id,g.date);
  }
+ market.lastActivity={date:g.date,attempts,completed:records.length,financiallyLimitedClubs:financiallyLimited.size};
  if(records.length)mail(g,`Thị trường thế giới · ${records.length} thương vụ mới`,['Các CLB đã tự thương lượng và hoàn tất những giao dịch sau trong tuần:',...records.map(t=>`${t.name}: ${g.clubs[t.from].name} → ${g.clubs[t.to].name}, phí ${money(t.fee)}, lương ${money(t.terms.wage)}/tuần.`),'Danh sách cầu thủ, quỹ lương, ngân sách và đăng ký của các CLB do máy quản lý đã được cập nhật. Đây là thị trường mô phỏng hoạt động quanh năm.']);
  return {ok:true,message:`${records.length} thương vụ giữa các CLB khác.`,transfers:records};
 }
@@ -303,6 +309,7 @@ export function validateTransferMarket(g){
  if(g.marketVersion===undefined){if(g.negotiations!==undefined||g.transferMarket!==undefined||Object.values(g.players).some(p=>p.contractTerms!==undefined))invalid();return true;}
  if(g.marketVersion!==1||!Array.isArray(g.negotiations)||g.negotiations.length>2000||!g.transferMarket)invalid();
  const market=g.transferMarket;
+ if(market.lastActivity!==undefined){const a=market.lastActivity;if(!a||!validDate(a.date)||!whole(a.attempts,100)||!whole(a.completed,6)||!whole(a.financiallyLimitedClubs,Object.keys(g.clubs).length))invalid();}
  if(!whole(market.rng,4294967295)||!whole(market.sequence)||!Array.isArray(market.processedDates)||market.processedDates.length>2000||market.processedDates.some(d=>!validDate(d))||new Set(market.processedDates).size!==market.processedDates.length)invalid();
  const ids=new Set();
  for(const d of g.negotiations){

@@ -8,7 +8,17 @@ Touchline là game quản lý bóng đá độc lập dành cho một người c
 
 **Mục đích giải trí và hình ảnh:** Đây là dự án cá nhân phục vụ giải trí, không có liên kết chính thức với Football Manager, các CLB, giải đấu hay liên đoàn. Ảnh cầu thủ, logo, tên và tài sản của bên thứ ba thuộc các chủ sở hữu tương ứng; việc xuất hiện trong game không cấp quyền sử dụng lại. Tác giả không cấp phép khai thác thương mại các tài sản đó và không chịu trách nhiệm, trong phạm vi pháp luật cho phép, về việc người dùng sử dụng thương mại, phân phối lại hoặc vi phạm bản quyền hình ảnh/quyền hình ảnh. Người sử dụng tự chịu trách nhiệm xin các quyền cần thiết. Giấy phép MIT của mã nguồn dự án không cấp lại giấy phép cho tài sản của bên thứ ba.
 
-Bản **1.9.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+Bản **1.10.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+
+## Mới ở bản 1.10.0
+
+- **Thông tin trận đấu:** sân vận động, sức chứa, thời tiết mô phỏng theo mùa, nhiệt độ, gió, độ ẩm, mặt sân và số cổ động viên hai đội. Xem ở màn hình chuẩn bị, trong trận và báo cáo kết quả. Các điều kiện được giữ nguyên khi lưu/tải lại; dự báo trước trận dùng cùng mô hình với kết quả. Thời tiết hiện là thông tin, chưa tác động vào xác suất ghi bàn.
+- **Sân vận động:** hồ sơ CLB có sức chứa và liên kết nguồn. Có tên sân có nguồn cho đủ 132 CLB ở 7 giải hàng đầu châu Âu. Các sức chứa đã xác minh dùng mốc nguồn công khai; phần chưa xác minh được ghi rõ là ước tính. Sức chứa Spotify Camp Nou dùng mốc mở cửa từng phần, không tự coi công trình tương lai là đã hoàn thành. Các trận sân trung lập dùng địa điểm mô phỏng khi chưa có sân cụ thể.
+- **Bền vững tài chính:** mục Tài chính có chi phí đội hình hằng năm, giới hạn, dư địa và nguồn quy định cho cả đội của bạn lẫn AI. Phí mua cầu thủ được phân bổ theo hợp đồng tối đa 5 năm; lương, thưởng dự phòng và chi phí ký hợp đồng cũng được xét. Báo ngay tác động trong đàm phán, chặn ký khi vượt giới hạn. Đây là mô hình tài chính của sự nghiệp, không phải báo cáo kế toán hoặc kết luận vi phạm ngoài đời của CLB.
+- **Thị trường AI:** các CLB khác tiếp tục tự tìm người theo nhu cầu, giá, lương và tham vọng, đồng thời chịu cùng kiểm tra tài chính. Bộ lọc riêng “Giữa các CLB AI” giúp theo dõi giao dịch; tiền, lương, cầu thủ và đăng ký cập nhật theo từng thương vụ. Thị trường mô phỏng vẫn mở quanh năm.
+- **Thu chi:** doanh thu cơ sở được chốt theo mùa, không tự tăng chỉ vì mua cầu thủ lương cao. Tiền vé từng trận được ghi nhận một lần cho các CLB liên quan; sân trung lập chia đều trong mô phỏng. Save cũ được bổ sung hệ thống khi tải, không đổi tiền hoặc hạch toán ngược những trận đã chơi.
+
+[Chi tiết điều lệ và cách giản lược](docs/financial-rules.md) · [Nguồn sân và mô hình thời tiết, khán giả](docs/match-environment.md).
 
 ## Mới ở bản 1.9.0
 

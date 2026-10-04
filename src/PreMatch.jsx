@@ -4,6 +4,7 @@ import {Badge} from './components.jsx';
 import {dateLabel} from './locale.mjs';
 import {competition} from './competitions.mjs';
 import {preMatchReport} from './prematch.mjs';
+import MatchEnvironment from './MatchEnvironment.jsx';
 import TacticsPage from './TacticsPage.jsx';
 import './prematch.css';
 
@@ -21,6 +22,7 @@ export default function PreMatch({g,fixture,onConfirm,onBack,mutate,openPlayer,n
    {!report.valid&&<div role="alert" className="prematch-errors"><ul>{report.errors.map(error=><li key={error}>{error}</li>)}</ul><button className="text-button" onClick={()=>nav('registration')}>Đăng ký đội hình</button></div>}
    <div className="prematch-actions"><span>Ngày thi đấu và thời gian trận đấu chưa được tiếp tục.</span><button className="primary" disabled={!report.valid} onClick={onConfirm}><Play size={17} weight="fill"/>Xác nhận đội hình & vào trận</button></div>
   </section>
+  <MatchEnvironment g={g} fixture={fixture} forecast/>
   <TacticsPage g={g} mutate={mutate} openPlayer={openPlayer} competitionId={fixture.leagueId}/>
   <div className="prematch-bottom"><button className="secondary" onClick={onBack}>Về văn phòng</button><button className="primary" disabled={!report.valid} onClick={onConfirm}><Play size={17} weight="fill"/>Xác nhận đội hình & vào trận</button></div>
  </>;

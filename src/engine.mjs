@@ -1,3 +1,5 @@
+import {initializeMatchEnvironment,matchEnvironment,validateMatchEnvironment} from './matchEnvironment.mjs';
+import {initializeFinancials,settleWeeklyFinancials,settleMatchFinancials,rollFinancialSeason,validateFinancials} from './financialSustainability.mjs';
 import {number,money,dateLabel} from './locale.mjs';
 import {applyPlayerReality} from './playerReality.mjs';
 import {recordDiscipline,clearDisciplineBans,startDisciplineSeason,validateDiscipline,competitionSuspension} from './discipline.mjs';
@@ -82,7 +84,7 @@ export function newGame(db,clubId='e83',manager='HLV',seed=Date.now(),options={}
   for(const c of Object.values(g.clubs)){c.wageBudget=Math.round(clubPlayers(g,c.id).reduce((s,p)=>s+p.wage,0)*1.35);}
   mergeHomegrown(g,db.homegrownIndex);initializeInternational(g);g.tactics={...DEFAULT_TACTICS};g.cups=structuredClone(db.competitions||[]);g.fixtures=makeSeasonFixtures(g,schedule,random);g.registrations={};initializeRegistrations(g);
   g.lineup=autoLineup(g,clubId);addMessage(g,'Chào mừng đến '+g.clubs[clubId].name,`Ban lãnh đạo dành ${money(g.clubs[clubId].budget)} cho chuyển nhượng. Chọn đội hình, thiết lập chiến thuật và bắt đầu vòng đấu đầu tiên.`, 'board');
-  initializeStaff(g);initializeTransferMarket(g);initializePlayerDynamics(g);initializeMatchday(g);repairBench(g,{eligible:p=>available(p)&&registered(g,p,currentFixture(g)?.leagueId),rank:overall,fill:true});mergeInternationalCalendar(g,{fresh:true});processInternationalDate(g,g.date);
+  initializeStaff(g);initializeMatchEnvironment(g);initializeFinancials(g);initializeTransferMarket(g);initializePlayerDynamics(g);initializeMatchday(g);repairBench(g,{eligible:p=>available(p)&&registered(g,p,currentFixture(g)?.leagueId),rank:overall,fill:true});mergeInternationalCalendar(g,{fresh:true});processInternationalDate(g,g.date);
   return g;
 }
 export function addMessage(g,title,body,type='news',details={}){const m=makeMessage(g,title,body,type,details);m.paragraphs??=mailParagraphs(m,g);g.messages.unshift(m);g.messages=g.messages.slice(0,250);return m;}
@@ -211,7 +213,7 @@ export function createMatch(g,fixture){
     if(i===userSide&&g.benchVersion!==undefined)return [...new Set(g.bench||[])].filter(pid=>eligible(g.players[pid])).slice(0,rules.maxBench);
     return clubPlayers(g,id).filter(eligible).sort((a,b)=>overall(b)-overall(a)).slice(0,rules.maxBench).map(p=>p.id);
   });
-  return {fixtureId:fixture.id,...(fixture.leagueId==='friendly'?{friendly:true}:{}),...(userSide>=0&&(g.phaseTactics?.enabled||hasCustomPhaseTactics(g.phaseTactics))?{phaseTactics:[0,1].map(side=>side===userSide?structuredClone(g.phaseTactics):null)}:{}),home:fixture.home,away:fixture.away,minute:0,score:[0,0],shots:[0,0],onTarget:[0,0],xg:[0,0],possession:[0,0],lineups,bench,formation:[0,1].map(i=>i===userSide?g.formation:'4-3-3'),mentality:[0,1].map(i=>i===userSide?g.mentality:'balanced'),tactics:[0,1].map(i=>normalizeTactics(i===userSide?g.tactics:DEFAULT_TACTICS)),matchdayRules:structuredClone(rules),subWindows:[0,0],lastSubMinute:[null,null],subs:[0,0],off:[],red:[],injured:[],yellows:{},minutes:Object.fromEntries(all.map(id=>[id,0])),workload:Object.fromEntries(all.map(id=>[id,0])),goals:{},assists:{},events:[{minute:0,type:'kickoff',text:'Hai đội đã ra sân. Sẵn sàng giao bóng!'}],rng:hash(`${g.rng}:${fixture.id}`),ball:{x:50,y:50},phase:'kickoff',attack:0,neutral:!!fixture.neutral,completed:false};
+  return {fixtureId:fixture.id,environment:matchEnvironment(g,fixture),...(fixture.leagueId==='friendly'?{friendly:true}:{}),...(userSide>=0&&(g.phaseTactics?.enabled||hasCustomPhaseTactics(g.phaseTactics))?{phaseTactics:[0,1].map(side=>side===userSide?structuredClone(g.phaseTactics):null)}:{}),home:fixture.home,away:fixture.away,minute:0,score:[0,0],shots:[0,0],onTarget:[0,0],xg:[0,0],possession:[0,0],lineups,bench,formation:[0,1].map(i=>i===userSide?g.formation:'4-3-3'),mentality:[0,1].map(i=>i===userSide?g.mentality:'balanced'),tactics:[0,1].map(i=>normalizeTactics(i===userSide?g.tactics:DEFAULT_TACTICS)),matchdayRules:structuredClone(rules),subWindows:[0,0],lastSubMinute:[null,null],subs:[0,0],off:[],red:[],injured:[],yellows:{},minutes:Object.fromEntries(all.map(id=>[id,0])),workload:Object.fromEntries(all.map(id=>[id,0])),goals:{},assists:{},events:[{minute:0,type:'kickoff',text:'Hai đội đã ra sân. Sẵn sàng giao bóng!'}],rng:hash(`${g.rng}:${fixture.id}`),ball:{x:50,y:50},phase:'kickoff',attack:0,neutral:!!fixture.neutral,completed:false};
 }
 function active(g,m,side){return m.lineups[side].filter(id=>id&&!m.red.includes(id)&&!m.injured.includes(id)).map(id=>g.players[id]);}
 export function tacticalQuality(g,m,side,phase){
@@ -330,7 +332,8 @@ export function startFriendly(g,id){
 export function finishFriendly(g,m){
  const f=g.friendlies?.find(f=>f.id===m.fixtureId);
  if(!f||f.result||f.cancelled||!m.friendly||!m.completed||m.home!==f.home||m.away!==f.away||f.home!==g.clubId||f.year!==g.year||f.round!==g.round)throw Error('Kết quả giao hữu không hợp lệ hoặc đã được ghi nhận.');
- f.result={score:[...m.score],shots:[...m.shots],xg:[...m.xg],events:structuredClone(m.events),coachId:m.coachId||'manager',coachName:m.coachName||g.manager};
+ f.result={environment:structuredClone(m.environment||matchEnvironment(g,f)),score:[...m.score],shots:[...m.shots],xg:[...m.xg],events:structuredClone(m.events),coachId:m.coachId||'manager',coachName:m.coachName||g.manager};
+ settleMatchFinancials(g,f,f.result.environment);
  for(const [id,minutes] of Object.entries(m.minutes)){
   const p=g.players[id];if(!p||minutes<=0)continue;
   p.fitness=clamp(p.fitness-(m.workload?.[id]??minutes)*(22-p.attributes.stamina)/35,25,100);
@@ -344,7 +347,8 @@ export function finishFriendly(g,m){
 function recordMatch(g,f,m){
   if(f.result)throw Error('Trận đấu đã được ghi nhận.');
   if(!m.completed||m.fixtureId!==f.id||m.home!==f.home||m.away!==f.away)throw Error('Kết quả chưa hoàn tất hoặc sai trận đấu.');
-  f.result={score:m.score,shots:m.shots,xg:m.xg,events:m.events,winner:m.winner||null,aggregate:m.aggregate||null,penalties:m.penalties||null,extraTime:!!m.extraTime};
+  f.result={environment:structuredClone(m.environment||matchEnvironment(g,f)),score:m.score,shots:m.shots,xg:m.xg,events:m.events,winner:m.winner||null,aggregate:m.aggregate||null,penalties:m.penalties||null,extraTime:!!m.extraTime};
+  settleMatchFinancials(g,f,f.result.environment);
   for(const [id,minutes]of Object.entries(m.minutes)){const p=g.players[id];if(!p||minutes===0)continue;p.appearances++;p.seasonMinutes+=minutes;p.competitionStats||={};const stat=p.competitionStats[f.leagueId]||={goals:0,assists:0,appearances:0};stat.goals+=m.goals[id]||0;stat.assists+=m.assists[id]||0;stat.appearances++;p.goals+=m.goals[id]||0;p.assists+=m.assists[id]||0;p.fitness=clamp(p.fitness-(m.workload?.[id]??minutes)*(22-p.attributes.stamina)/30,25,100);
     const side=p.clubId===f.home?0:1,won=m.score[side]>m.score[1-side],lost=m.score[side]<m.score[1-side];p.morale=clamp(p.morale+(won?5:lost?-5:0),20,100);p.form.push(clamp(6.4+(won?.5:lost?-.5:0)+(m.goals[id]||0)*.8+(m.assists[id]||0)*.4-(m.red.includes(id)?2:0),1,10));p.form=p.form.slice(-5);
   }
@@ -444,14 +448,13 @@ export function advanceRound(g,played=null){
   const train=own?g.training:'balanced',chance=(intensity==='hard'?.055:intensity==='light'?.013:.03)*(p.age<24?1.6:1)*(p.age<22?staff.youthMultiplier:1)*(train==='physical'?staff.fitnessMultiplier:p.position==='GK'?staff.goalkeepingMultiplier:staff.trainingMultiplier);
   if(overall(p)<p.potential&&random(g)<chance){const keys=train==='attack'?['finishing','dribbling','composure']:train==='defence'?['tackling','positioning','heading']:train==='physical'?['pace','stamina','strength']:KEYS[p.position];const key=keys[Math.floor(random(g)*keys.length)];p.attributes[key]=clamp(p.attributes[key]+1,1,20);}
  }
- if(weekly)for(const c of Object.values(g.clubs)){const playerWages=clubPlayers(g,c.id).reduce((sum,p)=>sum+p.wage,0),staffWages=staffWeeklyWages(g,c.id),wage=playerWages+staffWages,income=Math.round(playerWages*1.06+(c.id===g.clubId&&ownMatch?.home===c.id?c.reputation*12000:0));c.cash+=income-wage;
-  if(c.id===g.clubId){g.ledger.unshift({round:g.round+1,date:g.date,type:'weekly',income,expense:wage,playerWages,staffWages,balance:c.cash});g.ledger=g.ledger.slice(0,100);}}
+ if(weekly)settleWeeklyFinancials(g);
  if(ownMatch){const m=ownMatch,f=ownFixture,c=g.clubs[g.clubId],op=g.clubs[f.home===g.clubId?f.away:f.home],name=competition(g,f.leagueId)?.name||f.leagueId;
   const notes=m.events.filter(e=>['goal','red','injury','penalties'].includes(e.type)).map(e=>`${e.minute}’: ${e.text}`);
   const body=`${g.clubs[f.home].name} ${m.score.join(' – ')} ${g.clubs[f.away].name}. ${name}.`;
   addMessage(g,`${g.clubs[f.home].shortName} ${m.score.join(' – ')} ${g.clubs[f.away].shortName}`,body,'match',{paragraphs:[`Kính gửi HLV ${g.manager},`,`Ban huấn luyện gửi báo cáo trận ${c.name} gặp ${op.name}, ngày ${dateLabel(g.date)}.`,body,`Cú sút: ${m.shots.join(' – ')}. Trúng đích: ${m.onTarget.join(' – ')}. Bàn thắng kỳ vọng (xG): ${m.xg.map(n=>number(n,2)).join(' – ')}.`,...notes,m.aggregate?`Tổng tỉ số hai lượt: ${m.aggregate.join(' – ')}.${m.penalties?' Luân lưu: '+m.penalties.join(' – ')+'.':''}`:'Kết quả đã được cập nhật vào bảng xếp hạng.',`Chấn thương mới: ${m.injured.map(id=>g.players[id].name).join(', ')||'không có'}. Thẻ đỏ: ${m.red.map(id=>g.players[id].name).join(', ')||'không có'}.`,`Hãy kiểm tra mục Huấn luyện để theo dõi hồi phục và chuẩn bị đội hình cho lịch tiếp theo.`,`Trân trọng,`,`Trợ lý huấn luyện viên`],action:{page:'fixtures',label:'Xem lịch và báo cáo trận'}});
  }
- if(weekly&&(slot?.week??g.round)%4===0){const c=g.clubs[g.clubId],entry=g.ledger[0];addMessage(g,'Báo cáo ngân sách và quỹ lương',`Số dư ${money(c.cash)}; ngân sách chuyển nhượng ${money(c.budget)}.`,'finance',{paragraphs:[`Kính gửi HLV ${g.manager},`,`Phòng tài chính xác nhận đã hạch toán tuần vừa qua: tài trợ và tiền vé ${money(entry.income)}, chi phí lương ${money(entry.expense)}, chênh lệch ${money(entry.income-entry.expense)}.`,`Số dư sau hạch toán: ${money(c.cash)}. Ngân sách chuyển nhượng còn lại: ${money(c.budget)}. Quỹ lương cho phép: ${money(c.wageBudget)}/tuần.`,`Các khoản trong báo cáo thuộc mô phỏng tài chính của sự nghiệp. Giao dịch sau ngày gửi sẽ được ghi ở báo cáo kế tiếp.`,`Trân trọng,`,`Giám đốc tài chính`],action:{page:'finances',label:'Mở sổ thu chi'}});}
+ if(weekly&&(slot?.week??g.round)%4===0){const c=g.clubs[g.clubId],entry=g.ledger.find(l=>l.type==='weekly'&&l.date===g.date)||{income:0,expense:0};addMessage(g,'Báo cáo ngân sách và quỹ lương',`Số dư ${money(c.cash)}; ngân sách chuyển nhượng ${money(c.budget)}.`,'finance',{paragraphs:[`Kính gửi HLV ${g.manager},`,`Phòng tài chính xác nhận đã hạch toán tuần vừa qua: tài trợ và bản quyền ${money(entry.income)}, chi phí lương ${money(entry.expense)}, chênh lệch ${money(entry.income-entry.expense)}.`,`Số dư sau hạch toán: ${money(c.cash)}. Ngân sách chuyển nhượng còn lại: ${money(c.budget)}. Quỹ lương cho phép: ${money(c.wageBudget)}/tuần.`,`Các khoản trong báo cáo thuộc mô phỏng tài chính của sự nghiệp. Giao dịch sau ngày gửi sẽ được ghi ở báo cáo kế tiếp.`,`Trân trọng,`,`Giám đốc tài chính`],action:{page:'finances',label:'Mở sổ thu chi'}});}
  if(ownMatch)handlePress(g,{fixture:ownFixture,result:ownFixture.result,tone:g.pressTone});
  if(weekly){runStaffWeek(g);reviewSquadPromises(g);reviewPlayerDynamics(g,{playedClubs:activeClubs});}
  for(const f of g.friendlies||[])if(!f.result&&!f.cancelled&&f.year===g.year&&f.round===g.round)f.cancelled=true;
@@ -481,13 +484,15 @@ export function nextSeason(g){
  const standings=Object.fromEntries(g.leagues.filter(l=>l.kind!=='external').map(l=>[l.id,table(g,l.id)]));const rank=standings[g.clubs[g.clubId].leagueId].findIndex(r=>r.clubId===g.clubId)+1;
  const history={year:g.year,rank,leagueId:g.clubs[g.clubId].leagueId,champions:[...Object.entries(standings).filter(([,rs])=>rs.length).map(([id,rs])=>({leagueId:id,clubId:rs[0].clubId})),...(g.cups||[]).filter(c=>c.champion).map(c=>({leagueId:c.id,clubId:c.champion}))],goals:clubPlayers(g,g.clubId).reduce((sum,p)=>sum+p.goals,0)};
  g.cups=nextEurope(g,standings);history.movements=promotionMoves(g,standings);g.history.unshift(history);
+ if(g.pendingExpansion){g.cups=structuredClone(g.pendingExpansion);delete g.pendingExpansion;}
  g.year++;g.round=0;g.date=`${g.year}-08-15`;
+ // Close the previous season before contractual pay rises become effective.
+ rollFinancialSeason(g);
  for(const p of Object.values(g.players)){p.age++;p.appearances=0;p.goals=0;p.assists=0;p.seasonMinutes=0;p.competitionStats={};p.form=[];p.fitness=100;p.injury=0;p.suspension=0;p.morale=80;
   startDisciplineSeason(g,p);
   if(p.contractTerms){if(p.contractUntil>=g.year&&p.contractTerms.signedYear<g.year)p.wage=Math.round(p.wage*(1+(p.contractTerms.annualRise||0)/100));p.contractTerms.promiseFrom=g.date;p.contractTerms.promiseStartMinutes=0;p.contractTerms.bonusPaidFixtures=[];delete p.contractTerms.lastPromiseReview;delete p.contractTerms.promiseWarned;}
   if(p.age>=33)for(const key of ['pace','stamina'])p.attributes[key]=clamp(p.attributes[key]-1,1,20);if(p.contractUntil<g.year)p.contractUntil=g.year+1;}
  for(const c of Object.values(g.clubs)){const prize=Math.round(c.reputation*200000/Math.max(1,g.leagues.find(l=>l.id===c.leagueId)?.tier||1));c.cash+=prize;c.budget+=Math.round(prize*.6);}
- if(g.pendingExpansion){g.cups=structuredClone(g.pendingExpansion);delete g.pendingExpansion;}
  g.fixtures=makeSeasonFixtures(g,schedule,random);initializeInternational(g);mergeInternationalCalendar(g,{fresh:true});initializeRegistrations(g);initializePlayerDynamics(g);repairLineup(g);repairBench(g,{eligible:p=>available(p)&&registered(g,p,currentFixture(g)?.leagueId),rank:overall,fill:true});
  const move=history.movements.find(m=>m.clubId===g.clubId);addMessage(g,`Mùa giải ${g.year}/${String(g.year+1).slice(-2)}`,`Bạn kết thúc mùa trước ở vị trí ${rank}. ${move?'CLB chuyển sang '+g.leagues.find(l=>l.id===move.to).name+'. ':''}Ban lãnh đạo đã bổ sung ngân sách. Hợp đồng hết hạn tự gia hạn một năm. Suất lên xuống hạng mô phỏng theo thứ hạng, chưa có play-off quốc nội.`,'season');
 }
@@ -511,6 +516,8 @@ function upgradeCareerSystems(g,db){
  mergeHomegrown(g,db.homegrownIndex);initializePlayerDynamics(g);initializeInternational(g);initializeMatchday(g);
  if(first)repairBench(g,{eligible:p=>available(p)&&registered(g,p,currentFixture(g)?.leagueId),rank:overall,fill:true});
  mergeInternationalCalendar(g);
+ initializeMatchEnvironment(g);initializeFinancials(g);
+ if(g.liveMatch&&!g.liveMatch.environment)g.liveMatch.environment=matchEnvironment(g,fixtureById(g,g.liveMatch.fixtureId));
 }
 function mergeScoutingProfiles(g,db){
  for(const raw of db.players){const p=g.players[raw.id];if(!p)continue;for(const k of ['naturalPositions','otherPositions','preferredFoot','profileSource','footSource','positionsSource','positionBasis','profileUpdatedAt','weight'])if(p[k]===undefined&&raw[k]!==undefined)p[k]=structuredClone(raw[k]);}
@@ -556,7 +563,7 @@ export function validateGame(g){
   const fail=()=>{throw Error('File lưu không hợp lệ hoặc không tương thích với Touchline.');};
   if(!g||![1,2,SCHEMA].includes(g.schema)||typeof g.id!=='string'||!/^[a-zA-Z0-9-]{1,100}$/.test(g.id)||!g.clubs||!g.clubs[g.clubId]||!g.players||!Array.isArray(g.leagues)||g.leagues.length<8||g.leagues.length>60||!Array.isArray(g.fixtures)||!Array.isArray(g.lineup)||g.lineup.length!==11||!FORMATIONS[g.formation]||!Number.isInteger(g.rng)||!Number.isInteger(g.round)||!Number.isInteger(g.year)||g.round<0||g.round>400||!/^\d{4}-\d{2}-\d{2}$/.test(g.date))fail();
   for(const key of ['messages','transfers','history','ledger','editorLog','shortlist'])if(!Array.isArray(g[key]))fail();
-  validateSaveMetadata(g);validateRecruitmentPlan(g);validateDiscipline(g);
+  validateSaveMetadata(g);validateRecruitmentPlan(g);validateDiscipline(g);validateMatchEnvironment(g);validateFinancials(g);
   if(g.phaseTactics!==undefined&&!validPhaseTactics(g.phaseTactics))fail();
   if(g.liveMatch?.phaseTactics!==undefined&&(!Array.isArray(g.liveMatch.phaseTactics)||g.liveMatch.phaseTactics.length!==2||g.liveMatch.phaseTactics.some(t=>t!==null&&!validPhaseTactics(t))))fail();
   const players=Object.values(g.players);if(players.length<88||players.length>50000)fail();

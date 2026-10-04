@@ -61,7 +61,10 @@ test('friendly completion does not pay contract bonuses, review promises or run 
  const g=fresh();for(const p of E.clubPlayers(g,g.clubId))p.contractTerms=terms(g,p,{appearanceBonus:1e6,goalBonus:1e6,promiseStartMinutes:p.seasonMinutes,promiseFrom:g.date});
  const before={clubs:structuredClone(g.clubs),market:structuredClone(g.transferMarket),trades:structuredClone(g.transfers),stats:playerStats(g),ledger:structuredClone(g.ledger)};
  const f=E.arrangeFriendly(g,'e83');let m=E.startFriendly(g,f.id);while(!m.completed)m=E.tickMatch(g,m);E.finishFriendly(g,m);
- assert.deepEqual(g.clubs,before.clubs);assert.deepEqual(g.transferMarket,before.market);assert.deepEqual(g.transfers,before.trades);assert.deepEqual(playerStats(g),before.stats);assert.deepEqual(g.ledger,before.ledger);
+ const gate=f.result.environment.gateReceipts;assert.ok(gate>0);before.clubs[f.home].cash+=gate;
+ assert.deepEqual(g.clubs,before.clubs);assert.deepEqual(g.transferMarket,before.market);assert.deepEqual(g.transfers,before.trades);assert.deepEqual(playerStats(g),before.stats);
+ assert.equal(g.ledger.length,before.ledger.length+1);assert.deepEqual(g.ledger.slice(1),before.ledger);assert.equal(g.ledger[0].type,'matchday');assert.equal(g.ledger[0].fixtureId,f.id);assert.equal(g.ledger[0].income,gate);assert.equal(g.ledger[0].expense,0);
+ const paidCash=g.clubs[g.clubId].cash;assert.throws(()=>E.finishFriendly(g,m));assert.equal(g.clubs[g.clubId].cash,paidCash);assert.equal(g.ledger.filter(e=>e.fixtureId===f.id).length,1);
  assert.ok(E.clubPlayers(g,g.clubId).every(p=>!p.contractTerms.bonusPaidFixtures&&!p.contractTerms.lastPromiseReview));assert.ok(E.validateGame(g));
 });
 
