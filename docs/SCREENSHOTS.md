@@ -35,3 +35,8 @@ Chụp ngày 04/10/2026 từ sự nghiệp kiểm thử riêng, sử dụng mô 
 ![Cài đặt ngôn ngữ và đơn vị](screenshots/04-settings.jpg)
 
 Tải ảnh JPEG gốc trong [thư mục screenshots](screenshots). Bài đăng mẫu tiếng Việt: [COMMUNITY_POST.vi.md](COMMUNITY_POST.vi.md).
+## Vị trí và role tùy chỉnh · bản 1.9
+
+CM–CM–CAM trên cùng sơ đồ gốc 4-3-3; chọn Wing-Back cho hậu vệ cánh ngay trong trận. Bảng chọn cạnh sân hiển thị mô tả nhiệm vụ của pha đang chỉnh.
+
+![Vị trí và role trong trận](screenshots/08-custom-tactics.jpg)

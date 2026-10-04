@@ -8,7 +8,16 @@ Touchline là game quản lý bóng đá độc lập dành cho một người c
 
 **Mục đích giải trí và hình ảnh:** Đây là dự án cá nhân phục vụ giải trí, không có liên kết chính thức với Football Manager, các CLB, giải đấu hay liên đoàn. Ảnh cầu thủ, logo, tên và tài sản của bên thứ ba thuộc các chủ sở hữu tương ứng; việc xuất hiện trong game không cấp quyền sử dụng lại. Tác giả không cấp phép khai thác thương mại các tài sản đó và không chịu trách nhiệm, trong phạm vi pháp luật cho phép, về việc người dùng sử dụng thương mại, phân phối lại hoặc vi phạm bản quyền hình ảnh/quyền hình ảnh. Người sử dụng tự chịu trách nhiệm xin các quyền cần thiết. Giấy phép MIT của mã nguồn dự án không cấp lại giấy phép cho tài sản của bên thứ ba.
 
-Bản **1.8.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+Bản **1.9.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+
+## Mới ở bản 1.9.0
+
+- **Vị trí tùy chỉnh:** mở Chiến thuật → Chỉnh vị trí & role. Kéo áo đến khoảng trống hoặc chọn vị trí trong danh sách, ví dụ chỉnh 4-3-3 từ CDM–CM–CM thành CM–CM–CAM. Giữ nguyên 11 cầu thủ; vị trí chiến thuật không sửa sở trường trong hồ sơ.
+- **Role theo pha:** chọn riêng khi có bóng và không có bóng, với mô tả nhiệm vụ ngay cạnh sân. Có Full-Back, Wing-Back, Inside Full-Back (cách dùng inverted full back), Inside Wing-Back, Playmaking Wing-Back, các tiền vệ kiến thiết, tiền đạo và vai trò phòng ngự. Danh mục được chọn lọc theo các ý tưởng FM26; Touchline dùng hành vi và cách tính riêng, không sao chép toàn bộ match engine hoặc database role của FM.
+- **Tác động trong trận:** vị trí và role ảnh hưởng đánh giá phù hợp, cấu trúc, chuyển pha và các mục tiêu chạy/chuyền/áp sát ở cả 2D lẫn 3D. Đổi người kế thừa nhiệm vụ của vị trí. Chỉnh trong trận không ghi đè kế hoạch CLB.
+- **Giữ thiết lập:** lưu được vị trí/role trong sự nghiệp và trận đang chơi. Tạm tắt hai pha giữ phần tùy chỉnh để bật lại. Đổi sơ đồ gốc hoặc bấm đặt lại sẽ xóa tùy chỉnh của riêng pha đang sửa. Các save cũ tiếp tục mở được; không cần New Game.
+
+[Xem hướng dẫn và nguồn role](docs/tactical-roles.md).
 
 ## Mới ở bản 1.8.0
 

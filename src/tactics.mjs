@@ -1,3 +1,4 @@
+import {defaultPlayerRole,validPlayerRole,playerRoleDefinition} from './playerRoles.mjs';
 // Positions are independent from ability ratings. Unknown detailed positions
 // keep the original broad role; they are never presented as verified facts.
 export const POSITION_DETAIL={GK:'Thủ môn',LB:'Hậu vệ trái',CB:'Trung vệ',RB:'Hậu vệ phải',LWB:'Hậu vệ biên trái',RWB:'Hậu vệ biên phải',DM:'Tiền vệ phòng ngự',CM:'Tiền vệ trung tâm',LM:'Tiền vệ trái',RM:'Tiền vệ phải',AM:'Tiền vệ tấn công',LW:'Tiền đạo trái',RW:'Tiền đạo phải',ST:'Tiền đạo cắm'};
@@ -80,17 +81,54 @@ export function createPhaseTactics(formation='4-3-3'){
 }
 export function validPhaseTactics(value){
  return !!value&&typeof value.enabled==='boolean'&&Object.keys(TACTICAL_PHASES).every(phase=>{
-  const p=value[phase];return !!p&&!!FORMATION_SLOTS[p.formation]&&Array.isArray(p.slots)&&p.slots.length===11&&new Set(p.slots).size===11&&p.slots.every(i=>Number.isInteger(i)&&i>=0&&i<11);
+  const p=value[phase];if(!p||!FORMATION_SLOTS[p.formation]||!Array.isArray(p.slots)||p.slots.length!==11||new Set(p.slots).size!==11||!p.slots.every(i=>Number.isInteger(i)&&i>=0&&i<11))return false;
+  if(p.positions!==undefined&&!validTacticalPositions(p.positions,p.formation))return false;
+  const positions=p.positions||FORMATION_SLOTS[p.formation];
+  return p.roles===undefined||(Array.isArray(p.roles)&&p.roles.length===11&&p.roles.every((role,i)=>validPlayerRole(role,positions[i][0],phase)));
  });
 }
+export function validTacticalPositions(positions,formation='4-3-3'){
+ if(!Array.isArray(positions)||positions.length!==11||!FORMATION_SLOTS[formation])return false;
+ return positions.every((p,i)=>Array.isArray(p)&&p.length===3&&Object.hasOwn(POSITION_DETAIL,p[0])&&Number.isFinite(p[1])&&Number.isFinite(p[2])&&(i===0?p.every((v,j)=>v===FORMATION_SLOTS[formation][0][j]):p[0]!=='GK'&&p[1]>=8&&p[1]<=92&&p[2]>=8&&p[2]<=84)&&positions.slice(0,i).every(q=>Math.hypot(q[1]-p[1],q[2]-p[2])>=5));
+}
+export const hasCustomPhaseTactics=config=>!!config&&Object.keys(TACTICAL_PHASES).some(phase=>config[phase]?.positions!==undefined||config[phase]?.roles!==undefined);
 export function phaseShape(config,phase,fallback='4-3-3'){
  return config?.enabled&&TACTICAL_PHASES[phase]?config[phase]:{formation:fallback,slots:seats()};
 }
 export function phaseLineup(lineup,config,phase,fallback='4-3-3'){
  return phaseShape(config,phase,fallback).slots.map(i=>lineup[i]||null);
 }
+export function phasePositions(config,phase,fallback='4-3-3'){
+ const shape=phaseShape(config,phase,fallback);return shape.positions||FORMATION_SLOTS[shape.formation];
+}
 export function phaseSlot(config,phase,seat,fallback='4-3-3'){
- const shape=phaseShape(config,phase,fallback);return FORMATION_SLOTS[shape.formation][shape.slots.indexOf(seat)];
+ const shape=phaseShape(config,phase,fallback);return phasePositions(config,phase,fallback)[shape.slots.indexOf(seat)];
+}
+export function phasePlayerRole(config,phase,seat,fallback='4-3-3'){
+ const shape=phaseShape(config,phase,fallback),index=shape.slots.indexOf(seat),position=phasePositions(config,phase,fallback)[index]?.[0];
+ return shape.roles?.[index]||defaultPlayerRole(position,phase);
+}
+const positionDepth={CB:73,LB:68,RB:68,LWB:50,RWB:50,DM:55,CM:43,LM:39,RM:39,AM:29,LW:22,RW:22,ST:12};
+// Validation and construction happen on a clone before callers enable or mutate a tactic.
+export function editTacticalPosition(config,phase,index,patch){
+ if(!validPhaseTactics(config)||!TACTICAL_PHASES[phase]||!Number.isInteger(index)||index<0||index>10||!patch||typeof patch!=='object'||Array.isArray(patch)||!Object.keys(patch).length||Object.keys(patch).some(k=>!['position','x','y'].includes(k))||('position' in patch&&typeof patch.position!=='string')||['x','y'].some(k=>k in patch&&!Number.isFinite(patch[k])))throw Error('Vị trí chiến thuật không hợp lệ.');
+ const next=structuredClone(config);next.enabled=true;const shape=next[phase],positions=(shape.positions||FORMATION_SLOTS[shape.formation]).map(p=>[...p]),old=positions[index];
+ const position=patch.position??old[0];if(!Object.hasOwn(POSITION_DETAIL,position))throw Error('Vị trí chiến thuật không hợp lệ.');
+ let x=old[1],y=old[2];if(position!==old[0]&&index!==0){y=positionDepth[position];if(['LB','LWB','LM','LW'].includes(position))x=16;else if(['RB','RWB','RM','RW'].includes(position))x=84;else x=Math.max(28,Math.min(72,x));}
+ positions[index]=[position,patch.x??x,patch.y??y];
+ if(!validTacticalPositions(positions,shape.formation))throw Error('Giữ thủ môn ở vị trí cố định và các cầu thủ cách nhau ít nhất 5 điểm trên sân.');
+ shape.positions=positions;if(shape.roles&&!validPlayerRole(shape.roles[index],position,phase))shape.roles[index]=defaultPlayerRole(position,phase);
+ return next;
+}
+export function editTacticalRole(config,phase,index,roleId){
+ if(!validPhaseTactics(config)||!TACTICAL_PHASES[phase]||!Number.isInteger(index)||index<0||index>10)throw Error('Vai trò chiến thuật không hợp lệ.');
+ const next=structuredClone(config);next.enabled=true;const shape=next[phase],positions=shape.positions||FORMATION_SLOTS[shape.formation];
+ if(!validPlayerRole(roleId,positions[index][0],phase))throw Error('Vai trò không phù hợp với vị trí hoặc pha thi đấu.');
+ shape.roles||=positions.map(([position])=>defaultPlayerRole(position,phase));shape.roles[index]=roleId;return next;
+}
+export function resetPhasePositions(config,phase){
+ if(!validPhaseTactics(config)||!TACTICAL_PHASES[phase])throw Error('Pha thi đấu không hợp lệ.');
+ const next=structuredClone(config);delete next[phase].positions;delete next[phase].roles;return next;
 }
 export function remapPhaseFormation(config,phase,formation,lineup,players){
  if(!validPhaseTactics(config)||!TACTICAL_PHASES[phase]||!FORMATION_SLOTS[formation])throw Error('Sơ đồ theo pha không hợp lệ.');
@@ -99,7 +137,7 @@ export function remapPhaseFormation(config,phase,formation,lineup,players){
   let index=0;for(let n=mask;n;n&=n-1)index++;
   const [role,x,y]=FORMATION_SLOTS[formation][index];
   for(let seat=0;seat<11;seat++)if(!(mask&(1<<seat))){
-   const old=FORMATION_SLOTS[previous.formation][previous.slots.indexOf(seat)],next=mask|(1<<seat);
+   const old=(previous.positions||FORMATION_SLOTS[previous.formation])[previous.slots.indexOf(seat)],next=mask|(1<<seat);
    const score=scores[mask]+roleFit(players[lineup[seat]],role)*100-Math.hypot(x-old[1],y-old[2])*.002;
    if(score>scores[next]){scores[next]=score;chosen[next]=seat;}
   }
@@ -119,6 +157,9 @@ export function phaseTransitionEffort(config,seat){
 // Deliberately small game modifiers. Role suitability remains the main effect.
 export function phaseShapeEffects(config,phase){
  if(!config?.enabled)return {attack:1,allowed:1};
- const shape=phaseShape(config,phase),depth=mean(FORMATION_SLOTS[shape.formation].slice(1).map(s=>s[2]));
- return {attack:Math.max(.94,Math.min(1.06,1+(50-depth)*.003)),allowed:Math.max(.94,Math.min(1.06,1+(50-depth)*.003))};
+ const shape=phaseShape(config,phase),depth=mean(phasePositions(config,phase).slice(1).map(s=>s[2])),behaviors=(shape.roles||[]).slice(1).map(id=>playerRoleDefinition(id)?.behavior);
+ const count=key=>behaviors.filter(b=>key.includes(b)).length;
+ const attacking=count(['wing-back','advanced-wing-back','box-to-box','inside-forward','wide-forward'])*.004;
+ const holding=count(['holding','inside-full-back','covering'])*.003,outlets=count(['outlet'])*.008;
+ return {attack:Math.max(.92,Math.min(1.08,1+(50-depth)*.003+attacking-holding)),allowed:Math.max(.92,Math.min(1.08,1+(50-depth)*.003+outlets-holding))};
 }
