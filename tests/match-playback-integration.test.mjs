@@ -11,6 +11,25 @@ const initial=E.createMatch(g,E.currentFixture(g));
 const fresh=(rng=42,minute=0)=>({...structuredClone(initial),rng,minute});
 const attacks=events=>events.filter(e=>e.type==='goal'||e.type==='shot');
 
+// Fixed synthetic squads isolate simulation/RNG compatibility from twice-yearly
+// roster releases and changes to real-world player assessments.
+function syntheticPlaybackFixture(seed){
+ const clubs={home:{id:'home',shortName:'Home'},away:{id:'away',shortName:'Away'}},players={},lineups=[[],[]],bench=[[],[]];
+ const roles=['GK','RB','CB','CB','LB','DM','CM','CM','RW','ST','LW'];
+ for(const side of [0,1])for(let index=0;index<22;index++){
+  const seat=index%11,id=`visual-${side}-${index}`,position=seat===0?'GK':seat<5?'DF':seat<8?'MF':'FW';
+  players[id]={id,name:id,number:index+1,clubId:side===0?'home':'away',position,naturalPositions:[roles[seat]],otherPositions:[],preferredFoot:'both',age:25,potential:90,fitness:100,morale:80,injury:0,suspension:0,
+   attributes:Object.fromEntries(Object.keys(E.ATTRS).map(key=>[key,side===0?14:16]))};
+  (index<11?lineups:bench)[side].push(id);
+ }
+ const fixture={id:'visual-fixture',leagueId:'friendly',home:'home',away:'away',round:0,result:null};
+ const game={players,clubs,clubId:'away',date:'2026-08-15',rng:1234,fixtures:[fixture],leagues:[],registrations:{}};
+ const match={...fresh(seed),fixtureId:fixture.id,home:fixture.home,away:fixture.away,neutral:true,lineups,bench,matchdayRules:{maxBench:11,maxSubs:5,subWindows:3,extraTimeSub:0},
+  minutes:Object.fromEntries(lineups.flat().map(id=>[id,0])),workload:Object.fromEntries(lineups.flat().map(id=>[id,0]))};
+ return {game,match};
+}
+
+
 test('shot metadata reconciles exactly with shots, saves, goals and credited assists',()=>{
  const outcomes=new Set();
  for(const seed of [42,91,3657]){
@@ -46,17 +65,21 @@ test('shot metadata reconciles exactly with shots, saves, goals and credited ass
  assert.deepEqual([...outcomes].sort(),['goal','saved','wide']);
 });
 
-test('adding playback metadata preserves the seeded pre-playback result and RNG',()=>{
- // Baselines captured from the previous engine with no assistId/outcome fields.
- // They guard against using simulation RNG to choose visual passes or shot arcs.
+test('playback preserves fixed synthetic full-match outcomes and does not draw additional RNG',()=>{
+ // Captured for the synthetic squads above; assessment/database changes cannot
+ // change these inputs. Direct ticks and rendered playback must match exactly.
  const baselines=[
-  {seed:42,score:[0,2],shots:[5,16],onTarget:[1,7],rng:273678926},
-  {seed:91,score:[1,2],shots:[10,22],onTarget:[3,6],rng:4293959431},
-  {seed:3657,score:[1,5],shots:[10,20],onTarget:[4,14],rng:1254287181},
+  {seed:42,score:[2,2],shots:[5,13],onTarget:[3,6],rng:2451401669},
+  {seed:91,score:[2,1],shots:[11,19],onTarget:[3,6],rng:262209285},
+  {seed:3657,score:[1,3],shots:[11,20],onTarget:[2,5],rng:1300111147},
  ];
- for(const expected of baselines){
-  let m=fresh(expected.seed);while(!m.completed)m=E.tickMatch(g,m);
-  for(const key of ['score','shots','onTarget','rng'])assert.deepEqual(m[key],expected[key],`${expected.seed}: ${key}`);
+ const actual=baselines.map(({seed})=>{const {game,match}=syntheticPlaybackFixture(seed);let m=match;while(!m.completed)m=E.tickMatch(game,m);return {seed,score:m.score,shots:m.shots,onTarget:m.onTarget,rng:m.rng};});
+ assert.deepEqual(actual,baselines);
+ for(const {seed}of baselines){
+  const {game,match}=syntheticPlaybackFixture(seed),careerRng=game.rng;let expected=match;while(!expected.completed)expected=E.tickMatch(game,expected);
+  const playback=createMatchPlayback(game,structuredClone(match));let advances=0;
+  while(!playback.current().completed&&advances++<100)playback.advance(game,1e6);
+  assert.ok(advances<=90);assert.deepEqual(playback.current(),expected);assert.equal(game.rng,careerRng);
  }
 });
 
@@ -201,10 +224,14 @@ test('scene score and revealed events follow both shots in order, including two 
 });
 
 test('a scorer substituted in the same minute takes his shot and then leaves the rendered field',()=>{
- const before=fresh(91,61);before.minutes.e388601=61;before.workload.e388601=61;
- const after=E.tickMatch(g,before),scene=buildMatchScene(g,before,after);
- const goal=after.events[before.events.length],subIndex=before.events.length+1,sub=after.events[subIndex];
- assert.equal(goal.type,'goal');assert.equal(sub.type,'sub');assert.ok(after.off.includes(goal.playerId));
+ // Request a substitution explicitly after the recorded goal rather than
+ // relying on a particular real player's stamina or the AI's rotation choice.
+ const before=fresh(91,60),after=E.tickMatch(g,before),goal=after.events.slice(before.events.length).find(e=>e.type==='goal');
+ assert.ok(goal,'seed supplies a real goal event to render');assert.ok(after.lineups[goal.side].includes(goal.playerId));
+ const incoming=after.bench[goal.side].find(id=>E.available(g.players[id]));assert.ok(incoming);
+ E.substitute(g,after,goal.side,goal.playerId,incoming);
+ const subIndex=after.events.length-1,sub=after.events[subIndex],scene=buildMatchScene(g,before,after);
+ assert.equal(sub.type,'sub');assert.equal(sub.minute,goal.minute);assert.ok(after.off.includes(goal.playerId));
  const shot=scene.frames.find(f=>f.action.type==='shot'&&f.action.playerId===goal.playerId);
  assert.ok(shot?.players.some(p=>p.id===goal.playerId),'outgoing scorer must still perform his recorded shot');
  const end=sampleMatchScene(scene,scene.duration);

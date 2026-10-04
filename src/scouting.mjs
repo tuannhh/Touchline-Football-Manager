@@ -1,3 +1,4 @@
+import {playerAbility as ability} from './playerAbility.mjs';
 import {assignedStaff,STAFF_ROLES,workload} from './staff.mjs';
 import {makeMessage} from './mail.mjs';
 import {POSITION_DETAIL,phasePositions} from './tactics.mjs';
@@ -14,8 +15,6 @@ const date=v=>typeof v==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(v)&&Number.isFinit
 const hash=s=>{let h=2166136261;for(const c of String(s)){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}return h>>>0;};
 const internalPosition=p=>({CAM:'AM',CDM:'DM'})[p]||p;
 const money=n=>`${Number(n).toLocaleString('vi-VN')} €`;
-const KEYS={GK:['reflexes','handling','positioning','composure','decisions'],DF:['tackling','positioning','heading','strength','pace','decisions'],MF:['passing','vision','teamwork','dribbling','stamina','decisions'],FW:['finishing','dribbling','pace','composure','positioning','heading']};
-const ability=p=>Math.round((KEYS[p.position]||['passing']).reduce((s,k)=>s+(p.attributes?.[k]||10),0)/(KEYS[p.position]?.length||1)*5);
 const safeNumber=(n,max)=>Number.isFinite(n)&&n>=0&&n<=max;
 
 /** This module owns advice only: it never spends money, changes staff tasks or buys players. */

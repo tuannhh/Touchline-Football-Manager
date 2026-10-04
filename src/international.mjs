@@ -1,3 +1,4 @@
+import {playerAbility} from './playerAbility.mjs';
 import {makeMessage} from './mail.mjs';
 import {playerReadiness,injuryRiskMultiplier,recoverPlayerPhysical,recordPhysicalMatch} from './playerPhysical.mjs';
 import {staffEffects} from './staff.mjs';
@@ -27,8 +28,7 @@ export function nationalTeamId(p){
 }
 export function nationalTeamName(id){return ({ENG:'Anh',SCO:'Scotland',WAL:'Wales',NIR:'Bắc Ireland',XK:'Kosovo'})[id]||vi.of(id)||id;}
 const confederation=id=>EU.has(id)?'UEFA':AFC.has(id)?'AFC':NAM.has(id)?'CONCACAF':SAM.has(id)?'CONMEBOL':OFC.has(id)?'OFC':'CAF';
-const keys={GK:['reflexes','handling','positioning','composure'],DF:['tackling','positioning','heading','strength'],MF:['passing','vision','teamwork','dribbling'],FW:['finishing','dribbling','pace','composure']};
-export const internationalAbility=p=>Math.round((keys[p.position]||keys.MF).reduce((s,k)=>s+(p.attributes?.[k]||10),0)/4*5);
+export const internationalAbility=playerAbility;
 const byAbility=(a,b)=>internationalAbility(b)-internationalAbility(a)||a.id.localeCompare(b.id);
 const pool=(g,id)=>Object.values(g.players).filter(p=>nationalTeamId(p)===id).sort(byAbility);
 export function nationalRoster(g,id){const s=g.international;if(!s)return [];const active=s.callups.filter(c=>c.teamId===id&&['announced','pending','released'].includes(c.status)).map(c=>g.players[c.playerId]).filter(Boolean);return active.length?active:selectSquad(pool(g,id));}

@@ -20,7 +20,7 @@ export default function PlayerReality({p}){
   {availability?.expectedReturnText&&<p className="fine-print">Dự kiến trở lại theo nguồn: <b>{availability.expectedReturnText}</b></p>}
   {performance&&<><p className="reality-season">{performance.competitionName} · {performance.season}</p><dl className="reality-stats">{[['Điểm thi đấu',Number.isFinite(performance.rating)?number(performance.rating,2):'—'],['Trận',shown(performance.appearances)],['Phút',shown(performance.minutes)],['Bàn thắng',shown(performance.goals)],['Kiến tạo',shown(performance.assists)],['Thẻ vàng',shown(performance.yellowCards)],['Thẻ đỏ',shown(performance.redCards)]].map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></>}
   <p className="fine-print">Thẻ trong thống kê mùa giải không đồng nghĩa đang chịu án treo giò. Thiếu thời hạn hoặc phạm vi giải đấu thì game không tự cấm thi đấu.</p>
-  {p.realWorld&&<p className="fine-print">{observation.calibration?'Kỹ năng mô phỏng được hiệu chỉnh nhẹ theo điểm thi đấu và số phút; không phải chỉ số chính thức.':'Chưa đủ mẫu thi đấu để hiệu chỉnh kỹ năng. Chỉ số trong game vẫn là ước lượng.'}</p>}
+  {p.realWorld&&<p className="fine-print">{p.abilityAssessment?'Năng lực đã được ước lượng theo căn cứ trong phần đánh giá cầu thủ. Các thống kê dưới đây là quan sát ngoài đời tại mốc dữ liệu, độc lập với kết quả trong sự nghiệp.':observation.calibration?'Kỹ năng mô phỏng được hiệu chỉnh nhẹ theo điểm thi đấu và số phút; không phải chỉ số chính thức.':'Chưa đủ mẫu thi đấu để hiệu chỉnh kỹ năng. Chỉ số trong game vẫn là ước lượng.'}</p>}
   <a className="reality-source" href={observation.sourceUrl} target="_blank" rel="noreferrer">Xem nguồn FotMob ↗</a>
  </section>;
 }

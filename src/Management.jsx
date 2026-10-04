@@ -1,3 +1,4 @@
+import AssessmentSources from './AssessmentSources.jsx';
 import FinancialDashboard from './FinancialDashboard.jsx';
 import {ReadinessBadge} from './PhysicalReadiness.jsx';
 import {playerReadiness,matchCondition} from './playerPhysical.mjs';
@@ -42,7 +43,7 @@ export function Finances({g,nav}){
 
 export function DataView({g,db,onExport,onSave,onHome,onImport}){
  const counts=new Map(db.clubs.map(c=>[c.id,c.leagueId]));const conflicts=db.meta.conflicts||[];
- return <><PageTitle eyebrow="HỆ THỐNG" title="Sự nghiệp & dữ liệu" description="Lưu trên máy này. Không cần tài khoản hoặc kết nối mạng để chơi."/>
+ return <><AssessmentSources/><PageTitle eyebrow="HỆ THỐNG" title="Sự nghiệp & dữ liệu" description="Lưu trên máy này. Không cần tài khoản hoặc kết nối mạng để chơi."/>
  <div className="save-actions"><button className="primary" onClick={onSave}><FloppyDisk size={20}/>Lưu ngay</button><button className="secondary" onClick={onExport}><DownloadSimple size={20}/>Xuất file sự nghiệp</button><button className="secondary" onClick={onImport}><FolderOpen size={20}/>Nhập file lưu</button><button className="secondary" onClick={onHome}>Về màn hình chọn đội</button></div>
  <Panel title="Dữ liệu gắn với sự nghiệp này"><div className="prose"><p><strong>{g.dbRelease?.label||'Bản dữ liệu gốc khi tạo sự nghiệp'}</strong> · Mùa {g.dbRelease?.season||g.dbMeta?.season||g.year}{g.dbRelease?.asOf?' · Mốc '+g.dbRelease.asOf:''}</p><p>Các đợt cập nhật đội hình thực tế chỉ xuất hiện trong New Game. Đội hình, chuyển nhượng, chỉ số và lịch sử của bản lưu này tiếp tục theo thế giới bạn đang chơi. Dùng Saved Games để lưu thêm mốc và tải lại.</p></div></Panel>
  <Panel title="Nguồn database" subtitle={`Cập nhật ${new Date(db.meta.expandedAt||db.meta.importedAt).toLocaleString(getLocale())} · Mùa ${db.meta.season}`}><div className="data-facts"><div><strong>{number(db.clubs.length)}</strong><span>CLB có nguồn</span></div><div><strong>{number(db.players.length)}</strong><span>Hồ sơ cầu thủ</span></div><div><strong>{number(db.meta.portraitsDownloaded)}</strong><span>Ảnh thật đã lưu</span></div><div><strong>{number(db.players.filter(p=>p.nationality||p.countryCode).length)}</strong><span>Có quốc tịch từ nguồn</span></div></div>

@@ -1,4 +1,5 @@
 import {makeMessage} from './mail.mjs';
+import {playerAbility as ability} from './playerAbility.mjs';
 import {staffEffects} from './staff.mjs';
 import {assessTransferFinancials,financeReport,recordTransferFinancials} from './financialSustainability.mjs';
 
@@ -10,8 +11,6 @@ const STAGES=new Set([...ACTIVE,'completed','rejected','withdrawn','expired']);
 const MONEY_KEYS=['wage','signingBonus','agentFee','appearanceBonus','goalBonus','releaseClause'];
 const DATE=/^\d{4}-\d{2}-\d{2}$/;
 const validDate=v=>typeof v==='string'&&DATE.test(v)&&Number.isFinite(Date.parse(v+'T12:00:00Z'))&&new Date(v+'T12:00:00Z').toISOString().slice(0,10)===v;
-const KEYS={GK:['reflexes','handling','positioning','composure','decisions'],DF:['tackling','positioning','heading','strength','pace','decisions'],MF:['passing','vision','teamwork','dribbling','stamina','decisions'],FW:['finishing','dribbling','pace','composure','positioning','heading']};
-const ability=p=>Math.round((KEYS[p.position]||['passing']).reduce((s,k)=>s+(p.attributes?.[k]||10),0)/(KEYS[p.position]?.length||1)*5);
 const clamp=(n,a,b)=>Math.min(b,Math.max(a,n));
 const rounded=(n,step=100)=>Math.round(n/step)*step;
 const money=n=>Number(n).toLocaleString('vi-VN')+' €';
@@ -35,7 +34,9 @@ export function transferAssessment(g,p,buyerId,roster){
  const quality=ability(p),years=Math.max(0,p.contractUntil-g.year),positionPlayers=ps.filter(x=>x.position===p.position);
  const replacements=positionPlayers.filter(x=>x.id!==p.id&&x.injury===0&&ability(x)>=quality-8&&(!p.naturalPositions?.length||!x.naturalPositions?.length||p.naturalPositions.some(pos=>[...x.naturalPositions,...(x.otherPositions||[])].includes(pos)))).length;
  const average=ps.reduce((s,x)=>s+ability(x),0)/Math.max(1,ps.length);
- const important=p.contractTerms?.squadRole==='star'||quality>=88||quality>=Math.max(80,average+6);
+ const development=g.playerDevelopment?.players?.[p.id];
+ const influence=development?(development.clubId===p.clubId?development.influence:null):p.abilityAssessment?.influence;
+ const important=p.contractTerms?.squadRole==='star'||influence>=85||quality>=88||quality>=Math.max(80,average+6);
  const cornerstone=important&&quality>=88&&seller.reputation>=84&&years>=3;
  const wantsMove=p.listed||p.dynamics?.wantsToLeave||p.morale<45;
  const competitor=seller.leagueId===buyer.leagueId&&seller.reputation>=80&&buyer.reputation>=80&&Math.abs(seller.reputation-buyer.reputation)<=12;
@@ -53,7 +54,7 @@ export function transferAssessment(g,p,buyerId,roster){
  }
  if(buyer.reputation<quality-22||(!wantsMove&&important&&repGap>10))playerRefusal='Cầu thủ từ chối vì danh tiếng và mục tiêu cạnh tranh của CLB chưa phù hợp.';
  const injuryWeeks=Math.max(0,Number(p.injury)||0);
- return {modelVersion:2,quality,contractYears:years,important,cornerstone,replacements,competitor,release,wantsMove:!!wantsMove,expectedRole,buyerNeedsPlayer,buyerPositionQuality:Math.round(buyerAverage),injuryWeeks,sellerRefusal,playerRefusal,difficulty:sellerRefusal||playerRefusal?'unavailable':important||competitor||years>=4?'difficult':wantsMove||years<=1?'open':'normal'};
+ return {modelVersion:2,quality,influence:Number.isFinite(influence)?influence:null,contractYears:years,important,cornerstone,replacements,competitor,release,wantsMove:!!wantsMove,expectedRole,buyerNeedsPlayer,buyerPositionQuality:Math.round(buyerAverage),injuryWeeks,sellerRefusal,playerRefusal,difficulty:sellerRefusal||playerRefusal?'unavailable':important||competitor||years>=4?'difficult':wantsMove||years<=1?'open':'normal'};
 }
 
 export function initializeTransferMarket(g){
@@ -212,6 +213,7 @@ function move(g,p,buyerId,fee,terms,sellOnPercent,isAI,hooks,dealId){
  if(sellOnPayment){oldOwner.cash+=sellOnPayment;oldOwner.budget+=sellOnPayment;}
  jersey(g,p,buyerId);p.clubId=buyerId;p.wage=terms.wage;p.contractUntil=g.year+terms.years;p.listed=false;p.morale=Math.max(p.morale,85);
  p.contractTerms={...terms,sellOnClubId:from,sellOnPercent,signedAt:g.date,signedYear:g.year};
+ p.contractEndDate=`${p.contractUntil}-06-30`;
  const record={eventId:`transfer-${++g.transferMarket.sequence}`,id:p.id,playerId:p.id,name:p.name,from,to:buyerId,fee,date:g.date,isAI,terms:{...p.contractTerms},upfrontCost:total,sellOnPayment,...(sellOnPayment?{sellOnClubId:oldOwner.id}:{}),...(dealId?{dealId}:{})};
  recordTransferFinancials(g,record);
  g.transfers.unshift(record);g.transfers=g.transfers.slice(0,5000);
@@ -258,6 +260,38 @@ export function sellToAI(g,playerId,hooks={}){
  initializeTransferMarket(g);const record=move(g,p,buyer.id,fee,terms,0,false,hooks);hooks.repairLineup?.(g);
  mail(g,`${p.name} gia nhập ${buyer.name}`,[`CLB đồng ý bán ${p.name} cho ${buyer.name} với phí ${money(fee)}.`,record.sellOnPayment?`Đã trả ${money(record.sellOnPayment)} cho ${g.clubs[record.sellOnClubId].name} theo điều khoản bán tiếp trước đó.`:'Không có khoản chia sẻ phí cho CLB trước.',`Số tiền thực nhận ${money(fee-record.sellOnPayment)} được cộng vào số dư và ngân sách chuyển nhượng. Đội hình đã được rà soát sau giao dịch.`],p.id);
  return {ok:true,message:'Đã bán cầu thủ.',transfer:record};
+}
+
+
+/** Live simulated interest, not a claim about real-world scouting or offers.
+ * Uses the same squad/quality/ambition checks as negotiation and sale logic.
+ * A monitoring club may lack funds; active interest must fit current finances.
+ */
+export function simulatedClubInterests(g,p,{limit=5}={}){
+ if(!p||!g.clubs[p.clubId])return [];
+ const roster=new Map(Object.keys(g.clubs).map(id=>[id,[]]));
+ for(const player of Object.values(g.players))roster.get(player.clubId)?.push(player);
+ const candidates=[];
+ for(const buyer of Object.values(g.clubs)){
+  if(buyer.id===p.clubId)continue;
+  const assessment=transferAssessment(g,p,buyer.id,roster);
+  if(assessment.playerRefusal||!assessment.buyerNeedsPlayer||assessment.quality<buyer.reputation-22)continue;
+  const fee=clubTerms(g,p,buyer.id,assessment).fee,terms=playerTerms(g,p,buyer.id,fee,assessment);
+  const bp=roster.get(buyer.id),payroll=bp.reduce((sum,x)=>sum+x.wage,0),funds=Math.max(0,Math.min(buyer.budget,buyer.cash));
+  const cost=fee+terms.signingBonus+terms.agentFee,affordable=cost<=funds&&payroll+terms.wage<=buyer.wageBudget;
+  if(!affordable&&funds<cost*.2)continue;
+  const upgrade=assessment.quality-assessment.buyerPositionQuality;
+  const shortage=bp.filter(x=>x.position===p.position).length<desired[p.position];
+  const score=clamp(42+upgrade*1.4+(shortage?14:0)+(p.listed?8:0)+(p.age<24&&p.potential>=assessment.quality+5?6:0)+(affordable?14:-12)-(assessment.sellerRefusal?14:0)-(p.injury>=8?18:0),0,100);
+  if(score<35)continue;
+  const reasons=[shortage?'position_shortage':'quality_upgrade'];
+  if(p.age<24&&p.potential>=assessment.quality+5)reasons.push('development_potential');
+  reasons.push(affordable?'within_budget':'budget_watch');
+  if(assessment.sellerRefusal)reasons.push('seller_reluctant');
+  if(p.injury>0)reasons.push('medical_watch');
+  candidates.push({clubId:buyer.id,clubName:buyer.name,score:Math.round(score),level:affordable&&!assessment.sellerRefusal&&p.injury<8?'interested':'monitoring',basis:'simulation',asOf:g.date,affordable,reasons});
+ }
+ return candidates.sort((a,b)=>b.score-a.score||a.clubId.localeCompare(b.clubId)).slice(0,clamp(Math.floor(limit),0,20));
 }
 
 export function runAITransfers(g,hooks={}){

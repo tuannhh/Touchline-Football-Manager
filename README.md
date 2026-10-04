@@ -8,7 +8,17 @@ Touchline là game quản lý bóng đá độc lập dành cho một người c
 
 **Mục đích giải trí và hình ảnh:** Đây là dự án cá nhân phục vụ giải trí, không có liên kết chính thức với Football Manager, các CLB, giải đấu hay liên đoàn. Ảnh cầu thủ, logo, tên và tài sản của bên thứ ba thuộc các chủ sở hữu tương ứng; việc xuất hiện trong game không cấp quyền sử dụng lại. Tác giả không cấp phép khai thác thương mại các tài sản đó và không chịu trách nhiệm, trong phạm vi pháp luật cho phép, về việc người dùng sử dụng thương mại, phân phối lại hoặc vi phạm bản quyền hình ảnh/quyền hình ảnh. Người sử dụng tự chịu trách nhiệm xin các quyền cần thiết. Giấy phép MIT của mã nguồn dự án không cấp lại giấy phép cho tài sản của bên thứ ba.
 
-Bản **1.13.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+Bản **1.14.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+
+## Mới ở bản 1.14.0
+
+- **Đánh giá cầu thủ có căn cứ:** thay danh sách tên ngôi sao và biên độ ngẫu nhiên lớn bằng mô hình theo vị trí sở trường, định giá có nguồn, thành tích nhiều mùa và 32 mốc đối chiếu từ PFA/UEFA/CLB. Khởi điểm của bản dữ liệu hiện tại: Saliba 89, Mosquera 80, Yamal 94, Salah 88. Đây là điểm ước tính của Touchline, không phải chỉ số chính thức hay dữ liệu FM.
+- **Tách năng lực, tiềm năng và ảnh hưởng:** hồ sơ hiển thị căn cứ, ngày nguồn, độ tin cậy, tầm ảnh hưởng trong đội và lịch sử biến động. Tiền đạo cánh được đánh giá theo kỹ năng chạy cánh; tuổi cao không tự động đồng nghĩa năng lực thấp.
+- **Diễn biến trong sự nghiệp:** đánh giá lại mỗi 28 ngày trong game theo phong độ, thời lượng thi đấu, tuổi, chấn thương, hợp đồng và vai trò. Giá trị tiến dần về mức hợp lý, biến động tối đa 8% mỗi kỳ; năng lực phát triển chậm và có giới hạn. CLB AI cân nhắc chất lượng, nhu cầu, ngân sách và mức độ quan trọng của cầu thủ khi quan tâm/đàm phán; phần này được ghi rõ là mô phỏng.
+- **Tải nguồn mới cho New Game:** ở màn hình bắt đầu hoặc Lưu & dữ liệu, chọn Tải dữ liệu đánh giá mới. Game thu thập dữ liệu công khai trong nền, giữ ngày quan sát từng hồ sơ và báo phạm vi bao phủ. Mỗi lượt đối chiếu tối đa 100 hồ sơ chi tiết cũ hơn 24 giờ cùng các đội có nguồn. Mất kết nối hoàn toàn sẽ giữ bộ dữ liệu đã cài.
+- **Save cũ giữ nguyên:** bộ đánh giá ngoài đời mới chỉ áp dụng khi tạo New Game. Không tự thay chỉ số, giá trị, đội bóng hoặc chuyển nhượng khi tải save cũ. Những thay đổi sau đó theo lịch của sự nghiệp là mô phỏng. Tải nguồn đánh giá không phát hành đội hình mới và không thay lịch cập nhật đội hình ngày 03/02, 05/09.
+
+[Phương pháp, nguồn và cách sử dụng](docs/player-assessments.md).
 
 ## Mới ở bản 1.13.0
 

@@ -54,7 +54,19 @@ export function applyPlayerRealitySnapshot(database, snapshot) {
   return {...database,meta:{...database.meta,playerReality:{version:1,asOf:snapshot.asOf,importedAt:snapshot.importedAt,coverage:snapshot.coverage}},
     players:database.players.map(player => {
       const observation = snapshot.players[player.id];
-      return observation?.playerId === player.id ? {...player,realWorld:structuredClone(observation)} : player;
+      if(observation?.playerId!==player.id)return player;
+      const result={...player,realWorld:structuredClone(observation)},facts=observation.profileFacts;
+      const roles=new Set(['GK','CB','LB','RB','LWB','RWB','DM','CM','AM','LM','RM','LW','RW','ST']);
+      if(facts&&typeof facts.sourceUrl==='string'&&facts.sourceUrl.startsWith('https://')&&dateOnly(facts.observedAt)){
+        if(!player.naturalPositions?.length&&Array.isArray(facts.naturalPositions)&&facts.naturalPositions.length>0&&facts.naturalPositions.length<=10&&facts.naturalPositions.every(r=>roles.has(r))){
+          result.naturalPositions=[...new Set(facts.naturalPositions)];
+          result.otherPositions=Array.isArray(facts.otherPositions)?[...new Set(facts.otherPositions.filter(r=>roles.has(r)&&!result.naturalPositions.includes(r)))].slice(0,10):[];
+          result.positionsSource=facts.sourceUrl;result.positionBasis='FotMob verified player profile';
+        }
+        if(!player.preferredFoot&&['left','right','both'].includes(facts.preferredFoot)){result.preferredFoot=facts.preferredFoot;result.footSource=facts.sourceUrl;}
+        result.profileUpdatedAt=facts.observedAt;
+      }
+      return result;
     })};
 }
 
@@ -68,7 +80,7 @@ export function applyPlayerReality(player, raw = player, gameDate = null) {
   const contract = dateOnly(observation.contractUntil);
   if (contract && (!gameDate || contract >= gameDate)) {result.contractUntil = Number(contract.slice(0,4));result.contractEndDate = contract;}
   const calibration = observation.calibration;
-  if (calibration?.basis === 'performance_estimate' && Number.isFinite(calibration.overallDelta) && result.attributes) {
+  if (!result.abilityModel && calibration?.basis === 'performance_estimate' && Number.isFinite(calibration.overallDelta) && result.attributes) {
     result.attributes = {...result.attributes};
     const delta = clamp(calibration.overallDelta, -3, 3) / 5;
     // Spread the rounded total across role attributes deterministically so a

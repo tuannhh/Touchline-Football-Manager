@@ -1,3 +1,4 @@
+import {createAssessmentRefresh} from './src/assessmentRefresh.mjs';
 import http from 'node:http';
 import { readFile, readdir, stat, mkdir } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -9,6 +10,7 @@ import {saveSummary,normalizeSlotName,validateSaveMetadata} from './src/saveSlot
 import {saveStorageBytes,readSaveSnapshot,writeSaveSnapshot,deleteSaveSnapshot} from './src/saveStorage.mjs';
 
 const root=path.dirname(fileURLToPath(import.meta.url));
+const assessmentRefresh=createAssessmentRefresh({root});
 const saves=process.env.TOUCHLINE_SAVE_DIR||path.join(root,'saves');
 await mkdir(saves,{recursive:true});
 const port=Number(process.env.PORT||4179);
@@ -28,7 +30,10 @@ const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url,'http://127.0.0.1');
   if(req.headers.host&&!['127.0.0.1','localhost','[::1]'].some(h=>req.headers.host===`${h}:${port}`||req.headers.host===h))return json(res,403,{error:'Local access only'});
   if(req.method!=='GET'&&req.headers.origin&&!new Set(['http://127.0.0.1:'+port,'http://localhost:'+port,'http://127.0.0.1:5179','http://localhost:5179']).has(req.headers.origin))return json(res,403,{error:'Origin is not allowed'});
-  if(url.pathname==='/api/health')return json(res,200,{ok:true,name:'Touchline',version:3,appVersion:'1.13.0'});
+  if(url.pathname==='/api/health')return json(res,200,{ok:true,name:'Touchline',version:3,appVersion:'1.14.0'});
+  if(url.pathname==='/api/player-assessments/refresh'&&req.method==='GET')return json(res,200,assessmentRefresh.status());
+  if(url.pathname==='/api/player-assessments/refresh'&&req.method==='POST')return json(res,202,assessmentRefresh.start());
+  if(url.pathname==='/data/player-reality.json'&&req.method==='GET')return json(res,200,JSON.parse(await readFile(path.join(root,'public/data/player-reality.json'),'utf8')));
   if(url.pathname==='/api/roster-releases'&&req.method==='GET')return json(res,200,await listRosterReleases({rootDir:root}));
   const roster=url.pathname.match(/^\/api\/roster-releases\/([a-zA-Z0-9-]{1,100})$/);
   if(roster&&req.method==='GET')return json(res,200,await loadRosterRelease(roster[1],{rootDir:root}));
@@ -62,4 +67,4 @@ const server=http.createServer(async(req,res)=>{
  }catch(error){json(res,error.status||400,{error:error.message});}
 });
 server.listen(port,'127.0.0.1',()=>console.log(`Touchline is running at http://127.0.0.1:${port}\nSaves: ${saves}`));
-for(const signal of ['SIGINT','SIGTERM'])process.on(signal,()=>{server.close(async()=>{await writeQueue.catch(()=>{});process.exit(0);});server.closeIdleConnections();});
+for(const signal of ['SIGINT','SIGTERM'])process.on(signal,()=>{assessmentRefresh.stop();server.close(async()=>{await writeQueue.catch(()=>{});process.exit(0);});server.closeIdleConnections();});
