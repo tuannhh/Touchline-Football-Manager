@@ -17,7 +17,7 @@ spec.loader.exec_module(official)
 ROOT = official.ROOT
 AS_OF = '2026-10-03'
 PL = 'https://www.premierleague.com/en/news/4706139/see-all-the-202627-premier-league-squad-lists'
-UEFA = 'https://documents.uefa.com/r/Regulations-of-the-UEFA-Europa-League-2026/27/Article-31-Player-lists-Online'
+UEFA = 'https://documents.uefa.com/r/Regulations-of-the-UEFA-Champions-League-2026/27/Article-31-Player-lists-Online'
 SPURS = 'https://www.tottenhamhotspur.com/news/1088296/squad-confirmed-for-202627-premier-league-season'
 FIGC = 'https://files.figc.it/version/c%3AZmQ5Yzc3MGItNDE1Ni00%3AYzdmYmQ0YjItMDY4MS00/245%20-%20Modifica%20disposizioni%20in%20materia%20di%20Tetto%20alle%20Rose.pdf'
 
@@ -139,6 +139,27 @@ def main():
         limitations=['Không tự cộng tương lai sau ngày đối chiếu nguồn.', 'Các khoảng chỉ biết năm/tháng dùng mốc bảo thủ; ngoại lệ mùa giải cần ngày đầu/cuối giải được xác minh.', 'List B không suy chỉ từ CT. Ngoại lệ một đợt cho mượn cần hồ sơ riêng.'],
         sources=[dict(name='Premier League squad flags', url=PL), dict(name='UEFA Article 31', url=UEFA), dict(name='Spurs PL U21 cutoff corroboration', url=SPURS), dict(name='FIGC CU 245/A 2026', url=FIGC), dict(name='DFL LOS §5b 2026', url='https://media.dfl.de/sites/2/2026/04/Lizenzordnung-Spieler-LOS-2026-04-21-Stand.pdf'), dict(name='Liga Portugal 2026/27 definition u, articles 87–88', url='https://www.ligaportugal.pt/backoffice/assets/20260701_RC_2026_27_f53785bcd4.pdf')],
         sourceConflict='Footer bài PL ghi U21 2007 nhưng danh sách thực tế và thông báo chính thức Tottenham 2026/27 ghi 01/01/2005. Game giữ mốc 2005, không dùng lỗi footer để loại cầu thủ.')
+    # Refreshing one evidence source must not erase independently reviewed
+    # UEFA squads or career histories. Only retain identity-matched records.
+    previous_path = ROOT / 'public/data/homegrown.json'
+    previous = json.loads(previous_path.read_text()) if previous_path.exists() else {}
+    for pid, old in previous.get('players', {}).items():
+        player = players.get(pid)
+        if not player or old.get('name') != player['name'] or old.get('birthDate') != player.get('birthDate'):
+            continue
+        if pid not in rows:
+            rows[pid] = old
+            continue
+        row = rows[pid]
+        if old.get('uefaSquads'):
+            row['uefaSquads'] = old['uefaSquads']
+        row.setdefault('periods', []).extend(p for p in old.get('periods', []) if p.get('sourceType') in ('career-provider', 'reviewed-biography', 'reviewed-secondary'))
+    old_meta = previous.get('meta', {})
+    for key in ('uefaClubs', 'uefaMatched', 'uefaListB', 'uefaUnmatched', 'historyVersion', 'careerProfiles', 'careerPeriods', 'reviewedSupplementPlayers'):
+        if key in old_meta:
+            meta[key] = old_meta[key]
+    meta['verifiedAt'] = max(AS_OF, old_meta.get('verifiedAt', AS_OF))
+    meta['biographyPlayers'] = sum(bool(row.get('periods')) for row in rows.values())
     result = dict(meta=meta, players=rows)
     (ROOT / 'public/data/homegrown.json').write_text(json.dumps(result, ensure_ascii=False, indent=2))
     (official.CACHE / 'homegrown-unmatched.json').write_text(json.dumps(unmatched, ensure_ascii=False, indent=2))

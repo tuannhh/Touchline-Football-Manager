@@ -6,11 +6,20 @@ import os from 'node:os';
 import {createHash} from 'node:crypto';
 import {validateRosterSnapshot,publishRosterRelease,prepareRosterRelease,listRosterReleases,loadRosterRelease,stageRosterRefresh} from '../src/rosterReleases.mjs';
 
-const dbBytes=await readFile(new URL('../public/data/database.json',import.meta.url)),hgBytes=await readFile(new URL('../public/data/homegrown.json',import.meta.url));
+// These publication scenarios deliberately use the original dated source fixture.
+const dbBytes=await readFile(new URL('../public/data/database.json',import.meta.url)),hgBytes=await readFile(new URL('../public/data/releases/2026-10-03-initial/homegrown.json',import.meta.url));
 const database=JSON.parse(dbBytes),homegrown=JSON.parse(hgBytes),hash=bytes=>createHash('sha256').update(bytes).digest('hex');
 async function removeTree(dir){for(const item of await readdir(dir,{withFileTypes:true}).catch(()=>[]))if(item.isDirectory()){await chmod(path.join(dir,item.name),0o755);await removeTree(path.join(dir,item.name));}await rm(dir,{recursive:true,force:true});}
 async function root(t){const dir=await mkdtemp(path.join(os.tmpdir(),'touchline-release-test-'));t.after(()=>removeTree(dir));await mkdir(path.join(dir,'public/data'),{recursive:true});await mkdir(path.join(dir,'saves'));await writeFile(path.join(dir,'public/data/database.json'),dbBytes);await writeFile(path.join(dir,'public/data/homegrown.json'),hgBytes);await writeFile(path.join(dir,'saves/existing-career.json'),'THIS FILE MUST NEVER CHANGE');return dir;}
 const opts=rootDir=>({rootDir,id:'snapshot-20261003',name:'Đội hình 03/10/2026',season:'2026/27',asOf:'2026-10-03',publishedAt:'2026-10-03T12:00:00.000Z'});
+
+test('updated training evidence validates at its own date and cannot be backdated into a historical release',async()=>{
+ const latest=JSON.parse(await readFile(new URL('../public/data/homegrown.json',import.meta.url)));
+ assert.equal(validateRosterSnapshot(database,latest,{season:'2026/27',asOf:'2026-10-05'}).homegrownPlayers,5192);
+ assert.throws(()=>validateRosterSnapshot(database,latest,{asOf:'2026-10-03'}),/newer|after/);
+ const record=Object.values(latest.players).find(p=>p.uefaSquads?.length),squad=record.uefaSquads[0];
+ for(const change of [s=>s.list='X',s=>s.clubId='missing',s=>s.season='2027/28',s=>s.observedAt='2030-01-01',s=>s.source='https://example.org/unverified']){const old=structuredClone(squad);change(squad);assert.throws(()=>validateRosterSnapshot(database,latest,{asOf:'2026-10-05'}),/UEFA/);Object.assign(squad,old);}
+});
 
 test('current sourced snapshot validates; malformed identity, coverage, evidence or season cannot be overridden',()=>{
  assert.deepEqual(validateRosterSnapshot(database,homegrown,{season:'2026/27',asOf:'2026-10-03'}),{leagues:30,clubs:568,players:16440,homegrownPlayers:518});

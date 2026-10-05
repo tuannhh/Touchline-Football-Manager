@@ -1,0 +1,6 @@
+.homegrown-evidence table{table-layout:fixed;min-width:0;width:100%}
+.homegrown-evidence th,.homegrown-evidence td{white-space:normal;padding:12px 8px;overflow-wrap:anywhere;line-height:1.6}
+.homegrown-evidence th:first-child{width:29%}
+.homegrown-evidence th:nth-child(2),.homegrown-evidence th:nth-child(3){width:20%}
+.homegrown-evidence td:nth-child(2),.homegrown-evidence td:nth-child(3){white-space:nowrap;font-size:11px;font-variant-numeric:tabular-nums}
+.homegrown-evidence td small{display:block;font-size:10px}

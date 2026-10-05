@@ -1,8 +1,8 @@
 import {isoCountry} from './locale.mjs';
-import {verifiedTrainingStatus} from './homegrown.mjs';
+import {verifiedTrainingStatus,officialUefaRegistration,trainingAssociationFor} from './homegrown.mjs';
 import {competitionSuspension} from './discipline.mjs';
 export const RULE_SOURCES={
- UEFA:'https://documents.uefa.com/r/Regulations-of-the-UEFA-Europa-League-2026/27/Article-31-Player-lists-Online',
+ UEFA:'https://documents.uefa.com/r/Regulations-of-the-UEFA-Champions-League-2026/27/Article-31-Player-lists-Online',
  EN:'https://www.premierleague.com/en/news/4706139/see-all-the-202627-premier-league-squad-lists',
  EFL:'https://www.efl.com/governance/regulations/',
  DE:'https://media.dfl.de/sites/2/2026/04/Lizenzordnung-Spieler-LOS-2026-04-21-Stand.pdf',
@@ -13,7 +13,7 @@ export const RULE_SOURCES={
  NL:'https://www.knvb.nl/assist-bestuurders/regelgeving/reglementen',
  VN:'https://vpf.vn/tin-tuc/tin-vleague/thong-cao-bao-chi-le-boc-tham-xep-lich-thi-dau-cac-giai-bong-da-chuyen-nghiep-quoc-gia-2026-27/'
 };
-export const countryForClub=(g,id)=>g.leagues.find(l=>l.id===g.clubs[id]?.leagueId)?.countryCode||'';
+export const countryForClub=trainingAssociationFor;
 export function registrationRule(g,id){
  const league=g.leagues.find(l=>l.id===id);const country=league?.countryCode;
  if(id?.startsWith('uefa.'))return {name:'UEFA · List A / List B',max:25,localSlots:8,clubSlots:4,young:21,listB:true,minGK:2,minTotalGK:3,source:RULE_SOURCES.UEFA,mode:'enforced',text:'List A tối đa 25, dành 8 suất đào tạo tại liên đoàn, trong đó ít nhất 4 suất đào tạo tại CLB. Thiếu suất đào tạo thì giảm quy mô danh sách. List B cần đủ tuổi và thời gian đăng ký tại CLB; không chỉ là U21. Tối thiểu 2 thủ môn List A và 3 thủ môn tổng cộng.',detail:'Đào tạo: 3 mùa trọn vẹn hoặc 36 tháng trong khung 15–21 tuổi, có mở rộng đầu/cuối mùa sinh nhật theo UEFA. List B mùa 2026/27: sinh từ 01/01/2005, kèm 2 năm liên tục đủ điều kiện thi đấu tại CLB sau tuổi 15. Game tính riêng ngoại lệ 16 tuổi; ngoại lệ 3 năm có một lần cho mượn cần xác nhận thủ công. Game chặn khi thiếu 2 thủ môn List A; tổng 3 thủ môn A+B hiện chỉ cảnh báo vì một số nguồn thiếu danh sách trẻ. Cho sửa danh sách quanh năm; không mô phỏng hạn nộp và ngoại lệ y tế.'};
@@ -38,15 +38,17 @@ export function exemptPlayer(g,p,competitionId,clubId=p.clubId){
 export function registrationReport(g,competitionId,clubId,ids){
  const rule=registrationRule(g,competitionId);const pool=Object.values(g.players).filter(p=>p.clubId===clubId);
  const selected=new Set(ids||g.registrations?.[competitionId]?.[clubId]||[]);
- const a=pool.filter(p=>selected.has(p.id)&&!exemptPlayer(g,p,competitionId,clubId));const b=pool.filter(p=>exemptPlayer(g,p,competitionId,clubId));
+ // List B eligibility is an option. A club may deliberately use an eligible
+ // youth player on List A to fill a training/goalkeeper place.
+ const a=pool.filter(p=>selected.has(p.id)&&(rule.listB||!exemptPlayer(g,p,competitionId,clubId)));const b=pool.filter(p=>exemptPlayer(g,p,competitionId,clubId)&&(!rule.listB||!selected.has(p.id)));
  const hg=a.filter(p=>trainingStatus(g,p,competitionId,clubId).association).length,ct=a.filter(p=>trainingStatus(g,p,competitionId,clubId).club).length;
  const capacity=rule.max==null?Infinity:rule.localSlots?rule.max-rule.localSlots+Math.min(rule.localSlots,ct+Math.min(rule.localSlots-(rule.clubSlots||0),hg-ct)):rule.max;
  const errors=[];if(a.length>capacity)errors.push(`Danh sách chính ${a.length}/${capacity===Infinity?'∞':capacity}; cần bớt ${a.length-capacity} hoặc bổ sung suất đào tạo hợp lệ.`);
  if(rule.minGK&&a.filter(p=>p.position==='GK').length<rule.minGK)errors.push(`List A cần ít nhất ${rule.minGK} thủ môn.`);
  const warnings=[];
  if(rule.minTotalGK&&[...a,...b].filter(p=>p.position==='GK').length<rule.minTotalGK)warnings.push(`UEFA cần tổng cộng ${rule.minTotalGK} thủ môn List A + B; nguồn đội hình có thể thiếu thủ môn trẻ.`);
- const unknown=pool.filter(p=>!trainingStatus(g,p,competitionId,clubId).known).length;
- if(unknown)warnings.push(`${unknown} cầu thủ chưa có xác minh đào tạo. Những người này không được tự tính vào suất home-grown.`);
+ const unknown=pool.filter(p=>!trainingStatus(g,p,competitionId,clubId).known&&!b.includes(p)).length;
+ if(unknown)warnings.push(`${unknown} cầu thủ chưa có xác minh đào tạo. Họ vẫn có thể đăng ký ở suất thường; chỉ chưa được tính vào suất home-grown.`);
  if(rule.minLocal&&pool.filter(p=>trainingStatus(g,p,competitionId,clubId).association).length<rule.minLocal)warnings.push(`Chưa xác nhận đủ ${rule.minLocal} cầu thủ đào tạo trong nước.`);
  if(rule.minClub&&pool.filter(p=>trainingStatus(g,p,competitionId,clubId).club).length<rule.minClub)warnings.push(`Chưa xác nhận đủ ${rule.minClub} cầu thủ đào tạo tại CLB.`);
  if(rule.minNational&&pool.filter(p=>isoCountry(p)==='DE').length<rule.minNational)warnings.push(`Chưa xác nhận đủ ${rule.minNational} cầu thủ quốc tịch Đức.`);
@@ -54,11 +56,20 @@ export function registrationReport(g,competitionId,clubId,ids){
  return {rule,a,b,capacity,hg,ct,unknown,errors,warnings,valid:errors.length===0};
 }
 export function autoRegistration(g,competitionId,clubId,rank){
- const rule=registrationRule(g,competitionId);const ps=Object.values(g.players).filter(p=>p.clubId===clubId&&!exemptPlayer(g,p,competitionId,clubId)).sort((a,b)=>rank(b)-rank(a));
+ const rule=registrationRule(g,competitionId);const ps=Object.values(g.players).filter(p=>p.clubId===clubId&&(rule.listB||!exemptPlayer(g,p,competitionId,clubId))).sort((a,b)=>rank(b)-rank(a));
  if(rule.mode!=='enforced')return ps.map(p=>p.id);
- const ids=[];const keepers=ps.filter(p=>p.position==='GK').slice(0,rule.minTotalGK||0);
- for(const p of [...keepers,...ps]){if(ids.includes(p.id))continue;const candidate=[...ids,p.id].map(id=>g.players[id]),hg=candidate.filter(p=>trainingStatus(g,p,competitionId,clubId).association).length,ct=candidate.filter(p=>trainingStatus(g,p,competitionId,clubId).club).length;const capacity=rule.localSlots?rule.max-rule.localSlots+Math.min(rule.localSlots,ct+Math.min(rule.localSlots-(rule.clubSlots||0),hg-ct)):rule.max;if(candidate.length<=capacity)ids.push(p.id);}
+ const ids=[],status=new Map(ps.map(p=>[p.id,trainingStatus(g,p,competitionId,clubId)]));
+ const add=p=>{if(p&&!ids.includes(p.id))ids.push(p.id);};
+ ps.filter(p=>p.position==='GK').slice(0,rule.minGK||0).forEach(add);
+ for(const p of ps.filter(p=>status.get(p.id).club)){if(ids.filter(id=>status.get(id).club).length>=(rule.clubSlots||0))break;add(p);}
+ for(const p of ps.filter(p=>status.get(p.id).association)){if(ids.filter(id=>status.get(id).association).length>=(rule.localSlots||0))break;add(p);}
+ // Prefer keeping other List B players outside the capped list, while retaining
+ // the ability to select them manually or to satisfy the reserved places above.
+ for(const p of ps.filter(p=>!rule.listB||!exemptPlayer(g,p,competitionId,clubId))){if(ids.includes(p.id))continue;const candidate=[...ids,p.id].map(id=>g.players[id]),hg=candidate.filter(p=>status.get(p.id).association).length,ct=candidate.filter(p=>status.get(p.id).club).length;const capacity=rule.localSlots?rule.max-rule.localSlots+Math.min(rule.localSlots,ct+Math.min(rule.localSlots-(rule.clubSlots||0),hg-ct)):rule.max;if(candidate.length<=capacity)ids.push(p.id);}
  return ids;
+}
+export function officialUefaSelection(g,competitionId,clubId=g.clubId){
+ return Object.values(g.players).filter(p=>p.clubId===clubId).filter(p=>{const s=officialUefaRegistration(g,p,clubId);return s?.competitionId===competitionId&&s.list==='A';}).map(p=>p.id);
 }
 export function registered(g,p,competitionId){
  if(competitionSuspension(g,p,competitionId)>0)return false;

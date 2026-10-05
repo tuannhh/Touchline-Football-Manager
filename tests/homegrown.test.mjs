@@ -85,12 +85,17 @@ test('identity mismatch is skipped and refresh preserves independently sourced h
  const r=mergeHomegrown(g,{players:[{id:'p',name:'Different Player',birthDate:'2005-01-01',pl:{association:false}}]});assert.equal(r.skipped,1);
  mergeHomegrown(g,{players:[{id:'p',name:'Known Player',birthDate:'2005-01-01',pl:{association:true,source}}]});assert.equal(g.players.p.homegrownVerified.periods.length,1);
 });
-test('published research index has identity-specific official sources and no nationality-generated flags',()=>{
+test('published research index has identity-specific, attributed evidence and no nationality-generated flags',()=>{
  const index=JSON.parse(readFileSync(new URL('../public/data/homegrown.json',import.meta.url),'utf8'));
  assert.ok(index.meta.plMatched>=490);assert.ok(index.meta.biographyPlayers>=20);
  for(const [id,p] of Object.entries(index.players)){
   assert.equal(id,p.id);assert.ok(p.name);
   if(p.pl){assert.ok([true,false,null].includes(p.pl.association));assert.match(p.pl.source,/premierleague\.com/);assert.ok(p.pl.sourcePlayerName&&p.pl.sourceClubId);}
-  for(const row of p.periods||[]){assert.equal(row.verified,true);assert.match(row.source,/fcbarcelona\.com|arsenal\.com|realmadrid\.com/);assert.ok(row.evidence);}
+  for(const row of p.periods||[]){assert.equal(row.verified,true);assert.match(row.source,/^https:\/\//);assert.ok(row.evidence);assert.ok(row.verifiedAt);assert.ok(row.association&&row.association!=='EU');
+   if(row.sourceType==='career-provider'){assert.match(row.source,/^https:\/\/www.fotmob.com\/players\/\d+$/);assert.ok(row.sourceTeamName);assert.equal(row.datePrecision,'provider-inclusive');}
+   else if(!row.sourceType)assert.match(row.source,/fcbarcelona\.com|arsenal\.com|realmadrid\.com/);
+   else assert.ok(['reviewed-biography','reviewed-secondary'].includes(row.sourceType));
+  }
+  for(const row of p.uefaSquads||[]){assert.match(row.source,/^https:\/\/www.uefa.com\/uefachampionsleague\/clubs\//);assert.ok(['A','B'].includes(row.list));assert.ok(row.sourcePlayerName&&row.matchEvidence&&row.observedAt);}
  }
 });

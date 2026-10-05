@@ -1,0 +1,200 @@
+[
+  {
+    "id": "e196176",
+    "name": "David Raya",
+    "birthDate": "1995-09-15",
+    "period": {
+      "clubId": "e365",
+      "association": "EN",
+      "start": "2012-01-31",
+      "end": "2014-08-31",
+      "source": "https://www.brentfordfc.com/en/news/the-long-read-david-raya-630187",
+      "evidence": "Brentford ghi Raya vào Blackburn U18 tháng 01/2012. Chỉ bổ sung đoạn học viện trước đợt cho mượn Southport tháng 09/2014; không gộp thời gian cho mượn vào CT Blackburn.",
+      "datePrecision": "conservative",
+      "sourceType": "reviewed-biography",
+      "verified": true,
+      "eligible": true,
+      "verifiedAt": "2026-10-05"
+    }
+  },
+  {
+    "id": "e241077",
+    "name": "Ben White",
+    "birthDate": "1997-10-08",
+    "period": {
+      "clubId": "e331",
+      "association": "EN",
+      "start": "2014-12-31",
+      "end": "2016-07-01",
+      "source": "https://www.brightonandhovealbion.com/media-article/Ben-White%27s-journey-to-the-England-squad",
+      "evidence": "Brighton ghi White gia nhập học viện năm 2014 sau khi rời Southampton. Dùng cuối năm 2014 làm mốc bảo thủ, nối đến đoạn lịch sử đội một đã có nguồn.",
+      "datePrecision": "conservative",
+      "sourceType": "reviewed-biography",
+      "verified": true,
+      "eligible": true,
+      "verifiedAt": "2026-10-05"
+    }
+  },
+  {
+    "id": "e241077",
+    "name": "Ben White",
+    "birthDate": "1997-10-08",
+    "period": {
+      "clubId": null,
+      "association": "EN",
+      "start": "2012-10-08",
+      "end": "2014-01-01",
+      "source": "https://www.englandfootball.com/articles/2021/Jun/09/20210609-ben-white-interview-on-EURO-call-up",
+      "evidence": "FA ghi White rời Southampton lúc 16 tuổi và đến Brighton năm 2014. Đoạn bảo thủ từ sinh nhật 15 đến đầu 2014; chỉ xác nhận liên đoàn, không tự ghi CT Brighton.",
+      "datePrecision": "conservative",
+      "sourceType": "reviewed-biography",
+      "verified": true,
+      "eligible": true,
+      "verifiedAt": "2026-10-05"
+    }
+  },
+  {
+    "id": "e231859",
+    "name": "Ezri Konsa",
+    "birthDate": "1997-10-23",
+    "period": {
+      "clubId": "e372",
+      "association": "EN",
+      "start": "2010-10-23",
+      "end": "2015-12-01",
+      "source": "https://www.linkedin.com/posts/charlton-athletic-football-club_konsa-and-gomez-named-in-englands-euro-2024-activity-7204521410365407234-6d9Z",
+      "evidence": "Charlton xác nhận Konsa gia nhập lúc 11 tuổi; lấy sinh nhật 13 làm mốc bảo thủ, nối với ngày đăng ký đội một trong lịch sử nhà cung cấp.",
+      "datePrecision": "conservative",
+      "sourceType": "reviewed-biography",
+      "verified": true,
+      "eligible": true,
+      "verifiedAt": "2026-10-05"
+    }
+  },
+  {
+    "id": "e251400",
+    "name": "Eberechi Eze",
+    "birthDate": "1998-06-29",
+    "period": {
+      "clubId": "e391",
+      "association": "EN",
+      "start": "2014-12-31",
+      "end": "2016-01-01",
+      "source": "https://en.wikipedia.org/wiki/Eberechi_Eze",
+      "evidence": "Tiểu sử liệt kê học viện Millwall 2014–2016. Chỉ dùng phần chắc chắn cuối 2014 đến đầu 2016, không khẳng định ngày ký hợp đồng chính xác.",
+      "datePrecision": "conservative",
+      "sourceType": "reviewed-secondary",
+      "verified": true,
+      "eligible": true,
+      "verifiedAt": "2026-10-05"
+    }
+  },
+  {
+    "id": "e128714",
+    "name": "Eric García",
+    "birthDate": "2001-01-09",
+    "period": {
+      "clubId": "e83",
+      "association": "ES",
+      "start": "2008-12-31",
+      "end": "2017-01-01",
+      "source": "https://www.fcbarcelona.com/en/football/first-team/players/24635/eric-garcia",
+      "evidence": "Tiểu sử Barcelona ghi học viện 2008–2017, trở lại hè 2021. Chỉ dùng khoảng bảo thủ trước khi sang Man City; không suy CT chỉ từ việc từng ở La Masia.",
+      "datePrecision": "conservative",
+      "sourceType": "reviewed-biography",
+      "verified": true,
+      "eligible": true,
+      "verifiedAt": "2026-10-05"
+    }
+  },
+  {
+    "id": "e231828",
+    "name": "Rodri",
+    "birthDate": "1996-06-22",
+    "period": {
+      "clubId": "e102",
+      "association": "ES",
+      "start": "2013-12-31",
+      "end": "2015-02-01",
+      "source": "https://www.mancity.com/news/first-team/first-team-news/2019/july/manchester-city-rodrigo-12-facts-need-to-know",
+      "evidence": "Man City ghi Rodri đến Villarreal năm 2013, trước khi lên đội B. Nối mốc bảo thủ cuối 2013 với hồ sơ đội B, không tính thời gian tại Barcelona sau tuổi 21.",
+      "datePrecision": "conservative",
+      "sourceType": "reviewed-biography",
+      "verified": true,
+      "eligible": true,
+      "verifiedAt": "2026-10-05"
+    }
+  },
+  {
+    "id": "e297362",
+    "name": "Joan García",
+    "birthDate": "2001-05-04",
+    "period": {
+      "clubId": "e88",
+      "association": "ES",
+      "start": "2016-12-31",
+      "end": "2019-12-31",
+      "source": "https://en.wikipedia.org/wiki/Joan_Garcia",
+      "evidence": "Tiểu sử liệt kê gia nhập học viện Espanyol năm 2016, tiến lên đội B rồi đội một. Khoảng bảo thủ 2016–2019 nằm trong tuổi 15–21.",
+      "datePrecision": "conservative",
+      "sourceType": "reviewed-secondary",
+      "verified": true,
+      "eligible": true,
+      "verifiedAt": "2026-10-05"
+    }
+  },
+  {
+    "id": "e102053",
+    "name": "Joe Gomez",
+    "birthDate": "1997-05-23",
+    "period": {
+      "clubId": "e372",
+      "association": "EN",
+      "start": "2011-05-23",
+      "end": "2015-06-19",
+      "source": "https://www.liverpoolfc.com/news/first-team/187362-profile-joe-gomez-s-path-to-liverpool",
+      "evidence": "Liverpool ghi Gomez lên U18 Charlton khi 13 tuổi; dùng sinh nhật 14 tuổi làm mốc bảo thủ, kết thúc trước chuyển nhượng 20/06/2015.",
+      "datePrecision": "conservative",
+      "verified": true,
+      "eligible": true,
+      "verifiedAt": "2026-10-05",
+      "sourceType": "reviewed-biography"
+    }
+  },
+  {
+    "id": "e326230",
+    "name": "James McConnell",
+    "birthDate": "2004-09-13",
+    "period": {
+      "clubId": "e364",
+      "association": "EN",
+      "start": "2020-09-13",
+      "end": "2025-08-28",
+      "source": "https://www.liverpoolfc.com/news/james-mcconnell-signs-new-lfc-contract-and-joins-ajax-loan",
+      "evidence": "Gia nhập ở tuổi 15; dùng sinh nhật 16 tuổi làm mốc bảo thủ. Chỉ tính trước khi đi mượn Ajax ngày 29/08/2025; đối chiếu thêm bài Meet the Academy ngày 24/11/2023.",
+      "datePrecision": "conservative",
+      "verified": true,
+      "eligible": true,
+      "verifiedAt": "2026-10-05",
+      "sourceType": "reviewed-biography"
+    }
+  },
+  {
+    "id": "e194121",
+    "name": "Freddie Woodman",
+    "birthDate": "1997-03-04",
+    "period": {
+      "clubId": "e361",
+      "association": "EN",
+      "start": "2013-12-31",
+      "end": "2014-09-15",
+      "source": "https://www.newcastleunited.com/en/news/woodman-signs-new-three-year-magpies-deal-and-rejoins-swansea-on-loan",
+      "evidence": "Newcastle xác nhận gia nhập năm 2013; dùng cuối năm làm mốc bảo thủ, dừng trước đợt cho mượn Hartlepool 16/09/2014.",
+      "datePrecision": "conservative",
+      "verified": true,
+      "eligible": true,
+      "verifiedAt": "2026-10-05",
+      "sourceType": "reviewed-biography"
+    }
+  }
+]

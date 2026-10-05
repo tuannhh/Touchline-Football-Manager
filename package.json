@@ -1,6 +1,6 @@
 {
   "name": "touchline-manager",
-  "version": "1.15.0",
+  "version": "1.16.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -14,7 +14,8 @@
     "data:release": "node scripts/release-rosters.mjs",
     "i18n:audit": "node scripts/audit-i18n.mjs --strict",
     "data:reality": "node scripts/import-player-reality.mjs",
-    "data:assessments": "node scripts/import-player-reality.mjs --refresh-profiles --profile-limit 100"
+    "data:assessments": "node scripts/import-player-reality.mjs --refresh-profiles --profile-limit 100",
+    "data:homegrown": "node scripts/import-uefa-squads.mjs && node scripts/import-homegrown-history.mjs"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",

@@ -8,7 +8,15 @@ Touchline là game quản lý bóng đá độc lập dành cho một người c
 
 **Mục đích giải trí và hình ảnh:** Đây là dự án cá nhân phục vụ giải trí, không có liên kết chính thức với Football Manager, các CLB, giải đấu hay liên đoàn. Ảnh cầu thủ, logo, tên và tài sản của bên thứ ba thuộc các chủ sở hữu tương ứng; việc xuất hiện trong game không cấp quyền sử dụng lại. Tác giả không cấp phép khai thác thương mại các tài sản đó và không chịu trách nhiệm, trong phạm vi pháp luật cho phép, về việc người dùng sử dụng thương mại, phân phối lại hoặc vi phạm bản quyền hình ảnh/quyền hình ảnh. Người sử dụng tự chịu trách nhiệm xin các quyền cần thiết. Giấy phép MIT của mã nguồn dự án không cấp lại giấy phép cho tài sản của bên thứ ba.
 
-Bản **1.15.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+Bản **1.16.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+
+## Mới ở bản 1.16.0
+
+- **Home-grown có bằng chứng:** 4.474 cầu thủ có lịch sử đào tạo có nguồn, gồm dữ liệu FotMob đối chiếu tên/ngày sinh và tiểu sử CLB. Khoảng đi mượn không được cộng đồng thời cho CLB chủ quản. Nguồn nhà cung cấp, nguồn CLB và hồ sơ người chơi chỉnh được phân biệt; không suy CT/AT từ quốc tịch hay dấu home-grown của Premier League.
+- **Đối chiếu Champions League:** thu thập danh sách của 36 CLB mùa 2026/27; ghép 901 cầu thủ trong database, trong đó 114 cầu thủ được UEFA đánh dấu List B. List A/B là bằng chứng đăng ký, không tự chứng minh CT/AT. Những tên chưa khớp database không được tạo giả hoặc ghép theo họ.
+- **Đăng ký dễ kiểm tra hơn:** cầu thủ đủ List B vẫn được chọn vào List A để dùng suất đào tạo/thủ môn. Nút **Tham khảo List A của UEFA** tạo bản nháp theo nguồn; nút **Tự chọn danh sách hợp lệ** áp dụng hạn mức theo hồ sơ hiện có. Chưa xác minh không cấm đăng ký ở suất thường. Arsenal, Barcelona và Liverpool có thể dùng các cầu thủ List A đã ghép từ nguồn ở đầu mùa.
+- **Dùng ngay trong save đang chơi:** vào **Đăng ký đội hình → Cập nhật hồ sơ home-grown**. Nút này giữ tiến trình, chỉ số, chuyển nhượng, hồ sơ do người chơi chỉnh và danh sách đã lưu. New Game tự nhận hồ sơ mới. Mỗi cầu thủ có **Xem bằng chứng**, gồm thời gian, CLB/liên đoàn và nguồn.
+- Phần dữ liệu chưa đầy đủ, nhất là học viện và một số đội ngoài tám quốc gia chính, vẫn ghi chưa xác minh. Không dùng danh sách UEFA để bỏ qua hạn mức. [Phạm vi, phương pháp và giới hạn](docs/homegrown-evidence.md).
 
 ## Mới ở bản 1.15.0
 
