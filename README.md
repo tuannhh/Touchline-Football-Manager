@@ -8,7 +8,15 @@ Touchline là game quản lý bóng đá độc lập dành cho một người c
 
 **Mục đích giải trí và hình ảnh:** Đây là dự án cá nhân phục vụ giải trí, không có liên kết chính thức với Football Manager, các CLB, giải đấu hay liên đoàn. Ảnh cầu thủ, logo, tên và tài sản của bên thứ ba thuộc các chủ sở hữu tương ứng; việc xuất hiện trong game không cấp quyền sử dụng lại. Tác giả không cấp phép khai thác thương mại các tài sản đó và không chịu trách nhiệm, trong phạm vi pháp luật cho phép, về việc người dùng sử dụng thương mại, phân phối lại hoặc vi phạm bản quyền hình ảnh/quyền hình ảnh. Người sử dụng tự chịu trách nhiệm xin các quyền cần thiết. Giấy phép MIT của mã nguồn dự án không cấp lại giấy phép cho tài sản của bên thứ ba.
 
-Bản **1.16.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+Bản **1.17.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+
+## Mới ở bản 1.17.0
+
+- **Liên kết trong hộp thư:** tên cầu thủ mở hồ sơ để xem và thương lượng; tên CLB mở đội hình, nhân sự, chiến thuật dự kiến, lịch đấu và chuyển nhượng; tên giải mở đúng giải với BXH, đội tham dự và thống kê cầu thủ/đội bóng. Tên trùng không được liên kết bừa khi thư thiếu mã định danh.
+- **Tiếp tục từ thư phản hồi:** mở lại đúng cuộc đàm phán hiện tại, giữ nguyên phí, điều khoản, lịch sử trả giá và đề nghị đang chờ. Thương vụ đã đóng mở lịch sử; việc ký hợp đồng vẫn cần xác nhận riêng.
+- **Shortlist có thời hạn:** vào Chuyển nhượng → Shortlist. Theo dõi 3, 6 hoặc 12 tháng theo lịch trong game, gia hạn hoặc bỏ theo dõi từng người. Bắt đầu đàm phán tự thêm cầu thủ (mặc định 6 tháng); thất bại/rút lui/hết hạn đàm phán bắt đầu lại thời hạn đã chọn. Đề nghị còn hiệu lực được giữ trong danh sách. Có bộ lọc, ngày hết hạn và nút tiếp tục thương lượng.
+- **Áp dụng cả save cũ:** danh sách theo dõi cũ được giữ với hạn 6 tháng từ ngày tải nâng cấp; khôi phục các mục tiêu đang đàm phán hoặc vừa thất bại còn trong hạn. Lưu/tải không gia hạn lặp lại. Không thay chỉ số, tiền, kết quả hay đội hình.
+- Thống kê giải tính riêng mùa hiện tại, gồm vòng loại trực tiếp và không cộng bàn luân lưu. Trang chiến thuật CLB AI hiển thị đội hình dự kiến theo mô phỏng; không tuyên bố là chiến thuật ngoài đời.
 
 ## Mới ở bản 1.16.0
 

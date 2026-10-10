@@ -1,3 +1,4 @@
+import {trackPlayer} from './shortlist.mjs';
 import {dailyCareer} from './careerClock.mjs';
 import {makeMessage} from './mail.mjs';
 import {playerAbility as ability} from './playerAbility.mjs';
@@ -78,6 +79,7 @@ function canSell(g,p,roster){
  return null;
 }
 function close(g,d,stage,text,cooldown=14){
+ trackPlayer(g,d.playerId,{reason:'negotiation'});
  delete d.pendingOffer;
  d.stage=stage;d.closedAt=g.date;d.cooldownUntil=dayAdd(g.date,cooldown);d.reason=text;note(g,d,'system',text);return answer(d,text);
 }
@@ -129,7 +131,7 @@ export function beginNegotiation(g,playerId){
  if(old&&ACTIVE.has(old.stage))close(g,old,'expired','Thỏa thuận cũ đã hết hiệu lực.',0);
  const sellerId=p.clubId,assessment=transferAssessment(g,p,g.clubId),clubDemand=clubTerms(g,p,g.clubId,assessment);
  const d={id:`deal-${++g.transferMarket.sequence}`,playerId,buyerId:g.clubId,sellerId,stage:'club',createdAt:g.date,expiresOn:dayAdd(g.date,28),assessment,clubDemand,playerDemand:playerTerms(g,p,g.clubId,clubDemand.fee,assessment),originalClubDemand:{...clubDemand},clubRounds:0,playerRounds:0,maxRounds:4,clubPatience:4,playerPatience:4,history:[]};
- d.originalPlayerDemand={...d.playerDemand};g.negotiations.unshift(d);g.negotiations=g.negotiations.filter((x,i)=>i<1000||ACTIVE.has(x.stage));
+ d.originalPlayerDemand={...d.playerDemand};trackPlayer(g,playerId,{reason:'negotiation'});g.negotiations.unshift(d);g.negotiations=g.negotiations.filter((x,i)=>i<1000||ACTIVE.has(x.stage));
  const refusal=canSell(g,p)||assessment.sellerRefusal;
  if(refusal){note(g,d,'club',refusal);return close(g,d,'rejected',refusal);}
  if(assessment.playerRefusal){note(g,d,'player',assessment.playerRefusal);return close(g,d,'rejected',assessment.playerRefusal);}

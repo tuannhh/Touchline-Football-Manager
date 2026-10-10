@@ -1,3 +1,4 @@
+import {refreshShortlist} from './shortlist.mjs';
 import {dailyCareer,addCareerDays,daysBetween,nextClubFixture} from './careerClock.mjs';
 import {advanceRound,currentFixture,maxRounds,nextSeason,finishFriendly,repairLineup,postponeNationalAbsences,runCareerMarket,reviewSquadPromises,addMessage,hash,clubPlayers} from './engine.mjs';
 import {processInternationalDate} from './international.mjs';
@@ -54,7 +55,7 @@ export function advanceCareerDay(g){
  processInternationalDate(g,g.date);
  if(g.calendar?.[g.round]?.date===g.date)postponeNationalAbsences(g);
  if(!weeklyWork(g))reviewPlayerDynamics(g,{training:false,playedClubs:new Set(),reviewMinutes:false});
- processNegotiationReplies(g);processFriendlyInvitations(g);checkFriendlyMatchday(g);
+ processNegotiationReplies(g);refreshShortlist(g);processFriendlyInvitations(g);checkFriendlyMatchday(g);
  reviewPlayerDevelopment(g);runScoutingWeek(g);marketRumour(g);
  // Negotiations progress daily; completed AI transfers are spread across dates.
  if(daysBetween(g.date,g.careerClock.startedAt)%3===0)runCareerMarket(g);
