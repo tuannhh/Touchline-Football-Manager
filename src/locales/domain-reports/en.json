@@ -308,5 +308,14 @@
   "{{0}} · Chưa rõ chi tiết": "{{0}} · Details unknown",
   "Sở trường: {{0}}": "Natural positions: {{0}}",
   "{{0}} · Chưa có nguồn cho vị trí chi tiết": "{{0}} · No source for detailed position",
-  "· Vị trí phụ: {{0}}": "· Secondary positions: {{0}}"
+  "· Vị trí phụ: {{0}}": "· Secondary positions: {{0}}",
+  "Ảnh thật ưu tiên trang CLB chính thức, sau đó nguồn hồ sơ cầu thủ đã đối chiếu danh tính. Bộ ảnh mới tự bổ sung vào save cũ và vẫn theo cầu thủ sau chuyển nhượng. Ảnh thiếu hoặc lỗi tải để trống.": "Real photos prioritize official club websites, followed by identity-matched player profiles. Photo updates also reach existing saves and follow players after transfers. Missing or failed photos stay blank.",
+  "Chưa có ảnh thật trong thư viện.": "No real photo in the library yet.",
+  "Nguồn cầu thủ quốc tế": "International player sources",
+  "Chỉ bổ sung vào New Game để tuyển trạch và chuyển nhượng. Các giải này không thể dẫn dắt và không có lịch giải trong game.": "Added to New Game for scouting and transfers only. These leagues are not playable and have no league fixtures in the game.",
+  "Ngày lấy dữ liệu:": "Retrieved on:",
+  "Mức bao phủ theo gói nguồn, chưa loại hồ sơ đã có trong đội hình gốc. Một số quốc gia mới có một phần CLB; ảnh và thông tin chưa tìm được để trống.": "Coverage of the source pack, before removing profiles already in the base roster. Some countries have partial club coverage; unavailable photos and facts stay blank.",
+  "Chưa có ảnh thật": "No real photo yet",
+  "Chưa có ảnh thật · {{0}}": "No real photo yet · {{0}}",
+  "Chưa có ảnh thật ·": "No real photo yet ·"
 }

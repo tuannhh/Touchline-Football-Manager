@@ -308,5 +308,14 @@
   "{{0}} · Chưa rõ chi tiết": "{{0}} · Detalles desconocidos",
   "Sở trường: {{0}}": "Posiciones naturales: {{0}}",
   "{{0}} · Chưa có nguồn cho vị trí chi tiết": "{{0}} · Sin fuente para la posición detallada",
-  "· Vị trí phụ: {{0}}": "· Posiciones secundarias: {{0}}"
+  "· Vị trí phụ: {{0}}": "· Posiciones secundarias: {{0}}",
+  "Ảnh thật ưu tiên trang CLB chính thức, sau đó nguồn hồ sơ cầu thủ đã đối chiếu danh tính. Bộ ảnh mới tự bổ sung vào save cũ và vẫn theo cầu thủ sau chuyển nhượng. Ảnh thiếu hoặc lỗi tải để trống.": "Las fotos reales priorizan las webs oficiales de los clubes y después los perfiles con identidad verificada. Las actualizaciones también llegan a las partidas guardadas y siguen al jugador tras los traspasos. Las fotos ausentes o que no cargan quedan en blanco.",
+  "Chưa có ảnh thật trong thư viện.": "Todavía no hay una foto real en la biblioteca.",
+  "Nguồn cầu thủ quốc tế": "Fuentes internacionales de jugadores",
+  "Chỉ bổ sung vào New Game để tuyển trạch và chuyển nhượng. Các giải này không thể dẫn dắt và không có lịch giải trong game.": "Se añade a las nuevas partidas solo para ojeo y fichajes. Estas ligas no son jugables ni tienen calendario en el juego.",
+  "Ngày lấy dữ liệu:": "Fecha de recopilación:",
+  "Mức bao phủ theo gói nguồn, chưa loại hồ sơ đã có trong đội hình gốc. Một số quốc gia mới có một phần CLB; ảnh và thông tin chưa tìm được để trống.": "Cobertura del paquete antes de eliminar perfiles ya incluidos en la plantilla base. Algunos países solo tienen parte de sus clubes; las fotos y datos no disponibles quedan en blanco.",
+  "Chưa có ảnh thật": "Aún no hay foto real",
+  "Chưa có ảnh thật · {{0}}": "Aún no hay foto real · {{0}}",
+  "Chưa có ảnh thật ·": "Aún no hay foto real ·"
 }

@@ -1,0 +1,345 @@
+{
+  "snapshotAt": "2026-10-11T02:13:47.567762+00:00",
+  "leagues": [
+    {
+      "id": "scout.bra",
+      "name": "Série A",
+      "country": "Brazil",
+      "code": "BR",
+      "countryCode": "BR",
+      "kind": "external",
+      "tier": 1,
+      "playable": false,
+      "scoutingOnly": true,
+      "sourceUrl": "https://www.fotmob.com/leagues/268",
+      "sourceName": "FotMob",
+      "snapshotAt": "2026-10-11T02:13:47.567762+00:00",
+      "season": "2026",
+      "sourceClubCount": 20,
+      "coverage": {
+        "clubs": 20,
+        "players": 901,
+        "realPhotos": 807,
+        "officialPlayers": 0
+      }
+    },
+    {
+      "id": "scout.arg",
+      "name": "Liga Profesional",
+      "country": "Argentina",
+      "code": "AR",
+      "countryCode": "AR",
+      "kind": "external",
+      "tier": 1,
+      "playable": false,
+      "scoutingOnly": true,
+      "sourceUrl": "https://www.fotmob.com/leagues/112",
+      "sourceName": "FotMob",
+      "snapshotAt": "2026-10-11T02:13:47.567762+00:00",
+      "season": "2026",
+      "sourceClubCount": 30,
+      "coverage": {
+        "clubs": 30,
+        "players": 1096,
+        "realPhotos": 978,
+        "officialPlayers": 0
+      }
+    },
+    {
+      "id": "scout.gre",
+      "name": "Super League",
+      "country": "Hy Lạp",
+      "code": "GR",
+      "countryCode": "GR",
+      "kind": "external",
+      "tier": 1,
+      "playable": false,
+      "scoutingOnly": true,
+      "sourceUrl": "https://www.fotmob.com/leagues/135",
+      "sourceName": "FotMob",
+      "snapshotAt": "2026-10-11T02:13:47.567762+00:00",
+      "season": "2026/2027",
+      "sourceClubCount": 14,
+      "coverage": {
+        "clubs": 14,
+        "players": 461,
+        "realPhotos": 414,
+        "officialPlayers": 0
+      }
+    },
+    {
+      "id": "scout.pol",
+      "name": "Ekstraklasa",
+      "country": "Ba Lan",
+      "code": "PL",
+      "countryCode": "PL",
+      "kind": "external",
+      "tier": 1,
+      "playable": false,
+      "scoutingOnly": true,
+      "sourceUrl": "https://www.fotmob.com/leagues/196",
+      "sourceName": "FotMob",
+      "snapshotAt": "2026-10-11T02:13:47.567762+00:00",
+      "season": "2026/2027",
+      "sourceClubCount": 18,
+      "coverage": {
+        "clubs": 18,
+        "players": 552,
+        "realPhotos": 531,
+        "officialPlayers": 0
+      }
+    },
+    {
+      "id": "scout.tur",
+      "name": "Süper Lig",
+      "country": "Thổ Nhĩ Kỳ",
+      "code": "TR",
+      "countryCode": "TR",
+      "kind": "external",
+      "tier": 1,
+      "playable": false,
+      "scoutingOnly": true,
+      "sourceUrl": "https://www.fotmob.com/leagues/71",
+      "sourceName": "FotMob",
+      "snapshotAt": "2026-10-11T02:13:47.567762+00:00",
+      "season": "2026/2027",
+      "sourceClubCount": 18,
+      "coverage": {
+        "clubs": 18,
+        "players": 541,
+        "realPhotos": 502,
+        "officialPlayers": 0
+      }
+    },
+    {
+      "id": "scout.jpn",
+      "name": "J1 League",
+      "country": "Nhật Bản",
+      "code": "JP",
+      "countryCode": "JP",
+      "kind": "external",
+      "tier": 1,
+      "playable": false,
+      "scoutingOnly": true,
+      "sourceUrl": "https://www.fotmob.com/leagues/223",
+      "sourceName": "FotMob",
+      "snapshotAt": "2026-10-11T02:13:47.567762+00:00",
+      "season": "2026/2027",
+      "sourceClubCount": 20,
+      "coverage": {
+        "clubs": 20,
+        "players": 702,
+        "realPhotos": 620,
+        "officialPlayers": 0
+      }
+    },
+    {
+      "id": "scout.kor",
+      "name": "K League 1",
+      "country": "Hàn Quốc",
+      "code": "KR",
+      "countryCode": "KR",
+      "kind": "external",
+      "tier": 1,
+      "playable": false,
+      "scoutingOnly": true,
+      "sourceUrl": "https://www.fotmob.com/leagues/9080",
+      "sourceName": "FotMob",
+      "snapshotAt": "2026-10-11T02:13:47.567762+00:00",
+      "season": "2026",
+      "sourceClubCount": 12,
+      "coverage": {
+        "clubs": 12,
+        "players": 415,
+        "realPhotos": 359,
+        "officialPlayers": 0
+      }
+    },
+    {
+      "id": "scout.ksa",
+      "name": "Saudi Pro League",
+      "country": "Saudi Arabia",
+      "code": "SA",
+      "countryCode": "SA",
+      "kind": "external",
+      "tier": 1,
+      "playable": false,
+      "scoutingOnly": true,
+      "sourceUrl": "https://www.fotmob.com/leagues/536",
+      "sourceName": "FotMob",
+      "snapshotAt": "2026-10-11T02:13:47.567762+00:00",
+      "season": "2026/2027",
+      "sourceClubCount": 18,
+      "coverage": {
+        "clubs": 18,
+        "players": 559,
+        "realPhotos": 521,
+        "officialPlayers": 0
+      }
+    },
+    {
+      "id": "scout.usa",
+      "name": "Major League Soccer",
+      "country": "Mỹ / Canada",
+      "code": "US",
+      "countryCode": "US",
+      "kind": "external",
+      "tier": 1,
+      "playable": false,
+      "scoutingOnly": true,
+      "sourceUrl": "https://www.fotmob.com/leagues/130",
+      "sourceName": "FotMob",
+      "snapshotAt": "2026-10-11T02:13:47.567762+00:00",
+      "season": "2026",
+      "sourceClubCount": 30,
+      "coverage": {
+        "clubs": 30,
+        "players": 900,
+        "realPhotos": 872,
+        "officialPlayers": 0
+      }
+    },
+    {
+      "id": "scout.aus",
+      "name": "A-League Men",
+      "country": "Úc / New Zealand",
+      "code": "AU",
+      "countryCode": "AU",
+      "kind": "external",
+      "tier": 1,
+      "playable": false,
+      "scoutingOnly": true,
+      "sourceUrl": "https://www.fotmob.com/leagues/113",
+      "sourceName": "FotMob",
+      "snapshotAt": "2026-10-11T02:13:47.567762+00:00",
+      "season": "2026/2027",
+      "sourceClubCount": 12,
+      "coverage": {
+        "clubs": 12,
+        "players": 309,
+        "realPhotos": 254,
+        "officialPlayers": 0
+      }
+    },
+    {
+      "id": "scout.nga",
+      "name": "Nigeria Premier Football League",
+      "country": "Nigeria",
+      "code": "NG",
+      "countryCode": "NG",
+      "kind": "external",
+      "tier": 1,
+      "playable": false,
+      "scoutingOnly": true,
+      "sourceUrl": "https://www.fotmob.com/leagues/533",
+      "sourceName": "FotMob",
+      "snapshotAt": "2026-10-11T02:13:47.567762+00:00",
+      "season": "2026/2027",
+      "sourceClubCount": 20,
+      "coverage": {
+        "clubs": 3,
+        "players": 48,
+        "realPhotos": 31,
+        "officialPlayers": 33
+      }
+    },
+    {
+      "id": "scout.gha",
+      "name": "Ghana Premier League",
+      "country": "Ghana",
+      "code": "GH",
+      "countryCode": "GH",
+      "kind": "external",
+      "tier": 1,
+      "playable": false,
+      "scoutingOnly": true,
+      "sourceUrl": "https://www.fotmob.com/leagues/522",
+      "sourceName": "FotMob",
+      "snapshotAt": "2026-10-11T02:13:47.567762+00:00",
+      "season": "2026/2027",
+      "sourceClubCount": 18,
+      "coverage": {
+        "clubs": 1,
+        "players": 18,
+        "realPhotos": 17,
+        "officialPlayers": 18
+      }
+    },
+    {
+      "id": "scout.civ",
+      "name": "Ligue 1",
+      "country": "Bờ biển Ngà",
+      "code": "CI",
+      "countryCode": "CI",
+      "kind": "external",
+      "tier": 1,
+      "playable": false,
+      "scoutingOnly": true,
+      "sourceUrl": "https://www.asec.ci/",
+      "sourceName": "ASEC Mimosas",
+      "snapshotAt": "2026-10-11T02:13:47.567762+00:00",
+      "coverage": {
+        "clubs": 1,
+        "players": 34,
+        "realPhotos": 34,
+        "officialPlayers": 34
+      }
+    }
+  ],
+  "officialCrossChecks": [
+    {
+      "club": "Palmeiras",
+      "sourceUrl": "https://www.palmeiras.com.br/elenco/",
+      "matchedPlayers": 23,
+      "publishedCards": 25
+    },
+    {
+      "club": "Olympiacos",
+      "sourceUrl": "https://www.olympiacos.org/en/team/",
+      "matchedPlayers": 27,
+      "publishedCards": 30
+    },
+    {
+      "club": "Boca Juniors",
+      "sourceUrl": "https://www.bocajuniors.com.ar/futbol-masculino",
+      "matchedPlayers": 31,
+      "publishedCards": 31
+    },
+    {
+      "club": "Galatasaray",
+      "sourceUrl": "https://www.galatasaray.org/pl/futbol-takim-kadrosu/9",
+      "matchedPlayers": 22,
+      "publishedCards": 32
+    },
+    {
+      "club": "Al Hilal",
+      "sourceUrl": "https://alhilal.com/en/teams/mens-team",
+      "matchedPlayers": 16,
+      "publishedCards": 75
+    },
+    {
+      "club": "Sydney FC",
+      "sourceUrl": "https://sydneyfc.com/squads/men/",
+      "matchedPlayers": 27,
+      "publishedCards": 41
+    },
+    {
+      "club": "Inter Miami CF",
+      "sourceUrl": "https://www.intermiamicf.com/club/roster/",
+      "matchedPlayers": 27,
+      "publishedCards": 30
+    },
+    {
+      "club": "Legia Warszawa",
+      "sourceUrl": "https://legia.com/",
+      "matchedPlayers": 24,
+      "publishedCards": 31
+    },
+    {
+      "club": "Vissel Kobe",
+      "sourceUrl": "https://www.vissel-kobe.co.jp/profile/",
+      "matchedPlayers": 36,
+      "publishedCards": 50
+    }
+  ]
+}

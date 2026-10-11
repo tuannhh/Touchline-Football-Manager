@@ -44,8 +44,8 @@ export const invalidateRosters=g=>rosterCache.delete(g.players);
 export const available=p=>!!p&&p.injury===0&&p.suspension===0&&!p.internationalDuty?.active;
 const repMap={'Barcelona':90,'Real Madrid':92,'Manchester City':90,'Arsenal':88,'Liverpool':89,'Bayern Munich':90,'Paris Saint-Germain':89,'Internazionale':86,'Bayer Leverkusen':83,'Borussia Dortmund':82,'Atlético Madrid':85,'Chelsea':85,'Manchester United':82,'Tottenham Hotspur':81,'Newcastle United':82,'Aston Villa':82,'Juventus':83,'AC Milan':82,'Napoli':85,'Atalanta':82,'AS Roma':80,'Benfica':81,'FC Porto':79,'Sporting CP':82,'Ajax Amsterdam':78,'PSV Eindhoven':80,'Feyenoord Rotterdam':78};
 export function profile(raw,club,seasonYear=2026){
-  const age=Number.isFinite(raw.age)&&raw.age>=15?raw.age:24,r={rng:hash(raw.id)};
-  let p={...raw,age,ageEstimated:raw.age==null||raw.age<15,attributes:{},potential:50,fitness:100,morale:82,injury:0,suspension:0,goals:0,assists:0,appearances:0,seasonMinutes:0,form:[],listed:false,contractUntil:seasonYear+2+Math.floor(random(r)*4)};
+  const ageKnown=Number.isFinite(raw.age)&&raw.age>=15&&raw.age<=60,age=ageKnown?raw.age:24,r={rng:hash(raw.id)};
+  let p={...raw,age,ageEstimated:!ageKnown,attributes:{},potential:50,fitness:100,morale:82,injury:0,suspension:0,goals:0,assists:0,appearances:0,seasonMinutes:0,form:[],listed:false,contractUntil:seasonYear+2+Math.floor(random(r)*4)};
   p=applyAbilityAssessment(p,raw,club);
   p.value=Math.round(Math.max(25000,Math.pow(overall(p)/45,6)*700000*(age<24?1.35:age>32?.35:1))/10000)*10000;
   p=applyPlayerReality(p,raw,`${seasonYear}-08-15`);
@@ -81,12 +81,14 @@ export function autoPhaseLineup(g,competitionId=currentFixture(g)?.leagueId){
  shape.slots.forEach((seat,index)=>{lineup[seat]=chosen[index];});return lineup;
 }
 export function newGame(db,clubId='e83',manager='HLV',seed=Date.now(),options={}){
-  if(!db.clubs.some(c=>c.id===clubId))throw Error('CLB không tồn tại.');
+  const selectedClub=db.clubs.find(c=>c.id===clubId);
+  if(!selectedClub)throw Error('CLB không tồn tại.');
+  if(selectedClub.scoutingOnly)throw Error('CLB này chỉ là nguồn tuyển trạch.');
   const seasonYear=Number(String(db.release?.season||db.meta?.season||'2026/27').slice(0,4));
   if(!Number.isInteger(seasonYear)||seasonYear<2026||seasonYear>2200)throw Error('Mùa của bản đội hình không hợp lệ.');
   const g={schema:SCHEMA,id:`career-${Date.now()}-${Math.floor(Math.random()*1e6)}`,manager:manager.trim().slice(0,40)||'HLV',clubId,year:seasonYear,round:0,date:options.dailyCalendar===true?`${seasonYear}-07-20`:`${seasonYear}-08-15`,rng:seed>>>0,dbMeta:structuredClone(db.meta),leagues:structuredClone(db.leagues),clubs:{},players:{},fixtures:[],lineup:[],formation:'4-3-3',mentality:'balanced',training:'balanced',intensity:'normal',shortlist:[],messages:[],transfers:[],history:[],ledger:[],liveMatch:null,editorUsed:false,editorLog:[]};
   if(options.dailyCalendar===true){g.careerClock={version:1,startedAt:g.date,lastProcessedDate:g.date,lastWeeklyDate:g.date,lastRumourDate:null,seasonReadyDate:null};g.friendlyInvitations={version:1,sequence:0,items:[]};}
-  for(const c of db.clubs){const tier=db.leagues.find(l=>l.id===c.leagueId)?.tier||1;const reputation=repMap[c.name]??(c.leagueId.startsWith('vie.')?56-tier*4:['por.1','ned.1'].includes(c.leagueId)?69:c.leagueId==='eur.other'?68:76-(tier-1)*9);const budget=Math.round(Math.pow(reputation/70,5)*(c.leagueId.startsWith('vie.')?500000:23000000)/tier);g.clubs[c.id]={...c,reputation,budget,cash:budget*2,wageBudget:0};}
+  for(const c of db.clubs){const tier=db.leagues.find(l=>l.id===c.leagueId)?.tier||1;const reputation=repMap[c.name]??(c.scoutingOnly&&Number.isFinite(c.simulationReputation)?Math.max(35,Math.min(85,c.simulationReputation)):null)??(c.leagueId.startsWith('vie.')?56-tier*4:['por.1','ned.1'].includes(c.leagueId)?69:c.leagueId==='eur.other'?68:76-(tier-1)*9);const budget=Math.round(Math.pow(reputation/70,5)*(c.leagueId.startsWith('vie.')?500000:23000000)/tier);g.clubs[c.id]={...c,reputation,budget,cash:budget*2,wageBudget:0};}
   for(const p of db.players)g.players[p.id]=profile(p,g.clubs[p.clubId],seasonYear);
   initializeSnapshotInjuries(g,{enabled:options.sourceInjuries===true});
   for(const c of Object.values(g.clubs)){c.wageBudget=Math.round(clubPlayers(g,c.id).reduce((s,p)=>s+p.wage,0)*1.35);}

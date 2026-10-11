@@ -1,6 +1,6 @@
 {
   "name": "touchline-manager",
-  "version": "1.17.0",
+  "version": "1.18.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,6 +8,7 @@
     "build": "vite build",
     "start": "node server.mjs",
     "test": "node --test --test-concurrency=2 tests/*.test.mjs",
+    "data:scouting": "python3 scripts/import-scouting-pool.py",
     "data:refresh": "python3 scripts/refresh-data.py",
     "data:profiles": "python3 scripts/enrich-player-profiles.py --all",
     "data:portraits": "python3 scripts/refresh-portraits.py",

@@ -8,7 +8,15 @@ Touchline là game quản lý bóng đá độc lập dành cho một người c
 
 **Mục đích giải trí và hình ảnh:** Đây là dự án cá nhân phục vụ giải trí, không có liên kết chính thức với Football Manager, các CLB, giải đấu hay liên đoàn. Ảnh cầu thủ, logo, tên và tài sản của bên thứ ba thuộc các chủ sở hữu tương ứng; việc xuất hiện trong game không cấp quyền sử dụng lại. Tác giả không cấp phép khai thác thương mại các tài sản đó và không chịu trách nhiệm, trong phạm vi pháp luật cho phép, về việc người dùng sử dụng thương mại, phân phối lại hoặc vi phạm bản quyền hình ảnh/quyền hình ảnh. Người sử dụng tự chịu trách nhiệm xin các quyền cần thiết. Giấy phép MIT của mã nguồn dự án không cấp lại giấy phép cho tài sản của bên thứ ba.
 
-Bản **1.17.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+Bản **1.18.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+
+## Mới ở bản 1.18.0
+
+- **Nguồn tuyển trạch quốc tế:** thêm hồ sơ CLB/cầu thủ tại Brazil, Argentina, Hy Lạp, Ba Lan, Thổ Nhĩ Kỳ, Nhật Bản, Hàn Quốc, Saudi Arabia, Mỹ/Canada, Úc/New Zealand, Nigeria, Ghana và Bờ biển Ngà. Chỉ áp dụng khi tạo New Game; không thêm giải có thể dẫn dắt hoặc lịch giải quốc nội.
+- **Nguồn và mức bao phủ:** ưu tiên trang CLB chính thức cho hồ sơ/ảnh, bổ sung bằng FotMob. Màn hình New Game có bảng số CLB, cầu thủ, ảnh và ngày thu thập. Ba thị trường châu Phi mới có một phần CLB, không tuyên bố đủ cả giải. [Chi tiết nguồn và giới hạn](docs/scouting-pool.md).
+- **Ảnh thật hoặc để trống:** bỏ avatar AI; ảnh không có hoặc lỗi tải hiển thị ô trống. Ảnh đã tải được lưu cục bộ, kèm nguồn và dấu kiểm tra danh tính.
+- **Chỉ xem trận 2D:** ẩn lựa chọn 3D; lựa chọn 3D đã lưu trước đây tự trở về 2D.
+- Bản lưu cũ giữ nguyên cầu thủ, thương vụ và tiến trình; bộ nguồn mở rộng chỉ được ghép khi khởi tạo sự nghiệp mới.
 
 ## Mới ở bản 1.17.0
 
