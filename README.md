@@ -8,7 +8,12 @@ Touchline là game quản lý bóng đá độc lập dành cho một người c
 
 **Mục đích giải trí và hình ảnh:** Đây là dự án cá nhân phục vụ giải trí, không có liên kết chính thức với Football Manager, các CLB, giải đấu hay liên đoàn. Ảnh cầu thủ, logo, tên và tài sản của bên thứ ba thuộc các chủ sở hữu tương ứng; việc xuất hiện trong game không cấp quyền sử dụng lại. Tác giả không cấp phép khai thác thương mại các tài sản đó và không chịu trách nhiệm, trong phạm vi pháp luật cho phép, về việc người dùng sử dụng thương mại, phân phối lại hoặc vi phạm bản quyền hình ảnh/quyền hình ảnh. Người sử dụng tự chịu trách nhiệm xin các quyền cần thiết. Giấy phép MIT của mã nguồn dự án không cấp lại giấy phép cho tài sản của bên thứ ba.
 
-Bản **1.18.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+Bản **1.18.1**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+
+## Mới ở bản 1.18.1
+
+- **Tìm cầu thủ & CLB:** nút Tìm kiếm trên thanh trên cùng hoặc `Cmd/Ctrl + K`; tìm tên có/không dấu, tên viết tắt CLB và một phần tên. Lọc cầu thủ/CLB, phân trang và mở trực tiếp hồ sơ để theo dõi hoặc đàm phán.
+- Tìm trên dữ liệu của sự nghiệp đang chơi, gồm nguồn tuyển trạch đã có trong bản lưu; dùng được với save cũ.
 
 ## Mới ở bản 1.18.0
 

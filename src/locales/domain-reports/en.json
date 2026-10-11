@@ -317,5 +317,14 @@
   "Mức bao phủ theo gói nguồn, chưa loại hồ sơ đã có trong đội hình gốc. Một số quốc gia mới có một phần CLB; ảnh và thông tin chưa tìm được để trống.": "Coverage of the source pack, before removing profiles already in the base roster. Some countries have partial club coverage; unavailable photos and facts stay blank.",
   "Chưa có ảnh thật": "No real photo yet",
   "Chưa có ảnh thật · {{0}}": "No real photo yet · {{0}}",
-  "Chưa có ảnh thật ·": "No real photo yet ·"
+  "Chưa có ảnh thật ·": "No real photo yet ·",
+  "Tìm cầu thủ hoặc câu lạc bộ": "Search players or clubs",
+  "Tìm kiếm": "Search",
+  "Tìm cầu thủ & CLB": "Find players & clubs",
+  "Nhập tên cầu thủ hoặc CLB…": "Enter a player or club name…",
+  "Tìm trong sự nghiệp đang chơi, gồm cả nguồn tuyển trạch. Có thể nhập tên không dấu hoặc một phần tên.": "Search your current career, including scouting sources. Accents and full names are optional.",
+  "Loại kết quả": "Result type",
+  "Nhập tên để bắt đầu tìm kiếm.": "Enter a name to start searching.",
+  "{{0}} kết quả": "{{0}} results",
+  "Không tìm thấy cầu thủ hoặc CLB phù hợp. Hãy thử tên ngắn hơn hoặc kiểm tra chính tả.": "No matching players or clubs. Try a shorter name or check the spelling."
 }

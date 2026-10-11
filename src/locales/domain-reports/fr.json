@@ -317,5 +317,14 @@
   "Mức bao phủ theo gói nguồn, chưa loại hồ sơ đã có trong đội hình gốc. Một số quốc gia mới có một phần CLB; ảnh và thông tin chưa tìm được để trống.": "Couverture du pack avant déduplication avec l’effectif de base. Certains pays n’ont qu’une partie des clubs ; les photos et informations indisponibles restent vides.",
   "Chưa có ảnh thật": "Pas encore de photo réelle",
   "Chưa có ảnh thật · {{0}}": "Pas encore de photo réelle · {{0}}",
-  "Chưa có ảnh thật ·": "Pas encore de photo réelle ·"
+  "Chưa có ảnh thật ·": "Pas encore de photo réelle ·",
+  "Tìm cầu thủ hoặc câu lạc bộ": "Rechercher des joueurs ou des clubs",
+  "Tìm kiếm": "Rechercher",
+  "Tìm cầu thủ & CLB": "Rechercher des joueurs et clubs",
+  "Nhập tên cầu thủ hoặc CLB…": "Saisissez le nom d’un joueur ou d’un club…",
+  "Tìm trong sự nghiệp đang chơi, gồm cả nguồn tuyển trạch. Có thể nhập tên không dấu hoặc một phần tên.": "Recherchez dans votre carrière actuelle, y compris les sources de recrutement. Les accents et les noms complets sont facultatifs.",
+  "Loại kết quả": "Type de résultat",
+  "Nhập tên để bắt đầu tìm kiếm.": "Saisissez un nom pour lancer la recherche.",
+  "{{0}} kết quả": "{{0}} résultats",
+  "Không tìm thấy cầu thủ hoặc CLB phù hợp. Hãy thử tên ngắn hơn hoặc kiểm tra chính tả.": "Aucun joueur ou club correspondant. Essayez un nom plus court ou vérifiez l’orthographe."
 }
