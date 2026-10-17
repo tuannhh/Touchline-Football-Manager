@@ -8,7 +8,13 @@ Touchline là game quản lý bóng đá độc lập dành cho một người c
 
 **Mục đích giải trí và hình ảnh:** Đây là dự án cá nhân phục vụ giải trí, không có liên kết chính thức với Football Manager, các CLB, giải đấu hay liên đoàn. Ảnh cầu thủ, logo, tên và tài sản của bên thứ ba thuộc các chủ sở hữu tương ứng; việc xuất hiện trong game không cấp quyền sử dụng lại. Tác giả không cấp phép khai thác thương mại các tài sản đó và không chịu trách nhiệm, trong phạm vi pháp luật cho phép, về việc người dùng sử dụng thương mại, phân phối lại hoặc vi phạm bản quyền hình ảnh/quyền hình ảnh. Người sử dụng tự chịu trách nhiệm xin các quyền cần thiết. Giấy phép MIT của mã nguồn dự án không cấp lại giấy phép cho tài sản của bên thứ ba.
 
-Bản **1.19.0**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+Bản **1.19.1**, chơi cục bộ không cần Steam/VPN/tài khoản. Có giao diện tiếng Việt, Anh, Pháp, Tây Ban Nha và Bồ Đào Nha. Barcelona là lựa chọn mặc định; có thể chọn CLB ở ba cấp đấu của tám quốc gia.
+
+## Mới ở bản 1.19.1
+
+- **Đổi người trên mobile bằng chạm:** chạm áo hoặc mở danh sách đội hình, chọn cầu thủ và xác nhận. Có thể bắt đầu từ cầu thủ dự bị; không cần giữ/kéo thả. Bảng chọn có tìm kiếm, vị trí, thể lực và độ phù hợp. Dùng trước và trong trận; Hủy/Back giữ nguyên đội hình.
+- **Thanh trượt phản hồi tại chỗ:** kéo chỉ cập nhật phần điều khiển, thả tay mới áp dụng vào sự nghiệp. Cử chỉ bị hủy trả lại giá trị cũ; thêm nút −/+ để chỉnh từng nấc. Tránh sao chép toàn bộ thế giới cầu thủ ở mỗi nấc kéo.
+- Desktop màn hình rộng vẫn kéo thả như trước. Cài APK 1.19.1 đè lên bản 1.19.0 bằng cùng chữ ký; không cần New Game.
 
 ## Mới ở bản 1.19.0
 
