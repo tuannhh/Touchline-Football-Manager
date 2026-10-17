@@ -14,3 +14,14 @@ saves/
 .env
 .env.*
 *.pem
+
+# Android local build tools, signing material and generated bundles
+.toolchains/
+.android-signing/
+dist-mobile/
+artifacts/
+android/.gradle/
+android/local.properties
+android/**/build/
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor*.json

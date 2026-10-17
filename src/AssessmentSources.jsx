@@ -1,3 +1,5 @@
+import {OFFLINE_APP} from './platform.mjs';
+import {gameFetch} from './gameApi.mjs';
 import React,{useEffect,useRef,useState} from 'react';
 import {ArrowsClockwise,WarningCircle} from '@phosphor-icons/react';
 import {number,dateLabel,dateTimeLabel} from './locale.mjs';
@@ -8,12 +10,12 @@ export default function AssessmentSources({onUpdated}){
  const [snapshot,setSnapshot]=useState(null),[job,setJob]=useState({status:'idle'}),[checking,setChecking]=useState(true),[starting,setStarting]=useState(false),[error,setError]=useState('');
  const mounted=useRef(false),startLock=useRef(false),notified=useRef(''),callback=useRef(onUpdated);callback.current=onUpdated;
  const readSnapshot=async()=>{
-  const response=await fetch('/data/player-reality.json',{cache:'no-store'});if(!response.ok)throw Error('Không tải được bản dữ liệu đánh giá.');const next=await response.json();
+  const response=await gameFetch('/data/player-reality.json',{cache:'no-store'});if(!response.ok)throw Error('Không tải được bản dữ liệu đánh giá.');const next=await response.json();
   if(next?.version!==1||!next.players||!next.coverage)throw Error('Bản dữ liệu đánh giá không hợp lệ.');
   if(mounted.current)setSnapshot(next);return next;
  };
  const readStatus=async()=>{
-  const response=await fetch(endpoint,{cache:'no-store'});if(!response.ok)throw Error('Không kiểm tra được tiến trình cập nhật.');const next=await response.json();if(mounted.current)setJob(next);return next;
+  const response=await gameFetch(endpoint,{cache:'no-store'});if(!response.ok)throw Error('Không kiểm tra được tiến trình cập nhật.');const next=await response.json();if(mounted.current)setJob(next);return next;
  };
  useEffect(()=>{
   mounted.current=true;let active=true;
@@ -31,13 +33,13 @@ export default function AssessmentSources({onUpdated}){
  },[job.status,job.finishedAt,job.startedAt]);
  const refresh=async()=>{
   if(checking||starting||startLock.current||job.status==='running')return;startLock.current=true;setStarting(true);setError('');
-  try{const response=await fetch(endpoint,{method:'POST'});const next=await response.json();if(!response.ok)throw Error(next.error||'Không bắt đầu được cập nhật đánh giá.');if(mounted.current)setJob(next);}
+  try{const response=await gameFetch(endpoint,{method:'POST'});const next=await response.json();if(!response.ok)throw Error(next.error||'Không bắt đầu được cập nhật đánh giá.');if(mounted.current)setJob(next);}
   catch(err){if(mounted.current)setError(err.message||'Không bắt đầu được cập nhật đánh giá.');}
   finally{startLock.current=false;if(mounted.current)setStarting(false);}
  };
  const coverage=snapshot?.coverage,running=job.status==='running',display=n=>Number.isFinite(n)?number(n):'—';
  return <section className="assessment-sources" aria-label="Dữ liệu đánh giá cho New Game">
-  <header><div><h3>Dữ liệu đánh giá cho New Game</h3><p>Chỉ áp dụng khi tạo New Game. Sự nghiệp đang chơi giữ nguyên bộ đánh giá ban đầu.</p></div><button type="button" className="secondary" disabled={checking||starting||running} onClick={refresh}><ArrowsClockwise size={16} className={checking||starting||running?'spin':''}/>{running?'Đang cập nhật dữ liệu…':starting?'Đang bắt đầu…':'Tải dữ liệu đánh giá mới'}</button></header>
+  <header><div><h3>Dữ liệu đánh giá cho New Game</h3><p>Chỉ áp dụng khi tạo New Game. Sự nghiệp đang chơi giữ nguyên bộ đánh giá ban đầu.</p></div><button type="button" className="secondary" disabled={OFFLINE_APP||checking||starting||running} onClick={refresh}><ArrowsClockwise size={16} className={checking||starting||running?'spin':''}/>{OFFLINE_APP?'Dữ liệu đi kèm ứng dụng':running?'Đang cập nhật dữ liệu…':starting?'Đang bắt đầu…':'Tải dữ liệu đánh giá mới'}</button></header>
   {error&&<p className="assessment-source-error" role="alert"><WarningCircle size={16}/>{error}</p>}
   {job.status==='error'&&<p className="assessment-source-error" role="alert"><WarningCircle size={16}/><span>{job.error||'Cập nhật chưa thành công. Bản dữ liệu trước được giữ lại.'}</span></p>}
   {running&&<p className="assessment-source-progress" role="status">Đang thu thập từ nguồn công khai. Có thể mất vài phút; bạn vẫn có thể chơi với bản dữ liệu đang có.</p>}

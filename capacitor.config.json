@@ -1,0 +1,19 @@
+{
+  "appId": "com.tuannhh.touchline",
+  "appName": "Touchline",
+  "webDir": "dist-mobile",
+  "backgroundColor": "#101912",
+  "android": {
+    "backgroundColor": "#101912",
+    "allowMixedContent": false,
+    "webContentsDebuggingEnabled": false,
+    "minWebViewVersion": 100
+  },
+  "plugins": {
+    "SystemBars": {
+      "insetsHandling": "native",
+      "initialViewportFitValueHint": "cover",
+      "style": "DARK"
+    }
+  }
+}

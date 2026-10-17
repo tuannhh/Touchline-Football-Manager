@@ -1,9 +1,10 @@
+import {gameFetch} from './gameApi.mjs';
 import {savePayload} from './saveProtocol.mjs';
 let worker=null,previous=null,serial=0,workerDisabled=false,directQueue=Promise.resolve();
 const requests=new Map();
 function directSave(snapshot){
  const task=directQueue.catch(()=>{}).then(async()=>{
-  const response=await fetch(`/api/saves/${encodeURIComponent(snapshot.id)}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(snapshot)});
+  const response=await gameFetch(`/api/saves/${encodeURIComponent(snapshot.id)}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(snapshot)});
   const result=await response.json();if(!response.ok)throw Object.assign(Error(result.error||'Không lưu được game.'),{status:response.status});return result;
  });
  directQueue=task;return task;

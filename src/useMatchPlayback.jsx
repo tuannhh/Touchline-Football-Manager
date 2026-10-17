@@ -45,6 +45,11 @@ export default function useMatchPlayback(g,m,onChange,notify){
   if(committed)latest.current.onChange(committed);publish(true);
   return controller.current.current();
  };
+ useEffect(()=>{
+  const checkpoint=()=>finishAction();
+  window.addEventListener('touchline-checkpoint',checkpoint);
+  return()=>window.removeEventListener('touchline-checkpoint',checkpoint);
+ },[]);
  const change=fn=>{
   const base=finishAction(),next=structuredClone(base);fn(next);
   controller.current.replace(latest.current.g,next);latest.current.onChange(next);publish(true);
